@@ -1,0 +1,44 @@
+Package goplusplus;
+
+/*==========================*/
+/*			Helpers			*/
+/*==========================*/
+Helpers
+	all 		= [0 .. 0xFF];
+	tab   		= 9;
+	cr    		= 13;
+	lf    		= 10;
+	digit 		= ['0'..'9'];
+	lowercase 	= ['a'..'z'];
+	uppercase 	= ['A'..'Z'];
+	letter  	= lowercase | uppercase;
+	idletter 	= letter | '_';
+	idchar  	= letter | '_' | digit;
+	punc 		= '.' | ',' | '?' | '!';
+	char 		= letter | digit | punc | ' ' | tab;
+	commentstr 	= [all - [cr + lf]];
+
+
+/*==========================*/
+/*			Tokens			*/
+/*==========================*/
+Tokens
+	eol = cr | lf | cr lf;
+	blank = ' ' | tab;
+
+/*Keywords*/
+	break		= 'break';
+	default		= 'default';
+	func		= 'func';
+	interface	= 'interface';
+	select		= 'select';
+	case		= 'case';
+	defer		= 'defer';
+	go 			= 'go';
+	map			= 'map';
+
+/*Values*/
+
+/*Operators*/
+
+/*Comment*/
