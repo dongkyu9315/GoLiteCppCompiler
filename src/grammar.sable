@@ -36,9 +36,81 @@ Tokens
 	defer		= 'defer';
 	go 			= 'go';
 	map			= 'map';
+	struct		= 'struct';
+	chan		= 'chan';
+	else		= 'else';
+	goto		= 'goto';
+	package		= 'package';
+	switch		= 'switch';
+	const		= 'const';
+	fallthrough	= 'fallthrough';
+	if			= 'if';
+	range		= 'range';
+	type		= 'type';
+	continue	= 'continue';
+	for			= 'for';
+	import		= 'import';
+	return		= 'return';
+	var			= 'var';
+	int			= 'int';
+	float64		= 'float64';
+	bool		= 'bool';
+	rune		= 'rune';
+	string		= 'string';
+	print		= 'print';
+	println		= 'println';
+	append		= 'append';
 
 /*Values*/
 
 /*Operators*/
-
+	add			= '+';
+	sub			= '-';
+	mul			= '*';
+	div			= '/';
+	mod			= '%';
+	bit_and		= '&';
+	bit_or		= '|';
+	bit_xor		= '^';
+	lshift		= '<<';
+	rshift		= '>>';
+	bitclear	= '&^';
+	pluseq		= '+=';
+	subeq		= '-=';
+	muleq		= '*=';
+	diveq		= '/=';
+	modeq		= '%=';
+	andeq		= '&=';
+	oreq		= '|=';
+	xoreq		= '^=';
+	lshifteq	= '<<=';
+	rshifteq	= '>>=';
+	bitcleareq	= '&^=';
+	and			= '&&';
+	or			= '||';
+	receive		= '<-';
+	increment	= '++';
+	decrement	= '--';
+	eq			= '==';
+	lt			= '<';
+	gt			= '>';
+	assign		= '=';
+	not			= '!';
+	noteq		= '!=';
+	leq			= '<=';
+	geq			= '>=';
+	shortdecl	= ':=';
+	varargs		= '...';
+	leftpar		= '(';
+	leftsq		= '[';
+	leftcurl	= '{';
+	comma		= ',';
+	dot 		= '.';
+	rightpar	= ')';
+	rightsq		= ']';
+	rightcurl	= '}';
+	semicolon	= ';';
+	colon		= ':';
+	
+	
 /*Comment*/
