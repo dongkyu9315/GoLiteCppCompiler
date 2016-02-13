@@ -8,15 +8,18 @@ Helpers
 	tab   		= 9;
 	cr    		= 13;
 	lf    		= 10;
-	digit 		= ['0'..'9'];
+	dec_digit 	= ['0'..'9'];
+	oct_digit	= ['0'..'7'];
+	hex_digit	= ['0'..'9'] | ['A'..'F'] | ['a'..'f'];
 	lowercase 	= ['a'..'z'];
 	uppercase 	= ['A'..'Z'];
 	letter  	= lowercase | uppercase;
 	idletter 	= letter | '_';
-	idchar  	= letter | '_' | digit;
+	idchar  	= letter | '_' | dec_digit;
 	punc 		= '.' | ',' | '?' | '!';
-	char 		= letter | digit | punc | ' ' | tab;
+	char 		= letter | dec_digit | punc | ' ' | '_' | tab;
 	commentstr 	= [all - [cr + lf]];
+	newline		= '\n';
 
 
 /*==========================*/
@@ -112,5 +115,19 @@ Tokens
 	semicolon	= ';';
 	colon		= ':';
 	
-	
 /*Comment*/
+	linecomment 		= '//';
+	leftblockcomment 	= '/*';
+	rightblockcomment 	= '*/';
+
+/*Literals*/
+	escaped_char 		= '\' ('a' | 'b' | 'f' | 'n' | 'r' | 't' | 'v' | '\' | ''' | '"');
+	decimal_lit 		= ['1'..'9'] (dec_digit)*;
+	octal_lit 			= '0' (oct_digit)*;
+	hexa_lit 			= '0' ('x' | 'X') (hex_digit)+;
+	float_val 			= ((dec_digit)* '.' (dec_digit)+) | ((dec_digit)+ '.' (dec_digit)*);
+	raw_string 			= ''' (char | newline)* ''';
+	interpreted_string 	= '"' (char | newline)* '"';
+
+/*Identifiers*/
+	identifier = letter (letter | char)*;
