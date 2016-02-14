@@ -8,6 +8,7 @@ Helpers
 	tab   		= 9;
 	cr    		= 13;
 	lf    		= 10;
+	newline		= cr | lf | cr lf;
 	dec_digit 	= ['0'..'9'];
 	oct_digit	= ['0'..'7'];
 	hex_digit	= ['0'..'9'] | ['A'..'F'] | ['a'..'f'];
@@ -16,18 +17,19 @@ Helpers
 	letter  	= lowercase | uppercase;
 	idletter 	= letter | '_';
 	idchar  	= letter | '_' | dec_digit;
-	punc 		= '.' | ',' | '?' | '!';
-	char 		= letter | dec_digit | punc | ' ' | '_' | tab;
-	commentstr 	= [all - [cr + lf]];
-	newline		= '\n';
+	printable 	= [0x20 .. 0xFF];
+	char 		= printable | tab;
+	comment_lin = '//';
+	comment_beg = '/*';
+	comment_end = '*/';
 
 
 /*==========================*/
 /*			Tokens			*/
 /*==========================*/
 Tokens
-	eol = cr | lf | cr lf;
-	blank = ' ' | tab;
+	eol			= newline;
+	blank 		= ' ' | tab;
 
 /*Keywords*/
 	break		= 'break';
@@ -63,8 +65,6 @@ Tokens
 	print		= 'print';
 	println		= 'println';
 	append		= 'append';
-
-/*Values*/
 
 /*Operators*/
 	add			= '+';
@@ -116,9 +116,8 @@ Tokens
 	colon		= ':';
 	
 /*Comment*/
-	linecomment 		= '//';
-	leftblockcomment 	= '/*';
-	rightblockcomment 	= '*/';
+	line_comment 		= comment_lin all* newline;
+	block_comment	 	= comment_beg all* comment_end;
 
 /*Literals*/
 	escaped_char 		= '\' ('a' | 'b' | 'f' | 'n' | 'r' | 't' | 'v' | '\' | ''' | '"');
@@ -130,4 +129,26 @@ Tokens
 	interpreted_string 	= '"' (char | newline)* '"';
 
 /*Identifiers*/
-	identifier = letter (letter | char)*;
+	id = idletter idchar*;
+
+/*Package*/
+	//TODO
+
+Ignored Tokens
+	blank, eol, line_comment, block_comment;
+
+
+/*==========================*/
+/*		Productions			*/
+/*==========================*/
+Productions
+	program {-> program} =
+		id
+			{-> New program(id)};
+	
+
+/*==========================*/
+/*			AST				*/
+/*==========================*/
+Abstract Syntax Tree
+	program = id;
