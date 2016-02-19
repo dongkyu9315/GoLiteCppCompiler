@@ -228,4 +228,38 @@ Productions
 /*			AST				*/
 /*==========================*/
 Abstract Syntax Tree
-	program = id;
+	program = 
+		{empty}
+	|	{program_order} 	[l]:id [r]:declaration
+	;
+	
+	declaration = 
+		{var_dec_list}		[l]:declaration [r]:declaration
+	|	{multi_var_dec}		var_declaration
+	|	{type_dec_list} 	[l]:declaration [r]:declaration
+	|	{type_dec} 			id basic_types
+	|	{func_dec_list} 	[l]:declaration [r]:declaration
+	|	{func_dec}			func_declaration
+	;
+	
+	var_declaration = 
+		{var_dec_typeOnly} 	id+ basic_types
+	|	{var_dec_expOnly} 	id+ exp+
+	|	{var_dec_typeExp} 	id+ basic_types exp+
+	;
+	
+	func_declaration = 
+		{long_func} 	id param* 
+	|	{short_func} 	
+	;
+	
+	param = 
+		{func_param} 	id+ basic_types+
+	;
+	
+	exp = 
+		{intval} 	int_lit
+	|	{floatval} 	float_lit
+	|	{boolval} 	bool_lit
+	|	{runeval} 	rune_lit
+	|	{stringval} string_lit;
