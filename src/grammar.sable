@@ -171,9 +171,9 @@ Productions
 	;
 
 	var_decl_single = 
-		{type}		id_list basic_types
+		{type}		id_list type_exp
 	|	{expr}		id_list assign exp_list
-	|	{type_expr}	id_list type assign exp_list
+	|	{type_expr}	id_list type_exp assign exp_list
 	;
 
 	var_decl_single_semi =
@@ -199,8 +199,30 @@ Productions
 		{basic}		basic_types
 	|	{slice}		leftsq rightsq type_exp
 	|	{array}		leftsq int_lit rightsq type_exp
+	|	{struct}	struct leftcurl struct_decl rightcurl
 	;
 
+	struct_decl =
+		id_list type_exp semi
+	;
+
+	/*== Function Declaration ==*/
+
+	func_decl =
+		id leftpar func_param? rightpar type_exp? block
+	;
+
+	func_param = 
+		id_list type_exp func_param_tail*
+	;
+
+	func_param_tail =
+		comma func_param
+	;
+
+	block =
+		leftcurl rightcurl
+	;
 
 /*==========================*/
 /*			AST				*/
