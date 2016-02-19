@@ -22,6 +22,9 @@ Helpers
 	comment_lin = '//';
 	comment_beg = '/*';
 	comment_end = '*/';
+	dec 		= ['1'..'9'] (dec_digit)*;
+	oct			= '0' (oct_digit)*;
+	hex			= '0' ('x' | 'X') (hex_digit)+;
 
 
 /*==========================*/
@@ -57,11 +60,7 @@ Tokens
 	import		= 'import';
 	return		= 'return';
 	var			= 'var';
-	int			= 'int';
-	float64		= 'float64';
-	bool		= 'bool';
-	rune		= 'rune';
-	string		= 'string';
+	basic_types	= 'int' | 'float64' | 'bool' | 'rune' | 'string';
 	print		= 'print';
 	println		= 'println';
 	append		= 'append';
@@ -121,18 +120,14 @@ Tokens
 
 /*Literals*/
 	escaped_char 		= '\' ('a' | 'b' | 'f' | 'n' | 'r' | 't' | 'v' | '\' | ''' | '"');
-	decimal_lit 		= ['1'..'9'] (dec_digit)*;
-	octal_lit 			= '0' (oct_digit)*;
-	hexa_lit 			= '0' ('x' | 'X') (hex_digit)+;
-	float_val 			= ((dec_digit)* '.' (dec_digit)+) | ((dec_digit)+ '.' (dec_digit)*);
+	int_lit				= dec | oct | hex;
+	float_lit 			= ((dec_digit)* '.' (dec_digit)+) | ((dec_digit)+ '.' (dec_digit)*);
 	raw_string 			= ''' (char | newline)* ''';
 	interpreted_string 	= '"' (char | newline)* '"';
 
 /*Identifiers*/
 	id = idletter idchar*;
 
-/*Package*/
-	//TODO
 
 Ignored Tokens
 	blank, eol, line_comment, block_comment;
@@ -143,9 +138,69 @@ Ignored Tokens
 /*==========================*/
 Productions
 	program {-> program} =
-		id
-			{-> New program(id)};
-	
+		package id semi decl*
+	;
+
+	decl =
+		var var_decl semi
+	|	type type_decl semi
+	|	func func_decl semi
+	;
+
+	id_list =
+		 id id_tail*
+	;
+
+	id_tail =
+		comma id
+	;
+
+	exp_list =
+		exp exp_tail*
+	;
+
+	exp_tail =
+		comma exp
+	;
+
+	/*== Variable Declaration ==*/
+
+	var_decl = 
+		{single}	var_decl_single
+	|	{list}		leftpar var_decl_single_semi* rightpar
+	;
+
+	var_decl_single = 
+		{type}		id_list basic_types
+	|	{expr}		id_list assign exp_list
+	|	{type_expr}	id_list type assign exp_list
+	;
+
+	var_decl_single_semi =
+		var_decl_single semi
+	;
+
+	/*== Type Declaration ==*/
+
+	type_decl =
+		{single}	type_decl_single
+	|	{list}		leftpar type_decl_single_semi* rightpar
+	;
+
+	type_decl_single =
+		id type_exp
+	;
+
+	type_decl_single_semi =
+		type_decl_single semi
+	;
+
+	type_exp =
+		{basic}		basic_types
+	|	{slice}		leftsq rightsq type_exp
+	|	{array}		leftsq int_lit rightsq type_exp
+	;
+
 
 /*==========================*/
 /*			AST				*/
