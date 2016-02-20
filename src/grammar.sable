@@ -199,7 +199,7 @@ Productions
 		{basic}		basic_types
 	|	{slice}		leftsq rightsq type_exp
 	|	{array}		leftsq int_lit rightsq type_exp
-	|	{struct}	struct leftcurl struct_decl rightcurl
+	|	{struct}	struct leftcurl struct_decl* rightcurl
 	;
 
 	struct_decl =
@@ -230,32 +230,35 @@ Productions
 Abstract Syntax Tree
 	program = 
 		{empty}
-	|	{program_order} 	[l]:id [r]:declaration
+	|	{program_order} 	[l]:id [r]:declaration*
 	;
 	
 	declaration = 
-		{var_dec_list}		[l]:declaration [r]:declaration
 	|	{multi_var_dec}		var_declaration
-	|	{type_dec_list} 	[l]:declaration [r]:declaration
 	|	{type_dec} 			id basic_types
-	|	{func_dec_list} 	[l]:declaration [r]:declaration
 	|	{func_dec}			func_declaration
 	;
 	
 	var_declaration = 
-		{var_dec_typeOnly} 	id+ basic_types
+		{var_dec_typeOnly} 	id+ type
 	|	{var_dec_expOnly} 	id+ exp+
-	|	{var_dec_typeExp} 	id+ basic_types exp+
+	|	{var_dec_typeExp} 	id+ type exp+
 	;
 	
 	func_declaration = 
-		{long_func} 	id param* 
-	|	{short_func} 	
+		[name]id [params]param* [return] type? stm*
 	;
 	
 	param = 
-		{func_param} 	id+ basic_types+
+		{func_param} 	id+ type
 	;
+	
+	type = 
+		{basic}		basic_types
+	|	{slice}		type
+	|	{array}		[size]int_lit type
+	|	{struct}	(id_list type)*
+	|	{alias}		id
 	
 	exp = 
 		{intval} 	int_lit
@@ -263,3 +266,5 @@ Abstract Syntax Tree
 	|	{boolval} 	bool_lit
 	|	{runeval} 	rune_lit
 	|	{stringval} string_lit;
+	
+	stm =
