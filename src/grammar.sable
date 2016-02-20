@@ -156,11 +156,11 @@ Productions
 	;
 
 	exp_list =
-		exp exp_tail*
+		cst_exp exp_tail*
 	;
 
 	exp_tail =
-		comma exp
+		comma cst_exp
 	;
 
 	/*== Variable Declaration ==*/
@@ -245,6 +245,8 @@ Abstract Syntax Tree
 	|	{var_dec_typeExp} 	id+ type exp+
 	;
 	
+	type_declaration = id type;
+	
 	func_declaration = 
 		[name]id [params]param* [return] type? stm*
 	;
@@ -257,14 +259,46 @@ Abstract Syntax Tree
 		{basic}		basic_types
 	|	{slice}		type
 	|	{array}		[size]int_lit type
-	|	{struct}	(id_list type)*
+	|	{struct}	strct_field*
 	|	{alias}		id
+	;
+	
+	strct_field = id+ type;
 	
 	exp = 
 		{intval} 	int_lit
 	|	{floatval} 	float_lit
 	|	{boolval} 	bool_lit
 	|	{runeval} 	rune_lit
-	|	{stringval} string_lit;
+	|	{stringval} string_lit
+	;
 	
 	stm =
+		{empty}
+	|	{exp}			exp
+	|	{assign}		[lvalue]:exp+ exp+
+	|	{op_assign}		[l]:exp op [r]:exp
+	|	{var_decl}		var_declaration+
+	|	{short_decl}	[ids] exp+ exp+
+	|	{type_decl}		type_decl+
+	|	{inc_dec}		exp post_op exp
+	;
+	
+	op = 
+		{add}
+	|	{sub}
+	|	{mul}
+	|	{div}
+	|	{mod}
+	|	{bitor}
+	|	{bitand}
+	|	{bitxor}
+	|	{lshift}
+	|	{rshift}
+	|	{bitclear}
+	;
+	
+	post_op = 
+		{inc}
+	|	{dec}
+	;
