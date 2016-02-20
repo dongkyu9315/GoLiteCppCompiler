@@ -282,6 +282,22 @@ Abstract Syntax Tree
 	|	{short_decl}	[ids] exp+ exp+
 	|	{type_decl}		type_decl+
 	|	{inc_dec}		exp post_op exp
+	|	{print}			exp*
+	|	{println}		exp*
+	|	{return}		exp?
+	|	{shortif}		[init] stm? [condition]:exp stm*
+	|	{longif}		[init] stm? [condition]:exp [if_stms]stm* elseif* [else_stms]:stm*
+	|	{switch}		stm? exp? switch_case+
+	|	{for}			[init] stm? [condition] exp? [post] stm? [body] stm*
+	|	{break}
+	|	{continue}
+	;
+
+	elseif = [condition]:exp stm*;
+	
+	switch_case = 
+		{default}		stm*
+	|	{case} 			exp+ stm*
 	;
 	
 	op = 
