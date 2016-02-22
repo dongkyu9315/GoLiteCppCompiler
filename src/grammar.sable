@@ -139,10 +139,12 @@ Ignored Tokens
 Productions
 	program {-> program} =
 		package id semi decl*
+			{-> New program(id, [decl])}
 	;
 
-	decl =
+	decl {-> declaration} =
 		var var_decl semi
+			{-> New var_dec(var_decl.var_declaration)}
 	|	type type_decl semi
 	|	func func_decl semi
 	;
@@ -163,7 +165,9 @@ Productions
 		comma cst_exp
 	;
 
-	/*== Variable Declaration ==*/
+	/*======================*/
+	/*		Declaration		*/
+	/*======================*/
 
 	var_decl = 
 		{single}	var_decl_single
@@ -179,8 +183,6 @@ Productions
 	var_decl_single_semi =
 		var_decl_single semi
 	;
-
-	/*== Type Declaration ==*/
 
 	type_decl =
 		{single}	type_decl_single
@@ -206,8 +208,6 @@ Productions
 		id_list type_exp semi
 	;
 
-	/*== Function Declaration ==*/
-
 	func_decl =
 		id leftpar func_param? rightpar type_exp? block
 	;
@@ -229,30 +229,19 @@ Productions
 /*==========================*/
 Abstract Syntax Tree
 	program = 
-		{empty}
-	|	{program_order} 	[l]:id [r]:declaration*
+		[package]:id [decl]:declaration*
 	;
 	
 	declaration = 
-	|	{multi_var_dec}		var_declaration
-	|	{type_dec} 			id basic_types
-	|	{func_dec}			func_declaration
+	|	{var_dec}			var_declaration
+	|	{type_dec} 			id type
+	|	{func_dec}			id (id+ type)* type? stm
 	;
 	
 	var_declaration = 
 		{var_dec_typeOnly} 	id+ type
 	|	{var_dec_expOnly} 	id+ exp+
 	|	{var_dec_typeExp} 	id+ type exp+
-	;
-	
-	type_declaration = id type;
-	
-	func_declaration = 
-		[name]id [params]param* [return] type? stm*
-	;
-	
-	param = 
-		{func_param} 	id+ type
 	;
 	
 	type = 
@@ -265,18 +254,10 @@ Abstract Syntax Tree
 	
 	strct_field = id+ type;
 	
-	exp = 
-		{intval} 	int_lit
-	|	{floatval} 	float_lit
-	|	{boolval} 	bool_lit
-	|	{runeval} 	rune_lit
-	|	{stringval} string_lit
-	;
-	
 	stm =
 		{empty}
 	|	{exp}			exp
-	|	{assign}		[lvalue]:exp+ exp+
+	|	{assign}		[lval]:exp+ [rval]exp+
 	|	{op_assign}		[l]:exp op [r]:exp
 	|	{var_decl}		var_declaration+
 	|	{short_decl}	[ids] exp+ exp+
@@ -300,6 +281,14 @@ Abstract Syntax Tree
 	|	{case} 			exp+ stm*
 	;
 	
+	literal = 
+		{intval} 	int_lit
+	|	{floatval} 	float_lit
+	|	{boolval} 	bool_lit
+	|	{runeval} 	rune_lit
+	|	{stringval} string_lit
+	;
+
 	op = 
 		{add}
 	|	{sub}
