@@ -137,35 +137,35 @@ Ignored Tokens
 /*		Productions			*/
 /*==========================*/
 Productions
-	program {-> program} =
-		package id semi decl*
-			{-> New program(id, [decl])}
+	prod_program {-> ast_program} =
+		package id semi prod_decl*
+			{-> New ast_program(id, [prod_decl])}
 	;
 
-	decl {-> declaration} =
-		var var_decl semi
-			{-> New declaration.var_dec([var_decl.var_declaration])}
-	|	type type_decl semi
-			{-> New declaration.type_dec([type_decl.type_declaration])}
-	|	func func_decl semi
+	prod_decl {-> ast_declaration} =
+		var prod_var_decl semi
+			{-> New ast_declaration.ast_var_dec([prod_var_decl.ast_var_declaration])}
+	|	type prod_type_decl semi
+			{-> New ast_declaration.ast_type_dec([prod_type_decl.ast_type_declaration])}
+	|	func prod_func_decl semi
 	;
 
-	id_list {-> id*} =
-		 id id_tail*
-		 	{-> [id, id_tail.id]}
+	prod_id_list {-> ast_id*} =
+		 id prod_id_tail*
+		 	{-> [ast_id, prod_id_tail.ast_id]}
 	;
 
-	id_tail {-> id} =
+	prod_id_tail {-> ast_id} =
 		comma id
-			{-> id}
+			{-> ast_id}
 	;
 
-	exp_list {-> exp*} =
-		exp exp_tail*
+	prod_exp_list {-> ast_exp*} =
+		exp prod_exp_tail*
 			{-> [exp, exp_tail.exp]}
 	;
 
-	exp_tail {-> exp} =
+	prod_exp_tail {-> ast_exp} =
 		comma exp
 			{-> exp}
 	;
@@ -174,64 +174,72 @@ Productions
 	/*		Declaration		*/
 	/*======================*/
 
-	var_decl {-> var_declaration} = 
-		{single}	var_decl_single
-			{-> var_decl_sinle.var_declaration}
-	|	{list}		leftpar var_decl_single_semi* rightpar
-			{-> var_decl_single_semi.var_declaration}
+	prod_var_decl {-> ast_var_declaration} = 
+		{single}	prod_var_decl_single
+			{-> prod_var_decl_single.ast_var_declaration}
+	|	{list}		leftpar prod_var_decl_single_semi* rightpar
+			{-> prod_var_decl_single_semi.ast_var_declaration}
 	;
 
-	var_decl_single {-> var_declaration} = 
-		{type}		id_list type_exp
-			{-> New var_declaration.var_dec_typeOnly([id_list.id], type_exp.type_exp)}
-	|	{expr}		id_list assign exp_list
-			{-> New var_declaration.var_dec_expOnly([id_list.id], [exp_list.exp] )}
-	|	{type_exp}	id_list type_exp assign exp_list
-			{-> New var_declaration.var_dec_typeExp([id_list.id], type_exp.type_exp, [exp_list.exp])}
+	prod_var_decl_single {-> ast_var_declaration} = 
+		{type}		prod_id_list prod_type_exp
+			{-> New ast_var_declaration.ast_var_dec_typeOnly([prod_id_list.ast_id], ast_type_exp.ast_type_exp)}
+	|	{expr}		prod_id_list assign prod_exp_list
+			{-> New ast_var_declaration.ast_var_dec_expOnly([prod_id_list.ast_id], [prod_exp_list.ast_exp])}
+	|	{type_exp}	prod_id_list prod_type_exp assign prod_exp_list
+			{-> New ast_var_declaration.ast_var_dec_typeExp([prod_id_list.ast_id], ast_type_exp.ast_type_exp, [prod_exp_list.ast_exp])}
 	;
 
-	var_decl_single_semi {-> var_declaration} =
-		var_decl_single semi
-			{-> var_decl_single.var_declaration}
+	prod_var_decl_single_semi {-> ast_var_declaration} =
+		prod_var_decl_single semi
+			{-> prod_var_decl_single.ast_var_declaration}
 	;
 
-	type_decl =
-		{single}	type_decl_single
-	|	{list}		leftpar type_decl_single_semi* rightpar
+	prod_type_decl {-> ast_type_declaration} =
+		{single}	prod_type_decl_single
+			{-> ast_type_decl_single.ast_type_declaration}
+	|	{list}		leftpar prod_type_decl_single_semi* rightpar
+			{-> ast_type_decl_single_semi.ast_type_declaration}
 	;
 
-	type_decl_single =
-		id type_exp
+	prod_type_decl_single {-> ast_type_declaration} =
+		id prod_type_exp
+			{-> New ast_type_declaration(ast_id, prod_type_exp.ast_type_exp)}
 	;
 
-	type_decl_single_semi =
-		type_decl_single semi
+	prod_type_decl_single_semi {-> ast_type_declaration} =
+		prod_type_decl_single semi
+			{-> prod_type_decl_single.ast_type_declaration}
 	;
 
-	type_exp {-> type_exp} =
+	prod_type_exp {-> ast_type_exp} =
 		{basic}		basic_types
-	|	{slice}		leftsq rightsq type_exp
-	|	{array}		leftsq int_lit rightsq type_exp
-	|	{struct}	struct leftcurl struct_decl* rightcurl
+			{-> New ast_type_exp.basic(basic_types)}
+	|	{slice}		leftsq rightsq prod_type_exp
+			{-> New ast_type_exp.slice(????)}
+	|	{array}		leftsq int_lit rightsq prod_type_exp
+			{-> New ast_type_exp.array(????)}
+	|	{struct}	struct leftcurl prod_struct_decl* rightcurl
+			{-> New ast_type_exp.struct([prod_struct_decl.ast_struct_decl])}
 	;
 
-	struct_decl =
-		id_list type_exp semi
+	prod_struct_decl {-> ast_struct_decl} =
+		prod_id_list prod_type_exp semi
 	;
 
-	func_decl =
-		id leftpar func_param? rightpar type_exp? block
+	prod_func_decl =
+		id leftpar prod_func_param? rightpar prod_type_exp? block
 	;
 
-	func_param = 
-		id_list type_exp func_param_tail*
+	prod_func_param = 
+		prod_id_list prod_type_exp prod_func_param_tail*
 	;
 
-	func_param_tail =
-		comma func_param
+	prod_func_param_tail =
+		comma prod_func_param
 	;
 
-	block =
+	prod_block =
 		leftcurl rightcurl
 	;
 
