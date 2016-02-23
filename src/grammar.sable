@@ -73,7 +73,7 @@ Tokens
 	mod			= '%';
 	bit_and		= '&';
 	bit_or		= '|';
-	bit_xor		= '^';
+	caret		= '^';
 	lshift		= '<<';
 	rshift		= '>>';
 	bitclear	= '&^';
@@ -160,14 +160,14 @@ Productions
 			{-> id}
 	;
 
-	exp_list {-> exp*} =
-		exp exp_tail*
-			{-> [exp, exp_tail.exp]}
+	exp_list {-> ast_exp*} =
+		prod_exp exp_tail*
+			{-> [prod_exp, exp_tail.ast_exp]}
 	;
 
-	exp_tail {-> exp} =
-		comma exp
-			{-> exp}
+	exp_tail {-> ast_exp} =
+		comma prod_exp
+			{-> ast_exp}
 	;
 
 	/*======================*/
@@ -182,12 +182,12 @@ Productions
 	;
 
 	var_decl_single {-> var_declaration} = 
-		{type}		id_list type_exp
-			{-> New var_declaration.var_dec_typeOnly([id_list.id], type_exp.type_exp)}
+		{type}		id_list prod_type_exp
+			{-> New var_declaration.var_dec_typeOnly([id_list.id], prod_type_exp.ast_type_exp)}
 	|	{expr}		id_list assign exp_list
 			{-> New var_declaration.var_dec_expOnly([id_list.id], [exp_list.exp] )}
-	|	{type_exp}	id_list type_exp assign exp_list
-			{-> New var_declaration.var_dec_typeExp([id_list.id], type_exp.type_exp, [exp_list.exp])}
+	|	{type_exp}	id_list prod_type_exp assign exp_list
+			{-> New var_declaration.var_dec_typeExp([id_list.id], prod_type_exp.ast_type_exp, [exp_list.exp])}
 	;
 
 	var_decl_single_semi {-> var_declaration} =
@@ -201,30 +201,30 @@ Productions
 	;
 
 	type_decl_single =
-		id type_exp
+		id prod_type_exp
 	;
 
 	type_decl_single_semi =
 		type_decl_single semi
 	;
 
-	type_exp {-> type_exp} =
+	prod_type_exp {-> ast_type_exp} =
 		{basic}		basic_types
-	|	{slice}		leftsq rightsq type_exp
-	|	{array}		leftsq int_lit rightsq type_exp
+	|	{slice}		leftsq rightsq prod_type_exp
+	|	{array}		leftsq int_lit rightsq prod_type_exp
 	|	{struct}	struct leftcurl struct_decl* rightcurl
 	;
 
 	struct_decl =
-		id_list type_exp semi
+		id_list prod_type_exp semi
 	;
 
 	func_decl =
-		id leftpar func_param? rightpar type_exp? block
+		id leftpar func_param? rightpar prod_type_exp? block
 	;
 
 	func_param = 
-		id_list type_exp func_param_tail*
+		id_list prod_type_exp func_param_tail*
 	;
 
 	func_param_tail =
@@ -246,54 +246,67 @@ Abstract Syntax Tree
 	declaration = 
 	|	{var_dec}			var_declaration
 	|	{type_dec} 			type_declaration
-	|	{func_dec}			id (id+ type_exp)* type_exp? stm
+	|	{func_dec}			id (id+ ast_type_exp)* ast_type_exp? ast_stm
 	;
 	
 	var_declaration = 
-		{var_dec_typeOnly} 	id+ type_exp
-	|	{var_dec_expOnly} 	id+ exp+
-	|	{var_dec_typeExp} 	id+ type_exp exp+
+		{var_dec_typeOnly} 	id+ ast_type_exp
+	|	{var_dec_expOnly} 	id+ ast_exp+
+	|	{var_dec_typeExp} 	id+ ast_type_exp ast_exp+
 	;
 
 	type_declaration = 
-		id+ type_exp+
+		id+ ast_type_exp+
 	|
 	
-	type_exp = 
+	ast_type_exp = 
 		{basic}		basic_types
-	|	{slice}		type_exp
-	|	{array}		[size]int_lit type_exp
+	|	{slice}		ast_type_exp
+	|	{array}		[size]int_lit ast_type_exp
 	|	{struct}	strct_field*
 	|	{alias}		id
 	;
 
-	strct_field = id+ type_exp;
+	strct_field = id+ ast_type_exp;
 	
-	stm =
+	ast_stm =
 		{empty}
-	|	{exp}			exp
-	|	{assign}		[lval]:exp+ [rval]exp+
-	|	{op_assign}		[l]:exp op [r]:exp
+	|	{exp}			ast_exp
+	|	{assign}		[lval]:ast_exp+ [rval]ast_exp+
+	|	{op_assign}		[l]:ast_exp binary_op [r]:ast_exp
 	|	{var_decl}		var_declaration+
-	|	{short_decl}	[ids] exp+ exp+
+	|	{short_decl}	[ids] ast_exp+ ast_exp+
 	|	{type_decl}		type_decl+
-	|	{inc_dec}		exp post_op exp
-	|	{print}			exp*
-	|	{println}		exp*
-	|	{return}		exp?
-	|	{shortif}		[init] stm? [condition]:exp stm*
-	|	{longif}		[init] stm? [condition]:exp [if_stms]stm* elseif* [else_stms]:stm*
-	|	{switch}		stm? exp? switch_case+
-	|	{for}			[init] stm? [condition] exp? [post] stm? [body] stm*
+	|	{inc_dec}		ast_exp post_op ast_exp
+	|	{print}			ast_exp*
+	|	{println}		ast_exp*
+	|	{return}		ast_exp?
+	|	{shortif}		[init] ast_stm? [condition]:ast_exp ast_stm*
+	|	{longif}		[init] ast_stm? [condition]:ast_exp [if_stms]ast_stm* elseif* [else_stms]:ast_stm*
+	|	{switch}		ast_stm? ast_exp? switch_case+
+	|	{for}			[init] ast_stm? [condition] ast_exp? [post] ast_stm? [body] ast_stm*
 	|	{break}
 	|	{continue}
 	;
+	
+	ast_exp = 
+		{parenthesized}	ast_exp
+	|	{identifier}	id
+	|	{literal}		literal
+	|	{unary_op}		unary_op ast_exp
+	|	{binary_op}		[left]:ast_exp binary_op [right]:ast_exp
+	|	{func_call}		[name]:ast_exp [args]:ast_exp*
+	|	{apppend}		id ast_exp
+	|	{cast}			ast_type_exp ast_exp
+	|	{array_access}	[array]:ast_exp [index]:ast_exp
+	|	{field_access}	[struct]:ast_exp [field]:id
+	;
 
-	elseif = [condition]:exp stm*;
+	elseif = [condition]:ast_exp ast_stm*;
 	
 	switch_case = 
-		{default}		stm*
-	|	{case} 			exp+ stm*
+		{default}		ast_stm*
+	|	{case} 			ast_exp+ ast_stm*
 	;
 	
 	literal = 
@@ -304,7 +317,7 @@ Abstract Syntax Tree
 	|	{stringval} string_lit
 	;
 
-	op = 
+	binary_op = 
 		{add}
 	|	{sub}
 	|	{mul}
@@ -317,6 +330,8 @@ Abstract Syntax Tree
 	|	{rshift}
 	|	{bitclear}
 	;
+	
+	unary_op = {plus} | {minus} | {not} | {caret};
 	
 	post_op = 
 		{inc}
