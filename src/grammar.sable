@@ -144,44 +144,55 @@ Productions
 
 	decl {-> declaration} =
 		var var_decl semi
-			{-> New var_dec(var_decl.var_declaration)}
+			{-> New declaration.var_dec([var_decl.var_declaration])}
 	|	type type_decl semi
+			{-> New declaration.type_dec([type_decl.type_declaration])}
 	|	func func_decl semi
 	;
 
-	id_list =
+	id_list {-> id*} =
 		 id id_tail*
+		 	{-> [id, id_tail.id]}
 	;
 
-	id_tail =
+	id_tail {-> id} =
 		comma id
+			{-> id}
 	;
 
-	exp_list =
-		cst_exp exp_tail*
+	exp_list {-> exp*} =
+		exp exp_tail*
+			{-> [exp, exp_tail.exp]}
 	;
 
-	exp_tail =
-		comma cst_exp
+	exp_tail {-> exp} =
+		comma exp
+			{-> exp}
 	;
 
 	/*======================*/
 	/*		Declaration		*/
 	/*======================*/
 
-	var_decl = 
+	var_decl {-> var_declaration} = 
 		{single}	var_decl_single
+			{-> var_decl_sinle.var_declaration}
 	|	{list}		leftpar var_decl_single_semi* rightpar
+			{-> var_decl_single_semi.var_declaration}
 	;
 
-	var_decl_single = 
+	var_decl_single {-> var_declaration} = 
 		{type}		id_list type_exp
+			{-> New var_declaration.var_dec_typeOnly([id_list.id], type_exp.type_exp)}
 	|	{expr}		id_list assign exp_list
-	|	{type_expr}	id_list type_exp assign exp_list
+			{-> New var_declaration.var_dec_expOnly([id_list.id], [exp_list.exp] )}
+	|	{type_exp}	id_list type_exp assign exp_list
+			{-> New var_declaration.var_dec_typeExp([id_list.id], type_exp.type_exp, [exp_list.exp])}
 	;
 
-	var_decl_single_semi =
+	var_decl_single_semi {-> var_declaration} =
 		var_decl_single semi
+			{-> var_decl_single.var_declaration}
 	;
 
 	type_decl =
@@ -197,7 +208,7 @@ Productions
 		type_decl_single semi
 	;
 
-	type_exp =
+	type_exp {-> type_exp} =
 		{basic}		basic_types
 	|	{slice}		leftsq rightsq type_exp
 	|	{array}		leftsq int_lit rightsq type_exp
@@ -234,25 +245,29 @@ Abstract Syntax Tree
 	
 	declaration = 
 	|	{var_dec}			var_declaration
-	|	{type_dec} 			id type
-	|	{func_dec}			id (id+ type)* type? stm
+	|	{type_dec} 			type_declaration
+	|	{func_dec}			id (id+ type_exp)* type_exp? stm
 	;
 	
 	var_declaration = 
-		{var_dec_typeOnly} 	id+ type
+		{var_dec_typeOnly} 	id+ type_exp
 	|	{var_dec_expOnly} 	id+ exp+
-	|	{var_dec_typeExp} 	id+ type exp+
+	|	{var_dec_typeExp} 	id+ type_exp exp+
 	;
+
+	type_declaration = 
+		id+ type_exp+
+	|
 	
-	type = 
+	type_exp = 
 		{basic}		basic_types
-	|	{slice}		type
-	|	{array}		[size]int_lit type
+	|	{slice}		type_exp
+	|	{array}		[size]int_lit type_exp
 	|	{struct}	strct_field*
 	|	{alias}		id
 	;
-	
-	strct_field = id+ type;
+
+	strct_field = id+ type_exp;
 	
 	stm =
 		{empty}
