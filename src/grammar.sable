@@ -139,15 +139,16 @@ Ignored Tokens
 Productions
 	prod_program {-> ast_program} =
 		package id semi prod_decl*
-			{-> New ast_program(id, [prod_decl])}
+			{-> New ast_program(id, [prod_decl.ast_decl])}
 	;
 
 	prod_decl {-> ast_decl} =
 		var prod_var_decl semi
-			{-> New ast_decl.ast_var_dec([prod_var_decl.ast_var_decl])}
+			{-> New ast_decl.var_dec(prod_var_decl.ast_var_decl)}
 	|	type prod_type_decl semi
-			{-> New ast_decl.ast_type_dec([prod_type_decl.ast_type_decl])}
+			{-> New ast_decl.type_dec(prod_type_decl.ast_type_decl)}
 	|	func prod_func_decl semi
+			{-> New ast_decl.func_dec(prod_func_decl.ast_func_decl)}
 	;
 
 	prod_id_list {-> id*} =
@@ -282,7 +283,7 @@ Abstract Syntax Tree
 	ast_type_exp = 
 		{basic}		basic_types
 	|	{slice}		ast_type_exp
-	|	{array}		[size]int_lit ast_type_exp
+	|	{array}		[size]:int_lit ast_type_exp
 	|	{struct}	ast_strct_field*
 	|	{alias}		id
 	;
@@ -294,19 +295,19 @@ Abstract Syntax Tree
 	ast_stm =
 		{empty}
 	|	{exp}			ast_exp
-	|	{assign}		[lval]:ast_exp+ [rval]ast_exp+
+	|	{assign}		[lval]:ast_exp+ [rval]:ast_exp+
 	|	{op_assign}		[l]:ast_exp binary_op [r]:ast_exp
 	|	{var_decl}		var_decl+
-	|	{short_decl}	[ids] ast_exp+ ast_exp+
+	|	{short_decl}	[ids]:ast_exp+ ast_exp+
 	|	{type_decl}		ast_type_decl+
 	|	{inc_dec}		ast_exp post_op ast_exp
 	|	{print}			ast_exp*
 	|	{println}		ast_exp*
 	|	{return}		ast_exp?
-	|	{shortif}		[init] ast_stm? [condition]:ast_exp ast_stm*
-	|	{longif}		[init] ast_stm? [condition]:ast_exp [if_stms]ast_stm* elseif* [else_stms]:ast_stm*
+	|	{shortif}		[init]:ast_stm? [condition]:ast_exp ast_stm*
+	|	{longif}		[init]:ast_stm? [condition]:ast_exp [if_stms]:ast_stm* elseif* [else_stms]:ast_stm*
 	|	{switch}		ast_stm? ast_exp? switch_case+
-	|	{for}			[init] ast_stm? [condition] ast_exp? [post] ast_stm? [body] ast_stm*
+	|	{for}			[init]:ast_stm? [condition]:ast_exp? [post]:ast_stm? [body]:ast_stm*
 	|	{break}
 	|	{continue}
 	;
