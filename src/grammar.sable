@@ -170,8 +170,10 @@ Productions
 		comma prod_exp
 			{-> prod_exp.ast_exp}
 	;
-	
-	prod_exp {-> ast_exp} =;
+
+	prod_exp {-> ast_exp} =
+		
+	;
 
 	/*======================*/
 	/*		Declaration		*/
@@ -188,9 +190,9 @@ Productions
 		{type}		prod_id_list prod_type_exp
 			{-> New ast_var_decl.type([prod_id_list.id], ast_type_exp.ast_type_exp)}
 	|	{expr}		prod_id_list assign prod_exp_list
-			{-> New ast_var_decl.exp([prod_id_list.id], [prod_exp_list.prod_exp])}
+			{-> New ast_var_decl.exp([prod_id_list.id], [prod_exp_list.ast_exp])}
 	|	{type_exp}	prod_id_list prod_type_exp assign prod_exp_list
-			{-> New ast_var_decl.type_exp([prod_id_list.id], ast_type_exp.ast_type_exp, [prod_exp_list.prod_exp])}
+			{-> New ast_var_decl.type_exp([prod_id_list.id], ast_type_exp.ast_type_exp, [prod_exp_list.ast_exp])}
 	;
 
 	prod_var_decl_single_semi {-> ast_var_decl} =
