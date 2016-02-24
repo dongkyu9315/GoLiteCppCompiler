@@ -111,7 +111,7 @@ Tokens
 	rightpar	= ')';
 	rightsq		= ']';
 	rightcurl	= '}';
-	semicolon	= ';';
+	semi	= ';';
 	colon		= ':';
 	
 /*Comment*/
@@ -143,17 +143,17 @@ Productions
 	;
 
 	prod_decl {-> ast_decl} =
-		var prod_var_decl semi
+		{variable} var prod_var_decl semi
 			{-> New ast_decl.var_dec(prod_var_decl.ast_var_decl)}
-	|	type prod_type_decl semi
+	|	{type} type prod_type_decl semi
 			{-> New ast_decl.type_dec(prod_type_decl.ast_type_decl)}
-	|	func prod_func_decl semi
+	|	{function} func prod_func_decl semi
 			{-> New ast_decl.func_dec(prod_func_decl.ast_func_decl)}
 	;
 
 	prod_id_list {-> id*} =
 		 id prod_id_tail*
-		 	{-> [id, prod_id_tail.ast_id]}
+		 	{-> [id, prod_id_tail.id]}
 	;
 
 	prod_id_tail {-> id} =
@@ -161,15 +161,17 @@ Productions
 			{-> id}
 	;
 
-	prod_exp_list {-> prod_exp*} =
+	prod_exp_list {-> ast_exp*} =
 		prod_exp prod_exp_tail*
-			{-> [prod_exp, exp_tail.ast_exp]}
+			{-> [prod_exp.ast_exp, prod_exp_tail.ast_exp]}
 	;
 
-	prod_exp_tail {-> prod_exp} =
+	prod_exp_tail {-> ast_exp} =
 		comma prod_exp
-			{-> prod_exp}
+			{-> prod_exp.ast_exp}
 	;
+	
+	prod_exp {-> ast_exp} =;
 
 	/*======================*/
 	/*		Declaration		*/
@@ -230,7 +232,7 @@ Productions
 	;
 
 	prod_func_decl {-> ast_func_decl} =
-		id leftpar prod_func_param? rightpar prod_type_exp? block
+		id leftpar prod_func_param? rightpar prod_type_exp? prod_block
 			{-> New ast_func_decl(id, prod_func_param.ast_func_param)}
 	;
 
@@ -284,11 +286,11 @@ Abstract Syntax Tree
 		{basic}		basic_types
 	|	{slice}		ast_type_exp
 	|	{array}		[size]:int_lit ast_type_exp
-	|	{struct}	ast_strct_field*
+	|	{struct}	ast_struct_field*
 	|	{alias}		id
 	;
 
-	ast_strct_field = 
+	ast_struct_field = 
 		id+ ast_type_exp
 	;
 	
@@ -297,10 +299,10 @@ Abstract Syntax Tree
 	|	{exp}			ast_exp
 	|	{assign}		[lval]:ast_exp+ [rval]:ast_exp+
 	|	{op_assign}		[l]:ast_exp binary_op [r]:ast_exp
-	|	{var_decl}		var_decl+
+	|	{var_decl}		ast_var_decl+
 	|	{short_decl}	[ids]:ast_exp+ ast_exp+
 	|	{type_decl}		ast_type_decl+
-	|	{inc_dec}		ast_exp post_op ast_exp
+	|	{inc_dec}		ast_exp post_op
 	|	{print}			ast_exp*
 	|	{println}		ast_exp*
 	|	{return}		ast_exp?
@@ -337,9 +339,6 @@ Abstract Syntax Tree
 	literal = 
 		{int}	 	int_lit
 	|	{float} 	float_lit
-	|	{bool}	 	bool_lit
-	|	{rune}	 	rune_lit
-	|	{string}	string_lit
 	;
 
 	binary_op = 
