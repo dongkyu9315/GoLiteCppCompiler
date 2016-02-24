@@ -142,101 +142,105 @@ Productions
 			{-> New ast_program(id, [prod_decl])}
 	;
 
-	prod_decl {-> ast_declaration} =
+	prod_decl {-> ast_decl} =
 		var prod_var_decl semi
-			{-> New ast_declaration.ast_var_dec([prod_var_decl.ast_var_declaration])}
+			{-> New ast_decl.ast_var_dec([prod_var_decl.ast_var_decl])}
 	|	type prod_type_decl semi
-			{-> New ast_declaration.ast_type_dec([prod_type_decl.ast_type_declaration])}
+			{-> New ast_decl.ast_type_dec([prod_type_decl.ast_type_decl])}
 	|	func prod_func_decl semi
 	;
 
-	prod_id_list {-> ast_id*} =
+	prod_id_list {-> id*} =
 		 id prod_id_tail*
-		 	{-> [ast_id, prod_id_tail.ast_id]}
+		 	{-> [id, prod_id_tail.ast_id]}
 	;
 
-	prod_id_tail {-> ast_id} =
+	prod_id_tail {-> id} =
 		comma id
-			{-> ast_id}
+			{-> id}
 	;
 
-	prod_exp_list {-> ast_exp*} =
+	prod_exp_list {-> prod_exp*} =
 		prod_exp prod_exp_tail*
 			{-> [prod_exp, exp_tail.ast_exp]}
 	;
 
-	prod_exp_tail {-> ast_exp} =
+	prod_exp_tail {-> prod_exp} =
 		comma prod_exp
-			{-> ast_exp}
+			{-> prod_exp}
 	;
 
 	/*======================*/
 	/*		Declaration		*/
 	/*======================*/
 
-	prod_var_decl {-> ast_var_declaration} = 
+	prod_var_decl {-> ast_var_decl} = 
 		{single}	prod_var_decl_single
-			{-> prod_var_decl_single.ast_var_declaration}
+			{-> prod_var_decl_single.ast_var_decl}
 	|	{list}		leftpar prod_var_decl_single_semi* rightpar
-			{-> prod_var_decl_single_semi.ast_var_declaration}
+			{-> prod_var_decl_single_semi.ast_var_decl}
 	;
 
-	prod_var_decl_single {-> ast_var_declaration} = 
+	prod_var_decl_single {-> ast_var_decl} = 
 		{type}		prod_id_list prod_type_exp
-			{-> New ast_var_declaration.ast_var_dec_typeOnly([prod_id_list.ast_id], ast_type_exp.ast_type_exp)}
+			{-> New ast_var_decl.type([prod_id_list.id], ast_type_exp.ast_type_exp)}
 	|	{expr}		prod_id_list assign prod_exp_list
-			{-> New ast_var_declaration.ast_var_dec_expOnly([prod_id_list.ast_id], [prod_exp_list.ast_exp])}
+			{-> New ast_var_decl.exp([prod_id_list.id], [prod_exp_list.prod_exp])}
 	|	{type_exp}	prod_id_list prod_type_exp assign prod_exp_list
-			{-> New ast_var_declaration.ast_var_dec_typeExp([prod_id_list.ast_id], ast_type_exp.ast_type_exp, [prod_exp_list.ast_exp])}
+			{-> New ast_var_decl.type_exp([prod_id_list.id], ast_type_exp.ast_type_exp, [prod_exp_list.prod_exp])}
 	;
 
-	prod_var_decl_single_semi {-> ast_var_declaration} =
+	prod_var_decl_single_semi {-> ast_var_decl} =
 		prod_var_decl_single semi
-			{-> prod_var_decl_single.ast_var_declaration}
+			{-> prod_var_decl_single.ast_var_decl}
 	;
 
-	prod_type_decl {-> ast_type_declaration} =
+	prod_type_decl {-> ast_type_decl} =
 		{single}	prod_type_decl_single
-			{-> ast_type_decl_single.ast_type_declaration}
+			{-> ast_type_decl_single.ast_type_decl}
 	|	{list}		leftpar prod_type_decl_single_semi* rightpar
-			{-> ast_type_decl_single_semi.ast_type_declaration}
+			{-> ast_type_decl_single_semi.ast_type_decl}
 	;
 
-	prod_type_decl_single {-> ast_type_declaration} =
+	prod_type_decl_single {-> ast_type_decl} =
 		id prod_type_exp
-			{-> New ast_type_declaration(ast_id, prod_type_exp.ast_type_exp)}
+			{-> New ast_type_decl(id, prod_type_exp.ast_type_exp)}
 	;
 
-	prod_type_decl_single_semi {-> ast_type_declaration} =
+	prod_type_decl_single_semi {-> ast_type_decl} =
 		prod_type_decl_single semi
-			{-> prod_type_decl_single.ast_type_declaration}
+			{-> prod_type_decl_single.ast_type_decl}
 	;
 
 	prod_type_exp {-> ast_type_exp} =
 		{basic}		basic_types
 			{-> New ast_type_exp.basic(basic_types)}
 	|	{slice}		leftsq rightsq prod_type_exp
-			{-> New ast_type_exp.slice(????)}
+			{-> New ast_type_exp.slice(ast_type_exp)}
 	|	{array}		leftsq int_lit rightsq prod_type_exp
-			{-> New ast_type_exp.array(????)}
-	|	{struct}	struct leftcurl prod_struct_decl* rightcurl
-			{-> New ast_type_exp.struct([prod_struct_decl.ast_struct_decl])}
+			{-> New ast_type_exp.array(int_lit, prod_type_exp)}
+	|	{struct}	struct leftcurl prod_struct_field* rightcurl
+			{-> New ast_type_exp.struct([prod_struct_decl.ast_struct_field])}
 	;
 
-	prod_struct_decl {-> ast_struct_decl} =
+	prod_struct_field {-> ast_struct_field} =
 		prod_id_list prod_type_exp semi
+			{-> New ast_struct_field([prod_id_list.id], prod_type_exp.ast_type_exp)}
 	;
 
-	prod_func_decl =
+	prod_func_decl {-> ast_func_decl} =
 		id leftpar prod_func_param? rightpar prod_type_exp? block
+			{-> New ast_func_decl(id, prod_func_param.ast_func_param)}
 	;
 
-	prod_func_param = 
+	prod_func_param {-> ast_func_param*} = 
 		prod_id_list prod_type_exp prod_func_param_tail*
+			{-> [New ast_func_param([prod_id_list.id], prod_type_exp.ast_type_ast), prod_func_param_tail.ast_func_param]}
 	;
 
-	prod_func_param_tail =
+	prod_func_param_tail {-> ast_func_param}=
 		comma prod_func_param
+			{-> prod_func_param.ast_func_param}
 	;
 
 	prod_block =
@@ -247,44 +251,54 @@ Productions
 /*			AST				*/
 /*==========================*/
 Abstract Syntax Tree
-	program = 
-		[package]:id [decl]:declaration*
+	ast_program = 
+		[package]:id [decl]:ast_decl*
 	;
 	
-	declaration = 
-	|	{var_dec}			var_declaration
-	|	{type_dec} 			type_declaration
-	|	{func_dec}			id (id+ ast_type_exp)* ast_type_exp? ast_stm
+	ast_decl = 
+		{var_dec}			ast_var_decl
+	|	{type_dec} 			ast_type_decl
+	|	{func_dec}			ast_func_decl
 	;
 	
-	var_declaration = 
-		{var_dec_typeOnly} 	id+ ast_type_exp
-	|	{var_dec_expOnly} 	id+ ast_exp+
-	|	{var_dec_typeExp} 	id+ ast_type_exp ast_exp+
+	ast_var_decl = 
+		{type} 	id+ ast_type_exp
+	|	{exp} 	id+ ast_exp+
+	|	{type_exp} 	id+ ast_type_exp ast_exp+
 	;
 
-	type_declaration = 
+	ast_type_decl = 
 		id+ ast_type_exp+
-	|
+	;
+	
+	ast_func_decl = 
+		id ast_func_param* ast_type_exp? ast_stm
+	;
+	
+	ast_func_param = 
+		id+ ast_type_exp
+	;
 	
 	ast_type_exp = 
 		{basic}		basic_types
 	|	{slice}		ast_type_exp
 	|	{array}		[size]int_lit ast_type_exp
-	|	{struct}	strct_field*
+	|	{struct}	ast_strct_field*
 	|	{alias}		id
 	;
 
-	strct_field = id+ ast_type_exp;
+	ast_strct_field = 
+		id+ ast_type_exp
+	;
 	
 	ast_stm =
 		{empty}
 	|	{exp}			ast_exp
 	|	{assign}		[lval]:ast_exp+ [rval]ast_exp+
 	|	{op_assign}		[l]:ast_exp binary_op [r]:ast_exp
-	|	{var_decl}		var_declaration+
+	|	{var_decl}		var_decl+
 	|	{short_decl}	[ids] ast_exp+ ast_exp+
-	|	{type_decl}		type_decl+
+	|	{type_decl}		ast_type_decl+
 	|	{inc_dec}		ast_exp post_op ast_exp
 	|	{print}			ast_exp*
 	|	{println}		ast_exp*
@@ -298,9 +312,9 @@ Abstract Syntax Tree
 	;
 	
 	ast_exp = 
-		{parenthesized}	ast_exp
-	|	{identifier}	id
-	|	{literal}		literal
+		{paren}			ast_exp
+	|	{id}			id
+	|	{lit}			literal
 	|	{unary_op}		unary_op ast_exp
 	|	{binary_op}		[left]:ast_exp binary_op [right]:ast_exp
 	|	{func_call}		[name]:ast_exp [args]:ast_exp*
@@ -310,7 +324,9 @@ Abstract Syntax Tree
 	|	{field_access}	[struct]:ast_exp [field]:id
 	;
 
-	elseif = [condition]:ast_exp ast_stm*;
+	elseif = 
+		[condition]:ast_exp ast_stm*
+	;
 	
 	switch_case = 
 		{default}		ast_stm*
@@ -318,11 +334,11 @@ Abstract Syntax Tree
 	;
 	
 	literal = 
-		{intval} 	int_lit
-	|	{floatval} 	float_lit
-	|	{boolval} 	bool_lit
-	|	{runeval} 	rune_lit
-	|	{stringval} string_lit
+		{int}	 	int_lit
+	|	{float} 	float_lit
+	|	{bool}	 	bool_lit
+	|	{rune}	 	rune_lit
+	|	{string}	string_lit
 	;
 
 	binary_op = 
@@ -339,7 +355,12 @@ Abstract Syntax Tree
 	|	{bitclear}
 	;
 	
-	unary_op = {plus} | {minus} | {not} | {caret};
+	unary_op = 
+		{plus}	ast_exp 
+	|	{minus} ast_exp
+	| 	{not}	ast_exp
+	|	{caret}	ast_exp
+	;
 	
 	post_op = 
 		{inc}
