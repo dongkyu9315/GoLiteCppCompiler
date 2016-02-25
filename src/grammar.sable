@@ -314,7 +314,7 @@ Productions
 	|	{gt} prod_bin_prec3 gt prod_bin_prec4
 			{-> New ast_exp.binary_op(prod_bin_prec3.ast_exp, New ast_binary_op.gt(), prod_bin_prec4.ast_exp)}
 	|	{geq} prod_bin_prec3 geq prod_bin_prec4
-			{-> New ast_exp.binary_op(prod_bin_prec3.ast_exp, New ast_binary_op.gep(), prod_bin_prec4.ast_exp)}
+			{-> New ast_exp.binary_op(prod_bin_prec3.ast_exp, New ast_binary_op.geq(), prod_bin_prec4.ast_exp)}
 	;
 
 	prod_bin_prec4 {-> ast_exp} =
@@ -334,19 +334,19 @@ Productions
 		{sin} prod_exp
 			{-> prod_exp.ast_exp}
 	|	{mult} prod_bin_prec5 mul prod_exp
-			{-> New ast_exp.mul(prod_bin_prec5.ast_exp, New ast_binary_op.mul(), prod_exp.ast_exp)}
+			{-> New ast_exp.binary_op(prod_bin_prec5.ast_exp, New ast_binary_op.mul(), prod_exp.ast_exp)}
 	|	{div} prod_bin_prec5 div prod_exp
-			{-> New ast_exp.div(prod_bin_prec5.ast_exp, New ast_binary_op.div(), prod_exp.ast_exp)}
+			{-> New ast_exp.binary_op(prod_bin_prec5.ast_exp, New ast_binary_op.div(), prod_exp.ast_exp)}
 	|	{mod} prod_bin_prec5 mod prod_exp
-			{-> New ast_exp.mod(prod_bin_prec5.ast_exp, New ast_binary_op.mod(), prod_exp.ast_exp)}
+			{-> New ast_exp.binary_op(prod_bin_prec5.ast_exp, New ast_binary_op.mod(), prod_exp.ast_exp)}
 	|	{lshift} prod_bin_prec5 lshift prod_exp
-			{-> New ast_exp.lshift(prod_bin_prec5.ast_exp, New ast_binary_op.lshift(), prod_exp.ast_exp)}
+			{-> New ast_exp.binary_op(prod_bin_prec5.ast_exp, New ast_binary_op.lshift(), prod_exp.ast_exp)}
 	|	{rshift} prod_bin_prec5 rshift prod_exp
-			{-> New ast_exp.rshift(prod_bin_prec5.ast_exp, New ast_binary_op.rshift(), prod_exp.ast_exp)}
+			{-> New ast_exp.binary_op(prod_bin_prec5.ast_exp, New ast_binary_op.rshift(), prod_exp.ast_exp)}
 	|	{bitand} prod_bin_prec5 bit_and prod_exp
-			{-> New ast_exp.bitand(prod_bin_prec5.ast_exp, New ast_binary_op.bitand(), prod_exp.ast_exp)}
+			{-> New ast_exp.binary_op(prod_bin_prec5.ast_exp, New ast_binary_op.bitand(), prod_exp.ast_exp)}
 	|	{bitclear} prod_bin_prec5 bitclear prod_exp
-			{-> New ast_exp.bitclear(prod_bin_prec5.ast_exp, New ast_binary_op.bitclear(), prod_exp.ast_exp)}
+			{-> New ast_exp.binary_op(prod_bin_prec5.ast_exp, New ast_binary_op.bitclear(), prod_exp.ast_exp)}
 	;
 	
 	prod_single {-> ast_exp} =
@@ -484,10 +484,10 @@ Abstract Syntax Tree
 	;
 	
 	ast_unary_op = 
-		{plus}	ast_exp 
-	|	{minus} ast_exp
-	| 	{not}	ast_exp
-	|	{caret}	ast_exp
+		{plus}	 
+	|	{minus} 
+	| 	{not}	
+	|	{caret}	
 	;
 	
 	post_op = 
