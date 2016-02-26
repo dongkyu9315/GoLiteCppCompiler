@@ -257,8 +257,71 @@ Productions
 	;
 	
 	prod_stm {-> ast_stm} =
-		{break}		break
+		{simple}		prod_simple_stm_semi
+			{-> prod_simple_stm_semi.ast_stm}
+	|
+		{variable_decl}	var prod_var_decl semi
+			{-> New ast_stm.var_decl([prod_var_decl.ast_var_decl])}
+	|	{type_decl}		type prod_type_decl semi
+			{-> New ast_stm.type_decl([prod_type_decl.ast_type_decl])}
+	|	{return}		return prod_exp? semi
+			{-> New ast_stm.return(prod_exp.ast_exp)}
+	|	{break}			break semi
 			{-> New ast_stm.break()}
+	|	{continue}		continue semi
+			{-> New ast_stm.continue()}
+	|	{print}			print leftpar prod_exp_list rightpar semi
+			{-> New ast_stm.print([prod_exp_list.ast_exp])}
+	|	{println}		println leftpar prod_exp_list rightpar semi
+			{-> New ast_stm.println([prod_exp_list.ast_exp])}
+	|	{if}			if_stm
+			{-> if_stm.ast_stm}
+
+	;
+	
+	if_stm {-> ast_stm} =
+		{if}			if prod_simple_stm_semi? prod_exp prod_block
+		{-> New ast_stm.shortif(prod_simple_stm_semi.ast_stm, prod_exp.ast_exp, [prod_block.ast_stm])}
+	|	{ifelse}		if prod_simple_stm_semi? prod_exp [if_block]:prod_block else [else_block]:prod_block
+		{-> New ast_stm.longif(prod_simple_stm_semi.ast_stm, prod_exp.ast_exp,[if_block.ast_stm],[else_block.ast_stm])}
+	|	{if_else_if}	if prod_simple_stm_semi? prod_exp prod_block else if_stm
+		{-> New ast_stm.longif(prod_simple_stm_semi.ast_stm, prod_exp.ast_exp,[prod_block.ast_stm],[if_stm.ast_stm])}
+	;
+	
+	prod_simple_stm_semi {-> ast_stm} =
+		prod_simple_stm semi
+		{-> prod_simple_stm.ast_stm}
+	;
+	
+	prod_simple_stm {-> ast_stm} =
+		{empty}
+		{-> New ast_stm.empty()}
+	|	{expression}	prod_exp
+		{-> New ast_stm.exp(prod_exp.ast_exp)}
+	|	{increment}		prod_exp increment
+		{-> New ast_stm.inc_dec(prod_exp.ast_exp, New post_op.inc())}
+	|	{decrement}		prod_exp decrement
+		{-> New ast_stm.inc_dec(prod_exp.ast_exp, New post_op.dec())}
+	|	{assign}		[left]:prod_exp_list assign [right]:prod_exp_list
+		{-> New ast_stm.assign([left.ast_exp],[right.ast_exp])}
+	|	{short_var_decl}[ids]:prod_id_list shortdecl prod_exp_list
+		{-> New ast_stm.short_decl([ids.id],[prod_exp_list.ast_exp])}
+	|	{op_assign}		id prod_op_assign prod_exp
+		{-> New ast_stm.op_assign(id,prod_op_assign.ast_op_assign,prod_exp.ast_exp)}
+	;
+	
+	prod_op_assign {-> ast_op_assign} =
+		{add_eq}	pluseq {-> New ast_op_assign.add_eq()}
+	|	{sub_eq}	subeq	{-> New ast_op_assign.sub_eq()}
+	|	{mul_eq}	muleq	{-> New ast_op_assign.mul_eq()}
+	|	{div_eq}	diveq	{-> New ast_op_assign.div_eq()}
+	|	{mod_eq}	modeq	{-> New ast_op_assign.mod_eq()}
+	|	{bitor_eq}	oreq	{-> New ast_op_assign.bitor_eq()}
+	|	{bitand_eq}	andeq	{-> New ast_op_assign.bitand_eq()}
+	|	{caret_eq}		xoreq	{-> New ast_op_assign.caret_eq()}
+	|	{lshift_eq}	lshifteq	{-> New ast_op_assign.lshift_eq()}
+	|	{rshift_eq}	rshifteq	{-> New ast_op_assign.rshift_eq()}
+	|	{bitclear_eq}	bitcleareq	{-> New ast_op_assign.bitclear_eq()}
 	;
 
 	/*======================*/
@@ -410,16 +473,16 @@ Abstract Syntax Tree
 		{empty}
 	|	{exp}			ast_exp
 	|	{assign}		[lval]:ast_exp+ [rval]:ast_exp+
-	|	{op_assign}		[l]:ast_exp ast_binary_op [r]:ast_exp
+	|	{op_assign}		[l]:id ast_op_assign [r]:ast_exp
 	|	{var_decl}		ast_var_decl+
-	|	{short_decl}	[ids]:ast_exp+ ast_exp+
+	|	{short_decl}	[ids]:id+ ast_exp+
 	|	{type_decl}		ast_type_decl+
 	|	{inc_dec}		ast_exp post_op
 	|	{print}			ast_exp*
 	|	{println}		ast_exp*
 	|	{return}		ast_exp?
 	|	{shortif}		[init]:ast_stm? [condition]:ast_exp ast_stm*
-	|	{longif}		[init]:ast_stm? [condition]:ast_exp [if_stms]:ast_stm* elseif* [else_stms]:ast_stm*
+	|	{longif}		[init]:ast_stm? [condition]:ast_exp [if_stms]:ast_stm* [else_stms]:ast_stm*
 	|	{switch}		ast_stm? ast_exp? switch_case+
 	|	{for}			[init]:ast_stm? [condition]:ast_exp? [post]:ast_stm? [body]:ast_stm*
 	|	{break}
@@ -439,9 +502,6 @@ Abstract Syntax Tree
 	|	{field_access}	[struct]:ast_exp [field]:id
 	;
 
-	elseif = 
-		[condition]:ast_exp ast_stm*
-	;
 	
 	switch_case = 
 		{default}		ast_stm*
@@ -476,6 +536,20 @@ Abstract Syntax Tree
 	|	{bitclear}
 	|	{or}
 	|	{and}
+	;
+	
+	ast_op_assign =
+		{add_eq}
+	|	{sub_eq}
+	|	{mul_eq}
+	|	{div_eq}
+	|	{mod_eq}
+	|	{bitor_eq}
+	|	{bitand_eq}
+	|	{caret_eq}
+	|	{lshift_eq}
+	|	{rshift_eq}
+	|	{bitclear_eq}
 	;
 	
 	ast_unary_op = 
