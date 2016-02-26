@@ -305,49 +305,50 @@ Productions
 	|	{bitor} prod_bin_prec4 bit_or prod_bin_prec5
 			{-> New ast_exp.binary_op(prod_bin_prec4.ast_exp, New ast_binary_op.bitor(), prod_bin_prec5.ast_exp)}
 	|	{caret} prod_bin_prec4 caret prod_bin_prec5
-			{-> New ast_exp.binary_op(prod_bin_prec4.ast_exp, New ast_binary_op.bitand(), prod_bin_prec5.ast_exp)}
+			{-> New ast_exp.binary_op(prod_bin_prec4.ast_exp, New ast_binary_op.caret(), prod_bin_prec5.ast_exp)}
 	;
 	
 	prod_bin_prec5 {-> ast_exp} =
-		{sin} prod_single
+		{unary} prod_unary
+			{-> prod_unary.ast_exp}
+	|	{mult} prod_bin_prec5 mul prod_unary
+			{-> New ast_exp.binary_op(prod_bin_prec5.ast_exp, New ast_binary_op.mul(), prod_unary.ast_exp)}
+	|	{div} prod_bin_prec5 div prod_unary
+			{-> New ast_exp.binary_op(prod_bin_prec5.ast_exp, New ast_binary_op.div(), prod_unary.ast_exp)}
+	|	{mod} prod_bin_prec5 mod prod_unary
+			{-> New ast_exp.binary_op(prod_bin_prec5.ast_exp, New ast_binary_op.mod(), prod_unary.ast_exp)}
+	|	{lshift} prod_bin_prec5 lshift prod_unary
+			{-> New ast_exp.binary_op(prod_bin_prec5.ast_exp, New ast_binary_op.lshift(), prod_unary.ast_exp)}
+	|	{rshift} prod_bin_prec5 rshift prod_unary
+			{-> New ast_exp.binary_op(prod_bin_prec5.ast_exp, New ast_binary_op.rshift(), prod_unary.ast_exp)}
+	|	{bitand} prod_bin_prec5 bit_and prod_unary
+			{-> New ast_exp.binary_op(prod_bin_prec5.ast_exp, New ast_binary_op.bitand(), prod_unary.ast_exp)}
+	|	{bitclear} prod_bin_prec5 bitclear prod_unary
+			{-> New ast_exp.binary_op(prod_bin_prec5.ast_exp, New ast_binary_op.bitclear(), prod_unary.ast_exp)}
+	;
+	
+	prod_unary {-> ast_exp} =
+		{pos} add prod_unary
+			{-> New ast_exp.unary_op(New ast_unary_op.plus(), prod_unary.ast_exp)}
+	|	{neg} sub prod_unary
+			{-> New ast_exp.unary_op(New ast_unary_op.minus(), prod_unary.ast_exp)}
+	|	{not} not prod_unary
+			{-> New ast_exp.unary_op(New ast_unary_op.not(), prod_unary.ast_exp)}
+	|	{caret} caret prod_unary
+			{-> New ast_exp.unary_op(New ast_unary_op.caret(), prod_unary.ast_exp)}
+	|	{sin}	prod_single
 			{-> prod_single.ast_exp}
-	|	{mult} prod_bin_prec5 mul prod_exp
-			{-> New ast_exp.binary_op(prod_bin_prec5.ast_exp, New ast_binary_op.mul(), prod_exp.ast_exp)}
-	|	{div} prod_bin_prec5 div prod_exp
-			{-> New ast_exp.binary_op(prod_bin_prec5.ast_exp, New ast_binary_op.div(), prod_exp.ast_exp)}
-	|	{mod} prod_bin_prec5 mod prod_exp
-			{-> New ast_exp.binary_op(prod_bin_prec5.ast_exp, New ast_binary_op.mod(), prod_exp.ast_exp)}
-	|	{lshift} prod_bin_prec5 lshift prod_exp
-			{-> New ast_exp.binary_op(prod_bin_prec5.ast_exp, New ast_binary_op.lshift(), prod_exp.ast_exp)}
-	|	{rshift} prod_bin_prec5 rshift prod_exp
-			{-> New ast_exp.binary_op(prod_bin_prec5.ast_exp, New ast_binary_op.rshift(), prod_exp.ast_exp)}
-	|	{bitand} prod_bin_prec5 bit_and prod_exp
-			{-> New ast_exp.binary_op(prod_bin_prec5.ast_exp, New ast_binary_op.bitand(), prod_exp.ast_exp)}
-	|	{bitclear} prod_bin_prec5 bitclear prod_exp
-			{-> New ast_exp.binary_op(prod_bin_prec5.ast_exp, New ast_binary_op.bitclear(), prod_exp.ast_exp)}
 	;
 	
 	prod_single {-> ast_exp} =
 		{paren} leftpar prod_exp rightpar
 			{-> New ast_exp.paren(prod_exp.ast_exp)}
-	|	{unary} prod_unary 
-			{-> prod_unary.ast_exp}
 	|	{prod_id} id
 			{-> New ast_exp.id(id)}
 	|	{prod_lit} prod_literals
 			{-> New ast_exp.lit(prod_literals.ast_literal)}
 	;
 
-	prod_unary {-> ast_exp} =
-		{pos} add prod_exp
-			{-> New ast_exp.unary_op(New ast_unary_op.plus(), prod_exp.ast_exp)}
-	|	{neg} sub prod_exp
-			{-> New ast_exp.unary_op(New ast_unary_op.minus(), prod_exp.ast_exp)}
-	|	{not} not prod_exp
-			{-> New ast_exp.unary_op(New ast_unary_op.not(), prod_exp.ast_exp)}
-	|	{caret} caret prod_exp
-			{-> New ast_exp.unary_op(New ast_unary_op.caret(), prod_exp.ast_exp)}
-	;
 	prod_literals {-> ast_literal} =
 		{prod_int} int_lit
 			{-> New ast_literal.int(int_lit)}
