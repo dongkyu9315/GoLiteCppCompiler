@@ -1,4 +1,4 @@
-src/goplusplus
+src/goplusplus/*/*
 bin
 #*.class
 
