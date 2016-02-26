@@ -9,6 +9,7 @@ Helpers
 	cr    		= 13;
 	lf    		= 10;
 	newline		= cr | lf | cr lf;
+	all_but_eol	= [all - [cr + lf]];
 	dec_digit 	= ['0'..'9'];
 	oct_digit	= ['0'..'7'];
 	hex_digit	= ['0'..'9'] | ['A'..'F'] | ['a'..'f'];
@@ -115,7 +116,7 @@ Tokens
 	colon		= ':';
 	
 /*Comment*/
-	line_comment 		= comment_lin all* newline;
+	line_comment 		= comment_lin all_but_eol*;
 	block_comment	 	= comment_beg all* comment_end;
 
 /*Literals*/
@@ -243,7 +244,7 @@ Productions
 
 	prod_func_param_tail {-> ast_func_param}=
 		comma prod_id_list prod_type_exp
-			{-> New ast_func_param([prod_id_list.id],prod_type_exp.ast_type_exp)}
+			{-> New ast_func_param([prod_id_list.id], prod_type_exp.ast_type_exp)}
 	;
 
 	/*======================*/
@@ -359,6 +360,7 @@ Productions
 	|	{prod_string} string_lit
 			{-> New ast_literal.string(string_lit)}
 	;
+
 
 /*==========================*/
 /*			AST				*/
