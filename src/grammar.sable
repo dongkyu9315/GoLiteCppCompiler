@@ -4,31 +4,27 @@ Package goplusplus;
 /*			Helpers			*/
 /*==========================*/
 Helpers
-	all 				= [0 .. 0xFF];
-	tab   				= 9;
-	cr    				= 13;
-	lf    				= 10;
-	newline				= cr | lf | cr lf;
-	all_but_eol			= [all - [cr + lf]];
-	dec_digit 			= ['0'..'9'];
-	oct_digit			= ['0'..'7'];
-	hex_digit			= ['0'..'9'] | ['A'..'F'] | ['a'..'f'];
-	lowercase 			= ['a'..'z'];
-	uppercase 			= ['A'..'Z'];
-	letter  			= lowercase | uppercase;
-	idletter 			= letter | '_';
-	idchar  			= letter | '_' | dec_digit;
-	printable 			= [0x20 .. 0xFF];
-	char 				= printable | tab;
-	comment_lin 		= '//';
-	comment_beg 		= '/*';
-	comment_end 		= '*/';
-	dec 				= ['1'..'9'] (dec_digit)*;
-	oct					= '0' (oct_digit)*;
-	hex					= '0' ('x' | 'X') (hex_digit)+;
-	escaped_char		= '\' ('a' | 'b' | 'f' | 'n' | 'r' | 't' | 'v' | '\' | ''' | '"');
-	raw_string 			= ''' char* ''';
-	interpreted_string 	= '"' (char | escaped_char)* '"';
+	all 		= [0 .. 0xFF];
+	tab   		= 9;
+	cr    		= 13;
+	lf    		= 10;
+	newline		= cr | lf | cr lf;
+	dec_digit 	= ['0'..'9'];
+	oct_digit	= ['0'..'7'];
+	hex_digit	= ['0'..'9'] | ['A'..'F'] | ['a'..'f'];
+	lowercase 	= ['a'..'z'];
+	uppercase 	= ['A'..'Z'];
+	letter  	= lowercase | uppercase;
+	idletter 	= letter | '_';
+	idchar  	= letter | '_' | dec_digit;
+	printable 	= [0x20 .. 0xFF];
+	char 		= printable | tab;
+	comment_lin = '//';
+	comment_beg = '/*';
+	comment_end = '*/';
+	dec 		= ['1'..'9'] (dec_digit)*;
+	oct			= '0' (oct_digit)*;
+	hex			= '0' ('x' | 'X') (hex_digit)+;
 
 
 /*==========================*/
@@ -119,14 +115,17 @@ Tokens
 	colon		= ':';
 	
 /*Comment*/
-	line_comment 		= comment_lin all_but_eol*;
+	line_comment 		= comment_lin all* newline;
 	block_comment	 	= comment_beg all* comment_end;
 
 /*Literals*/
+	escaped_char 		= '\' ('a' | 'b' | 'f' | 'n' | 'r' | 't' | 'v' | '\' | ''' | '"');
 	int_lit				= dec | oct | hex;
 	float_lit 			= ((dec_digit)* '.' (dec_digit)+) | ((dec_digit)+ '.' (dec_digit)*);
-	rune_lit			= ''' (char | escaped_char)* ''';
-	string_lit			= raw_string | interpreted_string;
+	rune_lit			= ;///////////////////////////////// need a fix
+	string_lit			= ;///////////////////////////////// need a fix
+	raw_string 			= ''' (char | newline)* ''';
+	interpreted_string 	= '"' (char | newline)* '"';
 
 /*Identifiers*/
 	id = idletter idchar*;
@@ -147,9 +146,9 @@ Productions
 
 	prod_decl {-> ast_decl} =
 		{variable} var prod_var_decl semi
-			{-> New ast_decl.var_dec([prod_var_decl.ast_var_decl])}
+			{-> New ast_decl.var_dec(prod_var_decl.ast_var_decl)}
 	|	{type} type prod_type_decl semi
-			{-> New ast_decl.type_dec([prod_type_decl.ast_type_decl])}
+			{-> New ast_decl.type_dec(prod_type_decl.ast_type_decl)}
 	|	{function} func prod_func_decl semi
 			{-> New ast_decl.func_dec(prod_func_decl.ast_func_decl)}
 	;
@@ -199,9 +198,9 @@ Productions
 			{-> prod_var_decl_single.ast_var_decl}
 	;
 
-	prod_type_decl {-> ast_type_decl*} =
+	prod_type_decl {-> ast_type_decl} =
 		{single}	prod_type_decl_single
-			{-> [prod_type_decl_single.ast_type_decl]}
+			{-> prod_type_decl_single.ast_type_decl}
 	|	{list}		leftpar prod_type_decl_single_semi* rightpar
 			{-> [prod_type_decl_single_semi.ast_type_decl]}
 	;
@@ -243,8 +242,8 @@ Productions
 	;
 
 	prod_func_param_tail {-> ast_func_param}=
-		comma prod_id_list prod_type_exp
-			{-> New ast_func_param([prod_id_list.id], prod_type_exp.ast_type_exp)}
+		comma prod_func_param
+			{-> prod_func_param.ast_func_param}
 	;
 
 	/*======================*/
@@ -266,88 +265,95 @@ Productions
 	/*======================*/
 
 	prod_exp {-> ast_exp} =
-		{prec2} prod_bin_prec2
-			{-> prod_bin_prec2.ast_exp}
-	|	{or} prod_exp or prod_bin_prec2
-			{-> New ast_exp.binary_op(prod_exp.ast_exp, New ast_binary_op.or(), prod_bin_prec2.ast_exp)}
-	;
-
-	prod_bin_prec2 {-> ast_exp} =
-		{prec3} prod_bin_prec3
-			{-> prod_bin_prec3.ast_exp}
-	|	{and} prod_bin_prec2 and prod_bin_prec3
-			{-> New ast_exp.binary_op(prod_bin_prec2.ast_exp, New ast_binary_op.and(), prod_bin_prec3.ast_exp)}
-	;
-
-	prod_bin_prec3 {-> ast_exp} =
-		{prec4} prod_bin_prec4
-			{-> prod_bin_prec4.ast_exp}
-	|	{eq} prod_bin_prec3 eq prod_bin_prec4
-			{-> New ast_exp.binary_op(prod_bin_prec3.ast_exp, New ast_binary_op.eq(), prod_bin_prec4.ast_exp)}
-	|	{noteq} prod_bin_prec3 noteq prod_bin_prec4
-			{-> New ast_exp.binary_op(prod_bin_prec3.ast_exp, New ast_binary_op.noteq(), prod_bin_prec4.ast_exp)}
-	|	{lt} prod_bin_prec3 lt prod_bin_prec4
-			{-> New ast_exp.binary_op(prod_bin_prec3.ast_exp, New ast_binary_op.lt(), prod_bin_prec4.ast_exp)}
-	|	{leq} prod_bin_prec3 leq prod_bin_prec4
-			{-> New ast_exp.binary_op(prod_bin_prec3.ast_exp, New ast_binary_op.leq(), prod_bin_prec4.ast_exp)}
-	|	{gt} prod_bin_prec3 gt prod_bin_prec4
-			{-> New ast_exp.binary_op(prod_bin_prec3.ast_exp, New ast_binary_op.gt(), prod_bin_prec4.ast_exp)}
-	|	{geq} prod_bin_prec3 geq prod_bin_prec4
-			{-> New ast_exp.binary_op(prod_bin_prec3.ast_exp, New ast_binary_op.geq(), prod_bin_prec4.ast_exp)}
-	;
-
-	prod_bin_prec4 {-> ast_exp} =
-		{prec5} prod_bin_prec5
-			{-> prod_bin_prec5.ast_exp}
-	|	{plus} prod_bin_prec4 add prod_bin_prec5
-			{-> New ast_exp.binary_op(prod_bin_prec4.ast_exp, New ast_binary_op.add(), prod_bin_prec5.ast_exp)}
-	|	{minus} prod_bin_prec4 sub prod_bin_prec5
-			{-> New ast_exp.binary_op(prod_bin_prec4.ast_exp, New ast_binary_op.sub(), prod_bin_prec5.ast_exp)}
-	|	{bitor} prod_bin_prec4 bit_or prod_bin_prec5
-			{-> New ast_exp.binary_op(prod_bin_prec4.ast_exp, New ast_binary_op.bitor(), prod_bin_prec5.ast_exp)}
-	|	{caret} prod_bin_prec4 caret prod_bin_prec5
-			{-> New ast_exp.binary_op(prod_bin_prec4.ast_exp, New ast_binary_op.caret(), prod_bin_prec5.ast_exp)}
-	;
-	
-	prod_bin_prec5 {-> ast_exp} =
-		{unary} prod_unary
-			{-> prod_unary.ast_exp}
-	|	{mult} prod_bin_prec5 mul prod_unary
-			{-> New ast_exp.binary_op(prod_bin_prec5.ast_exp, New ast_binary_op.mul(), prod_unary.ast_exp)}
-	|	{div} prod_bin_prec5 div prod_unary
-			{-> New ast_exp.binary_op(prod_bin_prec5.ast_exp, New ast_binary_op.div(), prod_unary.ast_exp)}
-	|	{mod} prod_bin_prec5 mod prod_unary
-			{-> New ast_exp.binary_op(prod_bin_prec5.ast_exp, New ast_binary_op.mod(), prod_unary.ast_exp)}
-	|	{lshift} prod_bin_prec5 lshift prod_unary
-			{-> New ast_exp.binary_op(prod_bin_prec5.ast_exp, New ast_binary_op.lshift(), prod_unary.ast_exp)}
-	|	{rshift} prod_bin_prec5 rshift prod_unary
-			{-> New ast_exp.binary_op(prod_bin_prec5.ast_exp, New ast_binary_op.rshift(), prod_unary.ast_exp)}
-	|	{bitand} prod_bin_prec5 bit_and prod_unary
-			{-> New ast_exp.binary_op(prod_bin_prec5.ast_exp, New ast_binary_op.bitand(), prod_unary.ast_exp)}
-	|	{bitclear} prod_bin_prec5 bitclear prod_unary
-			{-> New ast_exp.binary_op(prod_bin_prec5.ast_exp, New ast_binary_op.bitclear(), prod_unary.ast_exp)}
-	;
-	
-	prod_unary {-> ast_exp} =
-		{pos} add prod_unary
-			{-> New ast_exp.unary_op(New ast_unary_op.plus(), prod_unary.ast_exp)}
-	|	{neg} sub prod_unary
-			{-> New ast_exp.unary_op(New ast_unary_op.minus(), prod_unary.ast_exp)}
-	|	{not} not prod_unary
-			{-> New ast_exp.unary_op(New ast_unary_op.not(), prod_unary.ast_exp)}
-	|	{caret} caret prod_unary
-			{-> New ast_exp.unary_op(New ast_unary_op.caret(), prod_unary.ast_exp)}
-	|	{sin}	prod_single
+		{prod_par} leftpar prod_exp rightpar
+			{-> prod_exp.ast_exp}
+	|	{prod_sin} prod_single
 			{-> prod_single.ast_exp}
+	|	{prod_un} prod_unary
+			{-> prod_unary.ast_unary_op}
+	|	{prod_bin} prod_binary
+			{-> prod_binary.ast_binary_op}
+	;
+
+	prod_unary {-> ast_unary_op} =
+		{prod_pos} add prod_exp
+			{-> New ast_unary_op.plus(prod_exp.ast_exp)}
+	|	{prod_neg} sub prod_exp
+			{-> New ast_unary_op.minus(prod_exp.ast_exp)}
+	|	{prod_not} not prod_exp
+			{-> New ast_unary_op.not(prod_exp.ast_exp)}
+	|	{prod_caret} caret prod_exp
+			{-> New ast_unary_op.caret(prod_exp.ast_exp)}
+	;
+
+	prod_binary {-> ast_binary_op} =
+		{prec2} prod_bin_prec2
+			{-> prod_bin_prec2.ast_binary_op}
+	|	{or} prod_binary or prod_bin_prec2
+			{-> New ast_binary_op.bitor(prod_binary.ast_binary_op, prod_bin_prec2.ast_binary_op)}
+	;
+
+	prod_bin_prec2 {-> ast_binary_op} =
+		{prec3} prod_bin_prec3
+			{-> prod_bin_prec3.ast_binary_op}
+	|	{and} prod_bin_prec2 and prod_bin_prec3
+			{-> New ast_binary_op.bitand(prod_bin_prec2.ast_binary_op, prod_bin_prec3.ast_binary_op)}
+	;
+
+	prod_bin_prec3 {-> ast_binary_op} =
+		{prec4} prod_bin_prec4
+			{-> prod_bin_prec4.ast_binary_op}
+	|	{eq} prod_bin_prec3 eq prod_bin_prec4
+			{-> New ast_binary_op.eq(prod_bin_prec3.ast_binary_op, prod_bin_prec4.ast_binary_op)}
+	|	{noteq} prod_bin_prec3 noteq prod_bin_prec4
+			{-> New ast_binary_op.noteq(prod_bin_prec3.ast_binary_op, prod_bin_prec4.ast_binary_op)}
+	|	{lt} prod_bin_prec3 lt prod_bin_prec4
+			{-> New ast_binary_op.lt(prod_bin_prec3.ast_binary_op, prod_bin_prec4.ast_binary_op)}
+	|	{leq} prod_bin_prec3 leq prod_bin_prec4
+			{-> New ast_binary_op.leq(prod_bin_prec3.ast_binary_op, prod_bin_prec4.ast_binary_op)}
+	|	{gt} prod_bin_prec3 gt prod_bin_prec4
+			{-> New ast_binary_op.gt(prod_bin_prec3.ast_binary_op, prod_bin_prec4.ast_binary_op)}
+	|	{geq} prod_bin_prec3 geq prod_bin_prec4
+			{-> New ast_binary_op.geq(prod_bin_prec3.ast_binary_op, prod_bin_prec4.ast_binary_op)}
+	;
+
+	prod_bin_prec4 {-> ast_binary_op} =
+		{prec5} prod_bin_prec5
+			{-> prod_bin_prec5.ast_binary_op}
+	|	{plus} prod_bin_prec4 add prod_bin_prec5
+			{-> New ast_binary_op.add(prod_bin_prec4.ast_binary_op, prod_bin_prec5.ast_binary_op)}
+	|	{minus} prod_bin_prec4 sub prod_bin_prec5
+			{-> New ast_binary_op.sub(prod_bin_prec4.ast_binary_op, prod_bin_prec5.ast_binary_op)}
+	|	{bitor} prod_bin_prec4 bit_or prod_bin_prec5
+			{-> New ast_binary_op.bitor(prod_bin_prec4.ast_binary_op, prod_bin_prec5.ast_binary_op)}
+	|	{caret} prod_bin_prec4 caret prod_bin_prec5
+			{-> New ast_binary_op.caret(prod_bin_prec4.ast_binary_op, prod_bin_prec5.ast_binary_op)}
+	;
+	
+	prod_bin_prec5 {-> ast_binary_op} =
+		{sin} prod_exp
+			{-> prod_exp.ast_exp}
+	|	{mult} prod_bin_prec5 mul prod_exp
+			{-> New ast_binary_op.mul(prod_bin_prec5.ast_binary_op, prod_exp.ast_exp)}
+	|	{div} prod_bin_prec5 div prod_exp
+			{-> New ast_binary_op.div(prod_bin_prec5.ast_binary_op, prod_exp.ast_exp)}
+	|	{mod} prod_bin_prec5 mod prod_exp
+			{-> New ast_binary_op.mod(prod_bin_prec5.ast_binary_op, prod_exp.ast_exp)}
+	|	{lshift} prod_bin_prec5 lshift prod_exp
+			{-> New ast_binary_op.lshift(prod_bin_prec5.ast_binary_op, prod_exp.ast_exp)}
+	|	{rshift} prod_bin_prec5 rshift prod_exp
+			{-> New ast_binary_op.rshift(prod_bin_prec5.ast_binary_op, prod_exp.ast_exp)}
+	|	{bitand} prod_bin_prec5 bit_and prod_exp
+			{-> New ast_binary_op.bitand(prod_bin_prec5.ast_binary_op, prod_exp.ast_exp)}
+	|	{bitclear} prod_bin_prec5 bitclear prod_exp
+			{-> New ast_binary_op.bitclear(prod_bin_prec5.ast_binary_op, prod_exp.ast_exp)}
 	;
 	
 	prod_single {-> ast_exp} =
-		{paren} leftpar prod_exp rightpar
-			{-> New ast_exp.paren(prod_exp.ast_exp)}
-	|	{prod_id} id
+		{prod_id} id
 			{-> New ast_exp.id(id)}
 	|	{prod_lit} prod_literals
-			{-> New ast_exp.lit(prod_literals.ast_literal)}
+			{-> prod_literals.ast_literal}
 	;
 
 	prod_literals {-> ast_literal} =
@@ -361,7 +367,6 @@ Productions
 			{-> New ast_literal.string(string_lit)}
 	;
 
-
 /*==========================*/
 /*			AST				*/
 /*==========================*/
@@ -371,14 +376,14 @@ Abstract Syntax Tree
 	;
 	
 	ast_decl = 
-		{var_dec}			ast_var_decl+
-	|	{type_dec} 			ast_type_decl+
+		{var_dec}			ast_var_decl
+	|	{type_dec} 			ast_type_decl
 	|	{func_dec}			ast_func_decl
 	;
 	
 	ast_var_decl = 
-		{type} 		id+ ast_type_exp
-	|	{exp} 		id+ ast_exp+
+		{type} 	id+ ast_type_exp
+	|	{exp} 	id+ ast_exp+
 	|	{type_exp} 	id+ ast_type_exp ast_exp+
 	;
 
@@ -433,7 +438,7 @@ Abstract Syntax Tree
 	|	{unary_op}		ast_unary_op ast_exp
 	|	{binary_op}		[left]:ast_exp ast_binary_op [right]:ast_exp
 	|	{func_call}		[name]:ast_exp [args]:ast_exp*
-	|	{append}		id ast_exp
+	|	{apppend}		id ast_exp
 	|	{cast}			ast_type_exp ast_exp
 	|	{array_access}	[array]:ast_exp [index]:ast_exp
 	|	{field_access}	[struct]:ast_exp [field]:id
@@ -474,15 +479,13 @@ Abstract Syntax Tree
 	|	{lshift}
 	|	{rshift}
 	|	{bitclear}
-	|	{or}
-	|	{and}
 	;
 	
 	ast_unary_op = 
-		{plus}	 
-	|	{minus} 
-	| 	{not}	
-	|	{caret}	
+		{plus}	ast_exp 
+	|	{minus} ast_exp
+	| 	{not}	ast_exp
+	|	{caret}	ast_exp
 	;
 	
 	post_op = 

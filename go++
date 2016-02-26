@@ -1,0 +1,4 @@
+#! /bin/bash
+
+s=$(java -cp bin goplusplus.Main $1)
+echo $s
