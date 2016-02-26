@@ -265,32 +265,10 @@ Productions
 	/*======================*/
 
 	prod_exp {-> ast_exp} =
-		{par} leftpar prod_exp rightpar
-			{-> New ast_exp.paren(prod_exp.ast_exp)}
-	|	{sing} prod_single
-			{-> prod_single.ast_exp}
-	|	{unary} prod_unary
-			{-> prod_unary.ast_exp}
-	|	{binary} prod_binary
-			{-> prod_binary.ast_exp}
-	;
-
-	prod_unary {-> ast_exp} =
-		{pos} add prod_exp
-			{-> New ast_exp.unary_op(New ast_unary_op.plus(), prod_exp.ast_exp)}
-	|	{neg} sub prod_exp
-			{-> New ast_exp.unary_op(New ast_unary_op.minus(), prod_exp.ast_exp)}
-	|	{not} not prod_exp
-			{-> New ast_exp.unary_op(New ast_unary_op.not(), prod_exp.ast_exp)}
-	|	{caret} caret prod_exp
-			{-> New ast_exp.unary_op(New ast_unary_op.caret(), prod_exp.ast_exp)}
-	;
-
-	prod_binary {-> ast_exp} =
 		{prec2} prod_bin_prec2
 			{-> prod_bin_prec2.ast_exp}
-	|	{or} prod_binary or prod_bin_prec2
-			{-> New ast_exp.binary_op(prod_binary.ast_exp, New ast_binary_op.or(), prod_bin_prec2.ast_exp)}
+	|	{or} prod_exp or prod_bin_prec2
+			{-> New ast_exp.binary_op(prod_exp.ast_exp, New ast_binary_op.or(), prod_bin_prec2.ast_exp)}
 	;
 
 	prod_bin_prec2 {-> ast_exp} =
@@ -331,8 +309,8 @@ Productions
 	;
 	
 	prod_bin_prec5 {-> ast_exp} =
-		{sin} prod_exp
-			{-> prod_exp.ast_exp}
+		{sin} prod_single
+			{-> prod_single.ast_exp}
 	|	{mult} prod_bin_prec5 mul prod_exp
 			{-> New ast_exp.binary_op(prod_bin_prec5.ast_exp, New ast_binary_op.mul(), prod_exp.ast_exp)}
 	|	{div} prod_bin_prec5 div prod_exp
@@ -350,12 +328,26 @@ Productions
 	;
 	
 	prod_single {-> ast_exp} =
-		{prod_id} id
+		{paren} leftpar prod_exp rightpar
+			{-> New ast_exp.paren(prod_exp.ast_exp)}
+	|	{unary} prod_unary 
+			{-> prod_unary.ast_exp}
+	|	{prod_id} id
 			{-> New ast_exp.id(id)}
 	|	{prod_lit} prod_literals
 			{-> New ast_exp.lit(prod_literals.ast_literal)}
 	;
 
+	prod_unary {-> ast_exp} =
+		{pos} add prod_exp
+			{-> New ast_exp.unary_op(New ast_unary_op.plus(), prod_exp.ast_exp)}
+	|	{neg} sub prod_exp
+			{-> New ast_exp.unary_op(New ast_unary_op.minus(), prod_exp.ast_exp)}
+	|	{not} not prod_exp
+			{-> New ast_exp.unary_op(New ast_unary_op.not(), prod_exp.ast_exp)}
+	|	{caret} caret prod_exp
+			{-> New ast_exp.unary_op(New ast_unary_op.caret(), prod_exp.ast_exp)}
+	;
 	prod_literals {-> ast_literal} =
 		{prod_int} int_lit
 			{-> New ast_literal.int(int_lit)}
