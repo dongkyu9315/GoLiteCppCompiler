@@ -242,8 +242,8 @@ Productions
 	;
 
 	prod_func_param_tail {-> ast_func_param}=
-		comma prod_func_param
-			{-> prod_func_param.ast_func_param}
+		comma prod_id_list prod_type_exp
+			{-> New ast_func_param([prod_id_list.id],prod_type_exp.ast_type_exp)}
 	;
 
 	/*======================*/
@@ -353,7 +353,7 @@ Productions
 		{prod_id} id
 			{-> New ast_exp.id(id)}
 	|	{prod_lit} prod_literals
-			{-> prod_literals.ast_literal}
+			{-> New ast_exp.lit(prod_literals.ast_literal)}
 	;
 
 	prod_literals {-> ast_literal} =
