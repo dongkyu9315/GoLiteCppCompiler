@@ -1,14 +1,15 @@
 package main
 
+type num int
 func main(){
-	var x = uint64(5)
+	var x = num(5)
 	print("the result is:")
 	print(fac(x))
 }
 
-func fac(n uint64) uint64 {
-	if n > 0{
-		return n * fac(n-1)
+func fac(n num) num {
+	if int(n) > 0{
+		return num(int(n) * int(fac(n-1)))
 	}
-	return uint64(1);
+	return num(1)
 }

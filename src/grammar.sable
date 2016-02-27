@@ -281,7 +281,7 @@ Productions
 			{-> New ast_stm.println([prod_exp_list.ast_exp])}
 	|	{if}			if_stm
 			{-> if_stm.ast_stm}
-	|	{switch}		switch prod_simple_stm_semi? prod_exp leftcurl prod_switch_stm* rightcurl
+	|	{switch}		switch prod_simple_stm_semi? prod_exp? leftcurl prod_switch_stm* rightcurl
 			{->  New ast_stm.switch(prod_simple_stm_semi.ast_stm,prod_exp.ast_exp,[prod_switch_stm.ast_switch_stm])}
 	|	{for}			prod_for_stm
 			{-> prod_for_stm.ast_stm} 
@@ -568,7 +568,6 @@ Abstract Syntax Tree
 	|	{mod}
 	|	{bitor}
 	|	{bitand}
-	|	{bitxor}
 	|	{eq}
 	|	{noteq}
 	|	{lt}
