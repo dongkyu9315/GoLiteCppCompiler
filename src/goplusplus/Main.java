@@ -6,6 +6,7 @@ import java.util.HashMap;
 import goplusplus.lexer.Lexer;
 import goplusplus.node.Start;
 import goplusplus.parser.Parser;
+import goplusplus.interpret.Interpreter;
 
 public class Main {
 	public static void main(String[] args) {
@@ -17,7 +18,7 @@ public class Main {
 				System.out.println("Scanner ...");
 				System.out.println("Parser ...");
 				/* Form our AST */
-				Lexer lexer = new Lexer (new PushbackReader(
+				GoLexer lexer = new GoLexer (new PushbackReader(
 						new FileReader(args[0]), 1024));
 				Parser parser = new Parser(lexer);
 				Start ast = parser.parse();
@@ -25,30 +26,23 @@ public class Main {
 //				/* Get our Interpreter going. */
 //				Interpreter interp = new Interpreter();
 //				ast.apply(interp);
-//				Interpreter interp2 = new Interpreter();
-//				ast2.apply(interp2);
 				System.out.println("VALID\n");
 				
 				/* ---------------- */
 				/* filename extract */
 				/* ---------------- */
-//				String original = args[0];
-//				String[] splitString = original.split("\\.");
-//				String filename = splitString[0];
+				String original = args[0];
+				String[] splitString = original.split("\\.");
+				String filename = splitString[0];
 				
 				/* -------------- */
 				/* Pretty Printer */
 				/* -------------- */
-//				System.out.println("Pretty Printer ...");
-//				/* Pretty Print the AST */
-//				String pathAST = filename + ".pretty.go";
-//				File fileAST = new File(pathAST);
-//				fileAST.createNewFile();
-//				FileWriter writerAST = new FileWriter(fileAST, false);
-//				PrettyPrinter.print(ast, writerAST);
-//				writerAST.flush();
-//				writerAST.close();
-//				System.out.println("DONE\n");
+				System.out.println("Pretty Printer ...");
+				/* Pretty Print the AST */
+				String pathAST = filename + ".pretty.go";
+				PrettyPrinter.print(ast, pathAST);
+				System.out.println("DONE\n");
 				
 				/* ------------ */
 				/* Type Checker */
