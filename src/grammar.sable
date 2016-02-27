@@ -227,6 +227,8 @@ Productions
 			{-> New ast_type_exp.array(int_lit, prod_type_exp.ast_type_exp)}
 	|	{struct}	struct leftcurl prod_struct_field* rightcurl
 			{-> New ast_type_exp.struct([prod_struct_field.ast_struct_field])}
+	| 	{alias}		id
+			{-> New ast_type_exp.alias(id)}
 	;
 
 	prod_struct_field {-> ast_struct_field} =
@@ -334,6 +336,8 @@ Productions
 			{-> New ast_stm.inc_dec(prod_exp.ast_exp, New post_op.dec())}
 	|	{assign}		[left]:prod_exp_list assign [right]:prod_exp_list
 			{-> New ast_stm.assign([left.ast_exp],[right.ast_exp])}
+	|	{short_var_decl}[ids]:prod_exp_list shortdecl [exps]:prod_exp_list
+			{-> New ast_stm.short_decl([ids.ast_exp],[exps.ast_exp])}
 	|	{op_assign}		id prod_op_assign prod_exp
 			{-> New ast_stm.op_assign(id,prod_op_assign.ast_op_assign,prod_exp.ast_exp)}
 	;
