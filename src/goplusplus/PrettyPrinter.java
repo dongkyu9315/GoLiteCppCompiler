@@ -182,9 +182,26 @@ public class PrettyPrinter extends DepthFirstAdapter{
 		node.getAstTypeExp().apply(this);
 	}
 	
+	
+	@Override
+	public void caseABasicCastAstExp(ABasicCastAstExp node) {
+		print(node.getBasicTypes().toString().trim());
+		node.getAstExp().apply(this);
+	}
+	
+	@Override
+	public void caseAArrayAccessAstExp(AArrayAccessAstExp node) {
+		node.getArray().apply(this);
+		print("[");
+		node.getIndex().apply(this);
+		print("]");
+	}
+	
 	@Override
 	public void caseAFieldAccessAstExp(AFieldAccessAstExp node) {
-		
+		node.getStruct().apply(this);
+		print(".");
+		print(node.getField().toString().trim());
 	}
 	
 	@Override
