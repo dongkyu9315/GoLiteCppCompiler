@@ -84,7 +84,7 @@ public class PrettyPrinter extends DepthFirstAdapter{
 	
 	@Override
 	public void caseAFuncDecAstDecl(AFuncDecAstDecl node) {
-		node.apply(this);
+		node.getAstFuncDecl().apply(this);
 	}
 	
 	@Override
