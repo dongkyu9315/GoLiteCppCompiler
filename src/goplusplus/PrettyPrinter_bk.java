@@ -167,13 +167,15 @@ public class PrettyPrinter extends DepthFirstAdapter{
 		
 		LinkedList stmts = node.getAstStm();
 		for (Iterator iterator = stmts.iterator(); iterator.hasNext();) {
+			for (int i = 0; i < mIndentStack.size(); i++)
+				print("\t");
 			PAstStm stm = (PAstStm) iterator.next();
 			stm.apply(this);
 			print("\n");
 		}
 		
 		mIndentStack.pop();
-		print("\n");
+		print("}\n");
 	}
 	
 	@Override
@@ -182,7 +184,7 @@ public class PrettyPrinter extends DepthFirstAdapter{
 		node.getAstTypeExp().apply(this);
 	}
 	
-		@Override
+	@Override
 	public void caseABasicAstTypeExp(ABasicAstTypeExp node) {
 		print(node.getBasicTypes().getText().trim());
 	}
@@ -521,269 +523,5 @@ public class PrettyPrinter extends DepthFirstAdapter{
 		print(",");
 		node.getAstExp().apply(this);
 		print(")");
-	}
-	
-	@Override
-	public void caseABasicCastAstExp(ABasicCastAstExp node) {
-		print(node.getBasicTypes().toString().trim());
-		node.getAstExp().apply(this);
-	}
-	
-	@Override
-	public void caseAArrayAccessAstExp(AArrayAccessAstExp node) {
-		node.getArray().apply(this);
-		print("[");
-		node.getIndex().apply(this);
-		print("]");
-	}
-	
-	@Override
-	public void caseAFieldAccessAstExp(AFieldAccessAstExp node) {
-		node.getStruct().apply(this);
-		print(".");
-		print(node.getField().toString().trim());
-	}
-	
-	@Override
-	public void caseAAstSwitchStm(AAstSwitchStm node) {
-		node.getAstSwitchCase().apply(this);
-		
-		LinkedList stms = node.getAstStm();
-		if (!stms.isEmpty()) {
-			for (Iterator iterator = stms.iterator(); iterator.hasNext();) {
-				PAstStm d = (PAstStm) iterator.next();
-				d.apply(this);
-				print("\n");
-			}
-		}
-		
-		PAstFallthroughStm tmp = (PAstFallthroughStm) node.getAstFallthroughStm();
-		if (!tmp.toString().isEmpty()) {
-			print("fallthrough\n");
-		}
-	}
-	
-	@Override
-	public void caseADefaultAstSwitchCase(ADefaultAstSwitchCase node) {
-		print("default: ");
-	}
-	
-	@Override
-	public void caseACaseAstSwitchCase(ACaseAstSwitchCase node) {
-		print("case ");
-		LinkedList exps = node.getAstExp();
-		if (!exps.isEmpty()) {
-			for (Iterator iterator = exps.iterator(); iterator.hasNext();) {
-				PAstExp d = (PAstExp) iterator.next();
-				d.apply(this);
-				print(", ");
-			}
-		}
-		print(": ");
-	}
-	
-	@Override
-	public void caseAIntAstLiteral(AIntAstLiteral node) {
-		print(node.getIntLit().toString().trim());
-	}
-	
-	@Override
-	public void caseAFloatAstLiteral(AFloatAstLiteral node) {
-		print(node.getFloatLit().toString().trim());
-	}
-	
-	@Override
-	public void caseARuneAstLiteral(ARuneAstLiteral node) {
-		print(node.getRuneLit().toString().trim());
-	}
-	
-	@Override
-	public void caseAStringAstLiteral(AStringAstLiteral node) {
-		print(node.getStringLit().toString().trim());
-	}
-	
-	@Override
-	public void caseAAddAstBinaryOp(AAddAstBinaryOp node) {
-		print("+");
-	}
-	
-	@Override
-	public void caseASubAstBinaryOp(ASubAstBinaryOp node) {
-		print("-");
-	}
-	
-	@Override
-	public void caseAMulAstBinaryOp(AMulAstBinaryOp node) {
-		print("*");
-	}
-	
-	@Override
-	public void caseADivAstBinaryOp(ADivAstBinaryOp node) {
-		print("/");
-	}
-	
-	@Override
-	public void caseAModAstBinaryOp(AModAstBinaryOp node) {
-		print("%");
-	}
-	
-	@Override
-	public void caseABitorAstBinaryOp(ABitorAstBinaryOp node) {
-		print("|");
-	}
-	
-	@Override
-	public void caseABitandAstBinaryOp(ABitandAstBinaryOp node) {
-		print("&");
-	}
-	
-	@Override
-	public void caseAEqAstBinaryOp(AEqAstBinaryOp node) {
-		print("==");
-	}
-	
-	@Override
-	public void caseANoteqAstBinaryOp(ANoteqAstBinaryOp node) {
-		print("!=");
-	}
-	
-	@Override
-	public void caseALtAstBinaryOp(ALtAstBinaryOp node) {
-		print("<");
-	}
-	
-	@Override
-	public void caseALeqAstBinaryOp(ALeqAstBinaryOp node) {
-		print("<=");
-	}
-	
-	@Override
-	public void caseAGtAstBinaryOp(AGtAstBinaryOp node) {
-		print(">");
-	}
-	
-	@Override
-	public void caseAGeqAstBinaryOp(AGeqAstBinaryOp node) {
-		print(">=");
-	}
-	
-	@Override
-	public void caseACaretAstBinaryOp(ACaretAstBinaryOp node) {
-		print("^");
-	}
-	
-	@Override
-	public void caseALshiftAstBinaryOp(ALshiftAstBinaryOp node) {
-		print("<<");
-	}
-	
-	@Override
-	public void caseARshiftAstBinaryOp(ARshiftAstBinaryOp node) {
-		print(">>");
-	}
-	
-	@Override
-	public void caseABitclearAstBinaryOp(ABitclearAstBinaryOp node) {
-		print("&^");
-	}
-	
-	@Override
-	public void caseAOrAstBinaryOp(AOrAstBinaryOp node) {
-		print("||");
-	}
-	
-	@Override
-	public void caseAAndAstBinaryOp(AAndAstBinaryOp node) {
-		print("&&");
-	}
-	
-	@Override
-	public void caseAAddEqAstOpAssign(AAddEqAstOpAssign node) {
-		print("+=");
-	}
-	
-	@Override
-	public void caseASubEqAstOpAssign(ASubEqAstOpAssign node) {
-		print("-=");
-	}
-	
-	@Override
-	public void caseAMulEqAstOpAssign(AMulEqAstOpAssign node) {
-		print("*=");
-	}
-	
-	@Override
-	public void caseADivEqAstOpAssign(ADivEqAstOpAssign node) {
-		print("/=");
-	}
-	
-	@Override
-	public void caseAModEqAstOpAssign(AModEqAstOpAssign node) {
-		print("%=");
-	}
-	
-	@Override
-	public void caseABitorEqAstOpAssign(ABitorEqAstOpAssign node) {
-		print("|=");
-	}
-	
-	@Override
-	public void caseABitandEqAstOpAssign(ABitandEqAstOpAssign node) {
-		print("&=");
-	}
-	
-	@Override
-	public void caseACaretEqAstOpAssign(ACaretEqAstOpAssign node) {
-		print("^=");
-	}
-	
-	@Override
-	public void caseALshiftEqAstOpAssign(ALshiftEqAstOpAssign node) {
-		print("<<=");
-	}
-	
-	@Override
-	public void caseARshiftEqAstOpAssign(ARshiftEqAstOpAssign node) {
-		print(">>=");
-	}
-	
-	@Override
-	public void caseABitclearEqAstOpAssign(ABitclearEqAstOpAssign node) {
-		print("&^=");
-	}
-	
-	@Override
-	public void caseAPlusAstUnaryOp(APlusAstUnaryOp node) {
-		print("+");
-	}
-	
-	@Override
-	public void caseAMinusAstUnaryOp(AMinusAstUnaryOp node) {
-		print("-");
-	}
-	
-	@Override
-	public void caseANotAstUnaryOp(ANotAstUnaryOp node) {
-		print("!");
-	}
-	
-	@Override
-	public void caseACaretAstUnaryOp(ACaretAstUnaryOp node) {
-		print("^");
-	}
-	
-	@Override
-	public void caseAIncPostOp(AIncPostOp node) {
-		print("++");
-	}
-	
-	@Override
-	public void caseADecPostOp(ADecPostOp node) {
-		print("--");
-	}
-	
-	@Override
-	public void caseAAstFallthroughStm(AAstFallthroughStm node) {
-		
 	}
 }
