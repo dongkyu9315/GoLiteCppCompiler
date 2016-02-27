@@ -19,17 +19,18 @@ Helpers
 	idletter 	= letter | '_';
 	idchar  	= letter | '_' | dec_digit;
 	printable 	= [0x20 .. 0xFF];
-	char 		= printable | tab;
+	char 		= [printable + tab];
 	comment_lin = '//';
 	comment_beg = '/*';
 	comment_end = '*/';
 	dec 		= ['1'..'9'] (dec_digit)*;
 	oct			= '0' (oct_digit)*;
 	hex			= '0' ('x' | 'X') (hex_digit)+;
+	char_but_sin_quote	= [char - '''];
 	escaped_char 		= '\' ('a' | 'b' | 'f' | 'n' | 'r' | 't' | 'v' | '\' | ''' | '"');
-	rune_content		= ''' (char | escaped_char)* ''';
-	raw_string 			= ''' (char | newline)* ''';
-	interpreted_string 	= '"' (char | newline)* '"';
+	rune_content		= ''' (char_but_sin_quote | escaped_char)* ''';
+	raw_string 			= ''' (char_but_sin_quote | newline)* ''';
+	interpreted_string 	= '"' (char_but_sin_quote | newline)* '"';
 
 
 /*==========================*/
@@ -126,7 +127,7 @@ Tokens
 /*Literals*/
 	int_lit				= dec | oct | hex;
 	float_lit 			= ((dec_digit)* '.' (dec_digit)+) | ((dec_digit)+ '.' (dec_digit)*);
-	rune_lit			= rune_content;
+	rune_lit			= rune_content?;
 	string_lit			= (raw_string | interpreted_string)?;
 
 /*Identifiers*/
@@ -269,7 +270,7 @@ Productions
 			{-> New ast_stm.return(prod_exp.ast_exp)}
 	|	{break}			break semi
 			{-> New ast_stm.break()}
-	|	{continue}		continue semi
+	|	{continue}		continue semi 
 			{-> New ast_stm.continue()}
 	|	{print}			print leftpar prod_exp_list rightpar semi
 			{-> New ast_stm.print([prod_exp_list.ast_exp])}
@@ -277,7 +278,8 @@ Productions
 			{-> New ast_stm.println([prod_exp_list.ast_exp])}
 	|	{if}			if_stm
 			{-> if_stm.ast_stm}
-
+	|	{switch}		switch prod_simple_stm_semi? prod_exp leftcurl prod_switch_stm* rightcurl
+			{->  New ast_stm.switch(prod_simple_stm_semi.ast_stm,prod_exp.ast_exp,[prod_switch_stm.ast_switch_stm])}
 	;
 	
 	if_stm {-> ast_stm} =
@@ -288,6 +290,21 @@ Productions
 	|	{if_else_if}	if prod_simple_stm_semi? prod_exp prod_block else if_stm
 		{-> New ast_stm.longif(prod_simple_stm_semi.ast_stm, prod_exp.ast_exp,[prod_block.ast_stm],[if_stm.ast_stm])}
 	;
+	
+	prod_switch_stm {-> ast_switch_stm} = 
+		prod_switch_case prod_stm* prod_fallthrough_stm? 
+		{-> New ast_switch_stm(prod_switch_case.ast_switch_case,[prod_stm.ast_stm],prod_fallthrough_stm.ast_fallthrough_stm)}
+	;
+	
+	prod_switch_case {-> ast_switch_case} = 
+		{exp}		case prod_exp_list colon
+			{-> New ast_switch_case.case([prod_exp_list.ast_exp])}
+	|	{default}	default colon
+			{-> New ast_switch_case.default()}
+	;
+	
+	prod_fallthrough_stm {-> ast_fallthrough_stm}= 
+		fallthrough semi {-> New ast_fallthrough_stm()};
 	
 	prod_simple_stm_semi {-> ast_stm} =
 		prod_simple_stm semi
@@ -474,7 +491,7 @@ Abstract Syntax Tree
 	|	{assign}		[lval]:ast_exp+ [rval]:ast_exp+
 	|	{op_assign}		[l]:id ast_op_assign [r]:ast_exp
 	|	{var_decl}		ast_var_decl+
-	|	{short_decl}	[ids]:id+ ast_exp+
+	|	{short_decl}	[ids]:ast_exp+ ast_exp+
 	|	{type_decl}		ast_type_decl+
 	|	{inc_dec}		ast_exp post_op
 	|	{print}			ast_exp*
@@ -482,7 +499,7 @@ Abstract Syntax Tree
 	|	{return}		ast_exp?
 	|	{shortif}		[init]:ast_stm? [condition]:ast_exp ast_stm*
 	|	{longif}		[init]:ast_stm? [condition]:ast_exp [if_stms]:ast_stm* [else_stms]:ast_stm*
-	|	{switch}		ast_stm? ast_exp? switch_case+
+	|	{switch}		ast_stm? ast_exp? ast_switch_stm+
 	|	{for}			[init]:ast_stm? [condition]:ast_exp? [post]:ast_stm? [body]:ast_stm*
 	|	{break}
 	|	{continue}
@@ -501,10 +518,11 @@ Abstract Syntax Tree
 	|	{field_access}	[struct]:ast_exp [field]:id
 	;
 
+	ast_switch_stm = ast_switch_case ast_stm* ast_fallthrough_stm? ;
 	
-	switch_case = 
-		{default}		ast_stm*
-	|	{case} 			ast_exp+ ast_stm*
+	ast_switch_case = 
+		{default}
+	|	{case} 		ast_exp+
 	;
 	
 	ast_literal = 
@@ -562,3 +580,5 @@ Abstract Syntax Tree
 		{inc}
 	|	{dec}
 	;
+	
+	ast_fallthrough_stm = ;
