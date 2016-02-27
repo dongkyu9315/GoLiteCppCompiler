@@ -282,7 +282,7 @@ Productions
 	|	{if}			if_stm
 			{-> if_stm.ast_stm}
 	|	{switch}		switch prod_simple_stm_semi? prod_exp? leftcurl prod_switch_stm* rightcurl
-			{->  New ast_stm.switch(prod_simple_stm_semi.ast_stm,prod_exp.ast_exp,[prod_switch_stm.ast_switch_stm])}
+			{->  New ast_stm.switch(prod_simple_stm_semi.ast_stm, prod_exp.ast_exp, [prod_switch_stm.ast_switch_stm])}
 	|	{for}			prod_for_stm
 			{-> prod_for_stm.ast_stm} 
 	;
@@ -291,14 +291,14 @@ Productions
 		{if}			if prod_simple_stm_semi? prod_exp prod_block
 			{-> New ast_stm.shortif(prod_simple_stm_semi.ast_stm, prod_exp.ast_exp, [prod_block.ast_stm])}
 	|	{ifelse}		if prod_simple_stm_semi? prod_exp [if_block]:prod_block else [else_block]:prod_block
-			{-> New ast_stm.longif(prod_simple_stm_semi.ast_stm, prod_exp.ast_exp,[if_block.ast_stm],[else_block.ast_stm])}
+			{-> New ast_stm.longif(prod_simple_stm_semi.ast_stm, prod_exp.ast_exp, [if_block.ast_stm],[else_block.ast_stm])}
 	|	{if_else_if}	if prod_simple_stm_semi? prod_exp prod_block else if_stm
-			{-> New ast_stm.longif(prod_simple_stm_semi.ast_stm, prod_exp.ast_exp,[prod_block.ast_stm],[if_stm.ast_stm])}
+			{-> New ast_stm.longif(prod_simple_stm_semi.ast_stm, prod_exp.ast_exp, [prod_block.ast_stm], [if_stm.ast_stm])}
 	;
 
 	prod_switch_stm {-> ast_switch_stm} = 
 		prod_switch_case prod_stm* prod_fallthrough_stm? 
-			{-> New ast_switch_stm(prod_switch_case.ast_switch_case,[prod_stm.ast_stm],prod_fallthrough_stm.ast_fallthrough_stm)}
+			{-> New ast_switch_stm(prod_switch_case.ast_switch_case, [prod_stm.ast_stm], prod_fallthrough_stm.ast_fallthrough_stm)}
 	;
 	
 	prod_switch_case {-> ast_switch_case} = 
@@ -315,9 +315,9 @@ Productions
 		
 	prod_for_stm {-> ast_stm} =
 		{while}		for prod_exp? prod_block
-			{-> New ast_stm.for(Null,prod_exp.ast_exp,Null,[prod_block.ast_stm])}
+			{-> New ast_stm.for(Null,prod_exp.ast_exp, Null, [prod_block.ast_stm])}
 	|	{long}		for prod_simple_stm_semi? prod_exp? semi prod_simple_stm prod_block
-			{-> New ast_stm.for(prod_simple_stm_semi.ast_stm,prod_exp.ast_exp,prod_simple_stm.ast_stm,[prod_block.ast_stm])}
+			{-> New ast_stm.for(prod_simple_stm_semi.ast_stm, prod_exp.ast_exp, prod_simple_stm.ast_stm, [prod_block.ast_stm])}
 	;
 	
 	prod_simple_stm_semi {-> ast_stm} =
@@ -335,11 +335,11 @@ Productions
 	|	{decrement}		prod_exp decrement
 			{-> New ast_stm.inc_dec(prod_exp.ast_exp, New post_op.dec())}
 	|	{assign}		[left]:prod_exp_list assign [right]:prod_exp_list
-			{-> New ast_stm.assign([left.ast_exp],[right.ast_exp])}
+			{-> New ast_stm.assign([left.ast_exp], [right.ast_exp])}
 	|	{short_var_decl}[ids]:prod_exp_list shortdecl [exps]:prod_exp_list
-			{-> New ast_stm.short_decl([ids.ast_exp],[exps.ast_exp])}
+			{-> New ast_stm.short_decl([ids.ast_exp], [exps.ast_exp])}
 	|	{op_assign}		id prod_op_assign prod_exp
-			{-> New ast_stm.op_assign(id,prod_op_assign.ast_op_assign,prod_exp.ast_exp)}
+			{-> New ast_stm.op_assign(id, prod_op_assign.ast_op_assign, prod_exp.ast_exp)}
 	;
 	
 	prod_op_assign {-> ast_op_assign} =
@@ -444,13 +444,13 @@ Productions
 	|	{prod_lit} 	prod_literals
 			{-> New ast_exp.lit(prod_literals.ast_literal)}
 	|	{function_call}	prod_single leftpar prod_exp_list? rightpar
-			{-> New ast_exp.func_call(prod_single.ast_exp,[prod_exp_list.ast_exp])}
+			{-> New ast_exp.func_call(prod_single.ast_exp, [prod_exp_list.ast_exp])}
 	|	{append}	append leftpar id comma prod_exp rightpar
-			{-> New ast_exp.append(id,prod_exp.ast_exp)}
+			{-> New ast_exp.append(id, prod_exp.ast_exp)}
 	|	{basic_cast}	basic_types leftpar prod_exp rightpar
-			{-> New ast_exp.basic_cast(basic_types,prod_exp.ast_exp)}
+			{-> New ast_exp.basic_cast(basic_types, prod_exp.ast_exp)}
 	|	{array_access}	prod_single leftsq prod_exp rightsq
-			{-> New ast_exp.array_access(prod_single.ast_exp,prod_exp.ast_exp)}
+			{-> New ast_exp.array_access(prod_single.ast_exp, prod_exp.ast_exp)}
 	|	{field_access}	prod_single dot id
 			{-> New ast_exp.field_access(prod_single.ast_exp,id)}
 	;
