@@ -48,7 +48,7 @@ public class PrettyPrinter extends DepthFirstAdapter{
 	public void caseAAstProgram(AAstProgram node) {
 		print("package");
 		print(node.getPackage().getText().trim());
-		
+		print("\n\n");
 		LinkedList decl = node.getDecl();
 		if (!decl.isEmpty()) {
 			for (Iterator iterator = decl.iterator(); iterator.hasNext();) {
@@ -84,7 +84,7 @@ public class PrettyPrinter extends DepthFirstAdapter{
 	
 	@Override
 	public void caseAFuncDecAstDecl(AFuncDecAstDecl node) {
-		node.apply(this);
+		node.getAstFuncDecl().apply(this);
 	}
 	
 	@Override
@@ -173,7 +173,7 @@ public class PrettyPrinter extends DepthFirstAdapter{
 		}
 		
 		mIndentStack.pop();
-		print("\n");
+		print("}\n");
 	}
 	
 	@Override
@@ -519,7 +519,7 @@ public class PrettyPrinter extends DepthFirstAdapter{
 	@Override
 	public void caseAFuncCallAstExp(AFuncCallAstExp node) {
 		node.getName().apply(this);
-		print("println(");
+		print("(");
 		LinkedList exps = node.getArgs();
 		for (Iterator iterator = exps.iterator(); iterator.hasNext();) {
 			PAstExp exp = (PAstExp) iterator.next();
@@ -542,7 +542,9 @@ public class PrettyPrinter extends DepthFirstAdapter{
 	@Override
 	public void caseABasicCastAstExp(ABasicCastAstExp node) {
 		print(node.getBasicTypes().toString().trim());
+		print("(");
 		node.getAstExp().apply(this);
+		print(")");
 	}
 	
 	@Override
