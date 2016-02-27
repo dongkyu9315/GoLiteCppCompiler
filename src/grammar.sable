@@ -261,8 +261,9 @@ Productions
 	prod_stm {-> ast_stm} =
 		{simple}		prod_simple_stm_semi
 			{-> prod_simple_stm_semi.ast_stm}
-	|
-		{variable_decl}	var prod_var_decl semi
+	|	{block}			prod_block semi
+			{-> New ast_stm.block([prod_block.ast_stm])}
+	|	{variable_decl}	var prod_var_decl semi
 			{-> New ast_stm.var_decl([prod_var_decl.ast_var_decl])}
 	|	{type_decl}		type prod_type_decl semi
 			{-> New ast_stm.type_decl([prod_type_decl.ast_type_decl])}
@@ -280,6 +281,8 @@ Productions
 			{-> if_stm.ast_stm}
 	|	{switch}		switch prod_simple_stm_semi? prod_exp leftcurl prod_switch_stm* rightcurl
 			{->  New ast_stm.switch(prod_simple_stm_semi.ast_stm,prod_exp.ast_exp,[prod_switch_stm.ast_switch_stm])}
+	|	{for}			prod_for_stm
+			{-> prod_for_stm.ast_stm} 
 	;
 	
 	if_stm {-> ast_stm} =
@@ -305,6 +308,13 @@ Productions
 	
 	prod_fallthrough_stm {-> ast_fallthrough_stm}= 
 		fallthrough semi {-> New ast_fallthrough_stm()};
+		
+	prod_for_stm {-> ast_stm} =
+		{while}		for prod_exp? prod_block
+			{-> New ast_stm.for(Null,prod_exp.ast_exp,Null,[prod_block.ast_stm])}
+	|	{long}		for prod_simple_stm_semi? prod_exp? semi prod_simple_stm prod_block
+			{-> New ast_stm.for(prod_simple_stm_semi.ast_stm,prod_exp.ast_exp,prod_simple_stm.ast_stm,[prod_block.ast_stm])}
+	;
 	
 	prod_simple_stm_semi {-> ast_stm} =
 		prod_simple_stm semi
@@ -501,6 +511,7 @@ Abstract Syntax Tree
 	|	{longif}		[init]:ast_stm? [condition]:ast_exp [if_stms]:ast_stm* [else_stms]:ast_stm*
 	|	{switch}		ast_stm? ast_exp? ast_switch_stm+
 	|	{for}			[init]:ast_stm? [condition]:ast_exp? [post]:ast_stm? [body]:ast_stm*
+	|	{block}			ast_stm*
 	|	{break}
 	|	{continue}
 	;
