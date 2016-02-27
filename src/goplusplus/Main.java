@@ -30,16 +30,14 @@ public class Main {
 				/* ---------------- */
 				/* filename extract */
 				/* ---------------- */
-				String original = args[0];
-				String[] splitString = original.split("\\.");
-				String filename = splitString[0];
+				String filenameNoExt = args[0].replaceFirst("[.][^.]+$", "");
 				
 				/* -------------- */
 				/* Pretty Printer */
 				/* -------------- */
 				System.out.println("Pretty Printer ...");
 				/* Pretty Print the AST */
-				String pathAST = filename + ".pretty.go";
+				String pathAST = filenameNoExt + ".pretty.go";
 				PrettyPrinter.print(ast, pathAST);
 				System.out.println("DONE\n");
 				
