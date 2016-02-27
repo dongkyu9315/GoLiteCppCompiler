@@ -3,6 +3,14 @@ Hai Tong Yang	260453583
 Shaokun Deng	260638592
 Dong Kyu Kim	260531174
 
+The valid test programs we use are
+programs/valid/valid1.go
+programs/valid/valid2.go
+programs/valid/valid3.go
+
+The pretty-printed files will be in the same folder as the input test file.
+For example for programs/valid/valid1.go, the output file will be programs/valid/valid1.pretty.go
+
 Instruction List
 ================
 To compile the grammar:
