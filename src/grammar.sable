@@ -257,7 +257,7 @@ Productions
 		leftcurl prod_stm* rightcurl
 			{-> [prod_stm.ast_stm]}
 	;
-	
+
 	prod_stm {-> ast_stm} =
 		{simple}		prod_simple_stm_semi
 			{-> prod_simple_stm_semi.ast_stm}
@@ -284,19 +284,19 @@ Productions
 	|	{for}			prod_for_stm
 			{-> prod_for_stm.ast_stm} 
 	;
-	
+
 	if_stm {-> ast_stm} =
 		{if}			if prod_simple_stm_semi? prod_exp prod_block
-		{-> New ast_stm.shortif(prod_simple_stm_semi.ast_stm, prod_exp.ast_exp, [prod_block.ast_stm])}
+			{-> New ast_stm.shortif(prod_simple_stm_semi.ast_stm, prod_exp.ast_exp, [prod_block.ast_stm])}
 	|	{ifelse}		if prod_simple_stm_semi? prod_exp [if_block]:prod_block else [else_block]:prod_block
-		{-> New ast_stm.longif(prod_simple_stm_semi.ast_stm, prod_exp.ast_exp,[if_block.ast_stm],[else_block.ast_stm])}
+			{-> New ast_stm.longif(prod_simple_stm_semi.ast_stm, prod_exp.ast_exp,[if_block.ast_stm],[else_block.ast_stm])}
 	|	{if_else_if}	if prod_simple_stm_semi? prod_exp prod_block else if_stm
-		{-> New ast_stm.longif(prod_simple_stm_semi.ast_stm, prod_exp.ast_exp,[prod_block.ast_stm],[if_stm.ast_stm])}
+			{-> New ast_stm.longif(prod_simple_stm_semi.ast_stm, prod_exp.ast_exp,[prod_block.ast_stm],[if_stm.ast_stm])}
 	;
-	
+
 	prod_switch_stm {-> ast_switch_stm} = 
 		prod_switch_case prod_stm* prod_fallthrough_stm? 
-		{-> New ast_switch_stm(prod_switch_case.ast_switch_case,[prod_stm.ast_stm],prod_fallthrough_stm.ast_fallthrough_stm)}
+			{-> New ast_switch_stm(prod_switch_case.ast_switch_case,[prod_stm.ast_stm],prod_fallthrough_stm.ast_fallthrough_stm)}
 	;
 	
 	prod_switch_case {-> ast_switch_case} = 
@@ -307,7 +307,9 @@ Productions
 	;
 	
 	prod_fallthrough_stm {-> ast_fallthrough_stm}= 
-		fallthrough semi {-> New ast_fallthrough_stm()};
+		fallthrough semi
+			{-> New ast_fallthrough_stm()}
+	;
 		
 	prod_for_stm {-> ast_stm} =
 		{while}		for prod_exp? prod_block
@@ -318,35 +320,35 @@ Productions
 	
 	prod_simple_stm_semi {-> ast_stm} =
 		prod_simple_stm semi
-		{-> prod_simple_stm.ast_stm}
+			{-> prod_simple_stm.ast_stm}
 	;
 	
 	prod_simple_stm {-> ast_stm} =
 		{empty}
-		{-> New ast_stm.empty()}
+			{-> New ast_stm.empty()}
 	|	{expression}	prod_exp
-		{-> New ast_stm.exp(prod_exp.ast_exp)}
+			{-> New ast_stm.exp(prod_exp.ast_exp)}
 	|	{increment}		prod_exp increment
-		{-> New ast_stm.inc_dec(prod_exp.ast_exp, New post_op.inc())}
+			{-> New ast_stm.inc_dec(prod_exp.ast_exp, New post_op.inc())}
 	|	{decrement}		prod_exp decrement
-		{-> New ast_stm.inc_dec(prod_exp.ast_exp, New post_op.dec())}
+			{-> New ast_stm.inc_dec(prod_exp.ast_exp, New post_op.dec())}
 	|	{assign}		[left]:prod_exp_list assign [right]:prod_exp_list
-		{-> New ast_stm.assign([left.ast_exp],[right.ast_exp])}
+			{-> New ast_stm.assign([left.ast_exp],[right.ast_exp])}
 	|	{op_assign}		id prod_op_assign prod_exp
-		{-> New ast_stm.op_assign(id,prod_op_assign.ast_op_assign,prod_exp.ast_exp)}
+			{-> New ast_stm.op_assign(id,prod_op_assign.ast_op_assign,prod_exp.ast_exp)}
 	;
 	
 	prod_op_assign {-> ast_op_assign} =
-		{add_eq}	pluseq {-> New ast_op_assign.add_eq()}
-	|	{sub_eq}	subeq	{-> New ast_op_assign.sub_eq()}
-	|	{mul_eq}	muleq	{-> New ast_op_assign.mul_eq()}
-	|	{div_eq}	diveq	{-> New ast_op_assign.div_eq()}
-	|	{mod_eq}	modeq	{-> New ast_op_assign.mod_eq()}
-	|	{bitor_eq}	oreq	{-> New ast_op_assign.bitor_eq()}
-	|	{bitand_eq}	andeq	{-> New ast_op_assign.bitand_eq()}
-	|	{caret_eq}		xoreq	{-> New ast_op_assign.caret_eq()}
-	|	{lshift_eq}	lshifteq	{-> New ast_op_assign.lshift_eq()}
-	|	{rshift_eq}	rshifteq	{-> New ast_op_assign.rshift_eq()}
+		{add_eq}		pluseq		{-> New ast_op_assign.add_eq()}
+	|	{sub_eq}		subeq		{-> New ast_op_assign.sub_eq()}
+	|	{mul_eq}		muleq		{-> New ast_op_assign.mul_eq()}
+	|	{div_eq}		diveq		{-> New ast_op_assign.div_eq()}
+	|	{mod_eq}		modeq		{-> New ast_op_assign.mod_eq()}
+	|	{bitor_eq}		oreq		{-> New ast_op_assign.bitor_eq()}
+	|	{bitand_eq}		andeq		{-> New ast_op_assign.bitand_eq()}
+	|	{caret_eq}		xoreq		{-> New ast_op_assign.caret_eq()}
+	|	{lshift_eq}		lshifteq	{-> New ast_op_assign.lshift_eq()}
+	|	{rshift_eq}		rshifteq	{-> New ast_op_assign.rshift_eq()}
 	|	{bitclear_eq}	bitcleareq	{-> New ast_op_assign.bitclear_eq()}
 	;
 
@@ -357,38 +359,38 @@ Productions
 	prod_exp {-> ast_exp} =
 		{prec2} prod_bin_prec2
 			{-> prod_bin_prec2.ast_exp}
-	|	{or} prod_exp or prod_bin_prec2
+	|	{or} 	prod_exp or prod_bin_prec2
 			{-> New ast_exp.binary_op(prod_exp.ast_exp, New ast_binary_op.or(), prod_bin_prec2.ast_exp)}
 	;
 
 	prod_bin_prec2 {-> ast_exp} =
 		{prec3} prod_bin_prec3
 			{-> prod_bin_prec3.ast_exp}
-	|	{and} prod_bin_prec2 and prod_bin_prec3
+	|	{and} 	prod_bin_prec2 and prod_bin_prec3
 			{-> New ast_exp.binary_op(prod_bin_prec2.ast_exp, New ast_binary_op.and(), prod_bin_prec3.ast_exp)}
 	;
 
 	prod_bin_prec3 {-> ast_exp} =
 		{prec4} prod_bin_prec4
 			{-> prod_bin_prec4.ast_exp}
-	|	{eq} prod_bin_prec3 eq prod_bin_prec4
+	|	{eq} 	prod_bin_prec3 eq prod_bin_prec4
 			{-> New ast_exp.binary_op(prod_bin_prec3.ast_exp, New ast_binary_op.eq(), prod_bin_prec4.ast_exp)}
 	|	{noteq} prod_bin_prec3 noteq prod_bin_prec4
 			{-> New ast_exp.binary_op(prod_bin_prec3.ast_exp, New ast_binary_op.noteq(), prod_bin_prec4.ast_exp)}
-	|	{lt} prod_bin_prec3 lt prod_bin_prec4
+	|	{lt} 	prod_bin_prec3 lt prod_bin_prec4
 			{-> New ast_exp.binary_op(prod_bin_prec3.ast_exp, New ast_binary_op.lt(), prod_bin_prec4.ast_exp)}
-	|	{leq} prod_bin_prec3 leq prod_bin_prec4
+	|	{leq} 	prod_bin_prec3 leq prod_bin_prec4
 			{-> New ast_exp.binary_op(prod_bin_prec3.ast_exp, New ast_binary_op.leq(), prod_bin_prec4.ast_exp)}
-	|	{gt} prod_bin_prec3 gt prod_bin_prec4
+	|	{gt} 	prod_bin_prec3 gt prod_bin_prec4
 			{-> New ast_exp.binary_op(prod_bin_prec3.ast_exp, New ast_binary_op.gt(), prod_bin_prec4.ast_exp)}
-	|	{geq} prod_bin_prec3 geq prod_bin_prec4
+	|	{geq} 	prod_bin_prec3 geq prod_bin_prec4
 			{-> New ast_exp.binary_op(prod_bin_prec3.ast_exp, New ast_binary_op.geq(), prod_bin_prec4.ast_exp)}
 	;
 
 	prod_bin_prec4 {-> ast_exp} =
 		{prec5} prod_bin_prec5
 			{-> prod_bin_prec5.ast_exp}
-	|	{plus} prod_bin_prec4 add prod_bin_prec5
+	|	{plus} 	prod_bin_prec4 add prod_bin_prec5
 			{-> New ast_exp.binary_op(prod_bin_prec4.ast_exp, New ast_binary_op.add(), prod_bin_prec5.ast_exp)}
 	|	{minus} prod_bin_prec4 sub prod_bin_prec5
 			{-> New ast_exp.binary_op(prod_bin_prec4.ast_exp, New ast_binary_op.sub(), prod_bin_prec5.ast_exp)}
@@ -397,30 +399,30 @@ Productions
 	|	{caret} prod_bin_prec4 caret prod_bin_prec5
 			{-> New ast_exp.binary_op(prod_bin_prec4.ast_exp, New ast_binary_op.caret(), prod_bin_prec5.ast_exp)}
 	;
-	
+
 	prod_bin_prec5 {-> ast_exp} =
-		{unary} prod_unary
+		{unary} 	prod_unary
 			{-> prod_unary.ast_exp}
-	|	{mult} prod_bin_prec5 mul prod_unary
+	|	{mult} 		prod_bin_prec5 mul prod_unary
 			{-> New ast_exp.binary_op(prod_bin_prec5.ast_exp, New ast_binary_op.mul(), prod_unary.ast_exp)}
-	|	{div} prod_bin_prec5 div prod_unary
+	|	{div} 		prod_bin_prec5 div prod_unary
 			{-> New ast_exp.binary_op(prod_bin_prec5.ast_exp, New ast_binary_op.div(), prod_unary.ast_exp)}
-	|	{mod} prod_bin_prec5 mod prod_unary
+	|	{mod} 		prod_bin_prec5 mod prod_unary
 			{-> New ast_exp.binary_op(prod_bin_prec5.ast_exp, New ast_binary_op.mod(), prod_unary.ast_exp)}
-	|	{lshift} prod_bin_prec5 lshift prod_unary
+	|	{lshift} 	prod_bin_prec5 lshift prod_unary
 			{-> New ast_exp.binary_op(prod_bin_prec5.ast_exp, New ast_binary_op.lshift(), prod_unary.ast_exp)}
-	|	{rshift} prod_bin_prec5 rshift prod_unary
+	|	{rshift} 	prod_bin_prec5 rshift prod_unary
 			{-> New ast_exp.binary_op(prod_bin_prec5.ast_exp, New ast_binary_op.rshift(), prod_unary.ast_exp)}
-	|	{bitand} prod_bin_prec5 bit_and prod_unary
+	|	{bitand} 	prod_bin_prec5 bit_and prod_unary
 			{-> New ast_exp.binary_op(prod_bin_prec5.ast_exp, New ast_binary_op.bitand(), prod_unary.ast_exp)}
-	|	{bitclear} prod_bin_prec5 bitclear prod_unary
+	|	{bitclear} 	prod_bin_prec5 bitclear prod_unary
 			{-> New ast_exp.binary_op(prod_bin_prec5.ast_exp, New ast_binary_op.bitclear(), prod_unary.ast_exp)}
 	;
 	
 	prod_unary {-> ast_exp} =
-		{pos} add prod_unary
+		{pos} 	add prod_unary
 			{-> New ast_exp.unary_op(New ast_unary_op.plus(), prod_unary.ast_exp)}
-	|	{neg} sub prod_unary
+	|	{neg} 	sub prod_unary
 			{-> New ast_exp.unary_op(New ast_unary_op.minus(), prod_unary.ast_exp)}
 	|	{not} not prod_unary
 			{-> New ast_exp.unary_op(New ast_unary_op.not(), prod_unary.ast_exp)}
@@ -431,22 +433,22 @@ Productions
 	;
 	
 	prod_single {-> ast_exp} =
-		{paren} leftpar prod_exp rightpar
+		{paren} 	leftpar prod_exp rightpar
 			{-> New ast_exp.paren(prod_exp.ast_exp)}
-	|	{prod_id} id
+	|	{prod_id} 	id
 			{-> New ast_exp.id(id)}
-	|	{prod_lit} prod_literals
+	|	{prod_lit} 	prod_literals
 			{-> New ast_exp.lit(prod_literals.ast_literal)}
 	;
 
 	prod_literals {-> ast_literal} =
-		{prod_int} int_lit
+		{prod_int} 		int_lit
 			{-> New ast_literal.int(int_lit)}
-	|	{prod_float} float_lit
+	|	{prod_float} 	float_lit
 			{-> New ast_literal.float(float_lit)}
-	|	{prod_rune} rune_lit
+	|	{prod_rune} 	rune_lit
 			{-> New ast_literal.rune(rune_lit)}
-	|	{prod_string} string_lit
+	|	{prod_string} 	string_lit
 			{-> New ast_literal.string(string_lit)}
 	;
 
@@ -458,16 +460,16 @@ Abstract Syntax Tree
 	ast_program = 
 		[package]:id [decl]:ast_decl*
 	;
-	
+
 	ast_decl = 
-		{var_dec}			ast_var_decl+
-	|	{type_dec} 			ast_type_decl+
-	|	{func_dec}			ast_func_decl
+		{var_dec}		ast_var_decl+
+	|	{type_dec} 		ast_type_decl+
+	|	{func_dec}		ast_func_decl
 	;
-	
+
 	ast_var_decl = 
-		{type} 	id+ ast_type_exp
-	|	{exp} 	id+ ast_exp+
+		{type} 		id+ ast_type_exp
+	|	{exp} 		id+ ast_exp+
 	|	{type_exp} 	id+ ast_type_exp ast_exp+
 	;
 
@@ -529,21 +531,22 @@ Abstract Syntax Tree
 	|	{field_access}	[struct]:ast_exp [field]:id
 	;
 
-	ast_switch_stm = ast_switch_case ast_stm* ast_fallthrough_stm? ;
+	ast_switch_stm =
+		ast_switch_case ast_stm* ast_fallthrough_stm?;
 	
-	ast_switch_case = 
+	ast_switch_case =
 		{default}
 	|	{case} 		ast_exp+
 	;
 	
-	ast_literal = 
+	ast_literal =
 		{int}	 	int_lit
 	|	{float} 	float_lit
 	|	{rune}		rune_lit
 	|	{string}	string_lit
 	;
 
-	ast_binary_op = 
+	ast_binary_op =
 		{add}
 	|	{sub}
 	|	{mul}
@@ -580,16 +583,17 @@ Abstract Syntax Tree
 	|	{bitclear_eq}
 	;
 	
-	ast_unary_op = 
+	ast_unary_op =
 		{plus}	 
 	|	{minus} 
 	| 	{not}	
 	|	{caret}	
 	;
 	
-	post_op = 
+	post_op =
 		{inc}
 	|	{dec}
 	;
 	
-	ast_fallthrough_stm = ;
+	ast_fallthrough_stm =
+	;
