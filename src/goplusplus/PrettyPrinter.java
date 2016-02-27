@@ -154,19 +154,21 @@ public class PrettyPrinter extends DepthFirstAdapter{
 			if (iterator.hasNext())
 				print(",");
 		}
-		
+	
 		print(")");
 		
 		if(node.getAstTypeExp() != null) {
 			node.getAstTypeExp().apply(this);
 		}
 		
-		print("\n{\n");
+		print("{\n");
 		
 		mIndentStack.push(mIndentStack.size()+1);
 		
 		LinkedList stmts = node.getAstStm();
 		for (Iterator iterator = stmts.iterator(); iterator.hasNext();) {
+			for (int i = 0; i < mIndentStack.size(); i++)
+				print("\t");
 			PAstStm stm = (PAstStm) iterator.next();
 			stm.apply(this);
 			print("\n");
@@ -213,6 +215,11 @@ public class PrettyPrinter extends DepthFirstAdapter{
 	public void caseAAstStructField(AAstStructField node) {
 		print_idlist(node.getId());
 		node.getAstTypeExp().apply(this);
+	}
+	
+	@Override
+	public void caseAAliasAstTypeExp(AAliasAstTypeExp node) {
+		print(node.getId().getText().trim());
 	}
 	
 	@Override
@@ -352,7 +359,7 @@ public class PrettyPrinter extends DepthFirstAdapter{
 		}
 		node.getCondition().apply(this);
 		
-		print("\n{\n");
+		print("{\n");
 		
 		mIndentStack.push(mIndentStack.size()+1);
 		
@@ -366,6 +373,9 @@ public class PrettyPrinter extends DepthFirstAdapter{
 		}
 		
 		mIndentStack.pop();
+
+		for (int i = 0; i < mIndentStack.size(); i++)
+				print("\t");
 		print("}\n");
 	}
 	
@@ -378,7 +388,7 @@ public class PrettyPrinter extends DepthFirstAdapter{
 		}
 		node.getCondition().apply(this);
 		
-		print("\n{\n");
+		print("{\n");
 		
 		mIndentStack.push(mIndentStack.size()+1);
 		
@@ -392,9 +402,11 @@ public class PrettyPrinter extends DepthFirstAdapter{
 		}
 		
 		mIndentStack.pop();
+		for (int i = 0; i < mIndentStack.size(); i++)
+				print("\t");
 		print("}\n");
 		
-		print("else\n{\n");
+		print("else {\n");
 		mIndentStack.push(mIndentStack.size()+1);
 		LinkedList else_stmts = node.getElseStms();
 		for (Iterator iterator = else_stmts.iterator(); iterator.hasNext();) {
@@ -406,6 +418,8 @@ public class PrettyPrinter extends DepthFirstAdapter{
 		}
 		
 		mIndentStack.pop();
+		for (int i = 0; i < mIndentStack.size(); i++)
+				print("\t");
 		print("}\n");
 	}
 	
@@ -440,7 +454,7 @@ public class PrettyPrinter extends DepthFirstAdapter{
 			node.getPost().apply(this);
 		}
 		
-		print("\n{\n");
+		print("{\n");
 		
 		mIndentStack.push(mIndentStack.size()+1);
 		
@@ -454,6 +468,8 @@ public class PrettyPrinter extends DepthFirstAdapter{
 		}
 		
 		mIndentStack.pop();
+		for (int i = 0; i < mIndentStack.size(); i++)
+				print("\t");
 		print("}\n");
 	}
 	
