@@ -1,0 +1,15 @@
+Student name	id
+Hai Tong Yang	260453583
+Shaokun Deng	260638592
+Dong Kyu Kim	260531174
+
+Instruction List
+================
+To compile the grammar:
+ant -Dbasedir=. -f src/build.xml generate
+
+To compile the java files:
+ant -Dbasedir=. -f src/build.xml
+
+To pretty print a test program(e.g. programs/valid/valid1.go)
+ant -Dbasedir=. -Dprogram="programs/valid/valid1.go" -f src/build.xml run
