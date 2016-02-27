@@ -227,6 +227,8 @@ Productions
 			{-> New ast_type_exp.array(int_lit, prod_type_exp.ast_type_exp)}
 	|	{struct}	struct leftcurl prod_struct_field* rightcurl
 			{-> New ast_type_exp.struct([prod_struct_field.ast_struct_field])}
+	| 	{alias}		id
+			{-> New ast_type_exp.alias(id)}
 	;
 
 	prod_struct_field {-> ast_struct_field} =
@@ -334,6 +336,8 @@ Productions
 			{-> New ast_stm.inc_dec(prod_exp.ast_exp, New post_op.dec())}
 	|	{assign}		[left]:prod_exp_list assign [right]:prod_exp_list
 			{-> New ast_stm.assign([left.ast_exp],[right.ast_exp])}
+	|	{short_var_decl}[ids]:prod_exp_list shortdecl [exps]:prod_exp_list
+			{-> New ast_stm.short_decl([ids.ast_exp],[exps.ast_exp])}
 	|	{op_assign}		id prod_op_assign prod_exp
 			{-> New ast_stm.op_assign(id,prod_op_assign.ast_op_assign,prod_exp.ast_exp)}
 	;
@@ -439,6 +443,16 @@ Productions
 			{-> New ast_exp.id(id)}
 	|	{prod_lit} 	prod_literals
 			{-> New ast_exp.lit(prod_literals.ast_literal)}
+	|	{function_call}	prod_single leftpar prod_exp_list? rightpar
+			{-> New ast_exp.func_call(prod_single.ast_exp,[prod_exp_list.ast_exp])}
+	|	{append}	append leftpar id comma prod_exp rightpar
+			{-> New ast_exp.append(id,prod_exp.ast_exp)}
+	|	{basic_cast}	basic_types leftpar prod_exp rightpar
+			{-> New ast_exp.basic_cast(basic_types,prod_exp.ast_exp)}
+	|	{array_access}	prod_single leftsq prod_exp rightsq
+			{-> New ast_exp.array_access(prod_single.ast_exp,prod_exp.ast_exp)}
+	|	{field_access}	prod_single dot id
+			{-> New ast_exp.field_access(prod_single.ast_exp,id)}
 	;
 
 	prod_literals {-> ast_literal} =
@@ -526,7 +540,7 @@ Abstract Syntax Tree
 	|	{binary_op}		[left]:ast_exp ast_binary_op [right]:ast_exp
 	|	{func_call}		[name]:ast_exp [args]:ast_exp*
 	|	{append}		id ast_exp
-	|	{cast}			ast_type_exp ast_exp
+	|	{basic_cast}	basic_types ast_exp
 	|	{array_access}	[array]:ast_exp [index]:ast_exp
 	|	{field_access}	[struct]:ast_exp [field]:id
 	;

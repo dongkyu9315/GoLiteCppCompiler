@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="GoLite" default="build" basedir="..">
+  <property name="program" value="${basedir}/programs/valid/valid1.go"/>
+	
+  <target name ="clean">
+  	<delete includeemptydirs="true">
+    	<fileset dir="${basedir}">
+    		<include name="src/goplusplus/*/*" />
+    	</fileset>
+	</delete>
+  </target>
+	
+	<target name ="clean_class">
+		<delete>
+		    	<fileset dir="${basedir}">
+		    		<include name="src/goplusplus/*.class" />
+		    		<include name="src/goplusplus/*/*.class" />
+		    	</fileset>
+		</delete>
+	</target>
+	<target name ="generate" description="Generate scanner/parser from grammar file" depends="clean">
+	  	<java classname="org.sablecc.sablecc.SableCC">
+	         <arg value="${basedir}/src/grammar.sable"/>
+	         <classpath>
+	           <pathelement location="${basedir}/lib/sablecc.jar"/>
+	           <pathelement path="${java.class.path}"/>
+	         </classpath>
+	     </java>
+	  </target>
+
+  <target name="build" description="Building class files" depends="clean_class">
+	<javac
+        fork="true"
+        srcdir="${basedir}/src"
+        destdir="${basedir}/src">
+    </javac>
+  </target>
+	
+	<target name="run" >
+	        <java classname="goplusplus.Main" fork="true">
+	            <classpath>
+	                <pathelement location="${basedir}/src"/>
+	            </classpath>
+	            <arg value="${program}"/>
+	        </java>
+	</target>
+
+</project>
