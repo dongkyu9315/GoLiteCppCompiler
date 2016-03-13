@@ -1,7 +1,10 @@
 package goplusplus;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Iterator;
 
 import goplusplus.analysis.DepthFirstAdapter;
 import goplusplus.node.*;
@@ -13,18 +16,77 @@ public class Typechecker extends DepthFirstAdapter{
 	
 	public static void check(Node node) {
 		node.apply(new Typechecker());
+		printSymbolTable();
 	}
 	
-	LinkedList<HashMap<String, String> > symbolTable;
+	private void print(String s) {
+		try {
+			mFileWriter.append(s+" ");
+			mFileWriter.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	
-//=====================================================================
-//=====================================================================
+	public static void printSymbolTable() {
+		for (int i = 0; i < symbolTable.size(); i++) {
+			HashMap<String, String> temp = symbolTable.get(i);
+			System.out.println("Layer " + i + ":");
+			for (HashMap.Entry<String, String> entry : temp.entrySet()) {
+				System.out.println("Key = " + entry.getKey() + ", Type = " + entry.getValue());
+			}
+		}
+	}
 	
+	
+	// NOT DONE!!!!!!!!!!!!!!!!!!!
+	private String getType(Node node) {
+		String type = "";
+		if (node.getClass().isInstance(new AParenAstExp())) {
+			AParenAstExp temp = (AParenAstExp) node;
+			type = getType(temp.getAstExp());
+		} else if (node.getClass().isInstance(new AIdAstExp())) {
+			AIdAstExp temp = (AIdAstExp) node;
+			type = forAIdAstExp(temp);
+		} else if (node.getClass().isInstance(new ALitAstExp())) {
+			ALitAstExp temp = (ALitAstExp) node;
+			type = getType(temp.getAstLiteral());
+		} else if (node.getClass().isInstance(new AUnaryOpAstExp())) {
+			
+		} else if (node.getClass().isInstance(new ABinaryOpAstExp())) {
+			
+		} else if (node.getClass().isInstance(new AFuncCallAstExp())) {
+			
+		} else if (node.getClass().isInstance(new AAppendAstExp())) {
+			
+		} else if (node.getClass().isInstance(new ABasicCastAstExp())) {
+			
+		} else if (node.getClass().isInstance(new AArrayAccessAstExp())) {
+			AArrayAccessAstExp temp = (AArrayAccessAstExp) node;
+			type =  getType(temp.getArray());
+		} else if (node.getClass().isInstance(new AFieldAccessAstExp())) {
+			AFieldAccessAstExp temp = (AFieldAccessAstExp) node;
+			
+		} else if (node.getClass().isInstance(new AIntAstLiteral())) {
+			type = "int";
+		} else if (node.getClass().isInstance(new AFloatAstLiteral())) {
+			type = "float";
+		} else if (node.getClass().isInstance(new ARuneAstLiteral())) {
+			type = "rune";
+		} else if (node.getClass().isInstance(new AStringAstLiteral())) {
+			type = "string";
+		}
+		
+		return type;
+	}
+	
+	private static LinkedList<HashMap<String, String> > symbolTable;
+	FileWriter mFileWriter;
+	
+	// ast_program		---------------------------------------------------
 	@Override
 	public void caseAAstProgram(AAstProgram node) {
-		print("package");
-		print(node.getPackage().getText().trim());
-		print("\n\n");
+		symbolTable.add(new HashMap<String, String>());
 		LinkedList decl = node.getDecl();
 		if (!decl.isEmpty()) {
 			for (Iterator iterator = decl.iterator(); iterator.hasNext();) {
@@ -34,6 +96,7 @@ public class Typechecker extends DepthFirstAdapter{
 		}
 	}
 	
+	// ast_decl			---------------------------------------------------
 	@Override
 	public void caseAVarDecAstDecl(AVarDecAstDecl node) {
 		LinkedList decl = node.getAstVarDecl();
@@ -41,7 +104,6 @@ public class Typechecker extends DepthFirstAdapter{
 			for (Iterator iterator = decl.iterator(); iterator.hasNext();) {
 				PAstVarDecl d = (PAstVarDecl) iterator.next();
 				d.apply(this);
-				print("\n");
 			}
 		}
 	}
@@ -53,7 +115,6 @@ public class Typechecker extends DepthFirstAdapter{
 			for (Iterator iterator = decl.iterator(); iterator.hasNext();) {
 				PAstTypeDecl d = (PAstTypeDecl) iterator.next();
 				d.apply(this);
-				print("\n");
 			}
 		}
 	}
@@ -63,38 +124,57 @@ public class Typechecker extends DepthFirstAdapter{
 		node.getAstFuncDecl().apply(this);
 	}
 	
+	// ast_var_decl		---------------------------------------------------
 	@Override
 	public void caseATypeAstVarDecl(ATypeAstVarDecl node) {
-		print("var");
 		LinkedList<TId> idlist = node.getId();
-		print_idlist(idlist);		
+		String varType = node.getAstTypeExp().toString().trim();
+		for (Iterator iterator = idlist.iterator(); iterator.hasNext();) {
+			TId d = (TId) iterator.next();
+			if (!symbolTable.getFirst().containsKey(d.getText().trim())) {
+				symbolTable.getFirst().put(d.getText().trim(), varType);
+			} else {
+				printSymbolTable();
+				String errorMsg = "1Declaration Error at line " + d.getLine();
+				throw new TypeException(errorMsg);
+			}
+		}
 		node.getAstTypeExp().apply(this);
 	}
 	
 	@Override
 	public void caseAExpAstVarDecl(AExpAstVarDecl node) {
-		print("var");
 		LinkedList<TId> idlist = node.getId();
-		print_idlist(idlist);	
+		LinkedList<PAstExp> exps = node.getAstExp();
+		System.out.println(idlist.size());
+		System.out.println(exps.size());
+		System.out.println(exps.getFirst().toString());
+		if (idlist.size() != exps.size()) {
+			printSymbolTable();
+			String errorMsg = "2Declaration Error at line " + idlist.getFirst().getLine();
+			throw new TypeException(errorMsg);
+		}
 		
-		print("=");
-		
-		LinkedList exps = node.getAstExp();
-		for (Iterator iterator = exps.iterator(); iterator.hasNext();) {
-			PAstExp exp = (PAstExp) iterator.next();
-			exp.apply(this);
-			if (iterator.hasNext())
-				print(",");
+		for (int i = 0; i < idlist.size(); i++) {
+			TId d = idlist.get(i);
+			PAstExp t = exps.get(i);
+			String varType = getType(t);
+			if (!symbolTable.getFirst().containsKey(d.getText().trim())) {
+				symbolTable.getFirst().put(d.getText().trim(), varType);
+			} else {
+				printSymbolTable();
+				String errorMsg = "3Declaration Error at line " + d.getLine();
+				throw new TypeException(errorMsg);
+			}
 		}
 	}
 	
+	//=====================================================================
+	//=====================================================================
+	
 	@Override
 	public void caseATypeExpAstVarDecl(ATypeExpAstVarDecl node) {
-		print("var");
-		
 		LinkedList<TId> idlist = node.getId();
-		print_idlist(idlist);	
-		
 		node.getAstTypeExp().apply(this);
 		
 		print("=");
@@ -108,6 +188,7 @@ public class Typechecker extends DepthFirstAdapter{
 		}
 	}
 	
+	// ast_type_decl
 	@Override
 	public void caseAAstTypeDecl(AAstTypeDecl node) {
 		print("type");
@@ -484,6 +565,28 @@ public class Typechecker extends DepthFirstAdapter{
 		node.getAstExp().apply(this);
 		print(")");
 	}
+	
+	//////////////////////////////////////////////////////////////////////////////////////
+	
+	// Returns the type of Id
+	public String forAIdAstExp(AIdAstExp node) {
+		String temp = node.getId().toString().trim();
+		for (Iterator iterator = symbolTable.iterator(); iterator.hasNext(); ) {
+			HashMap<String, String> mapTemp = (HashMap<String, String>) iterator.next();
+			if (!mapTemp.containsKey(temp)) {
+				printSymbolTable();
+				String errorMsg = "Declaration Error at line " + node.getId().getLine();
+				throw new TypeException(errorMsg);
+			} else {
+				return mapTemp.get(temp);
+			}
+		}
+		printSymbolTable();
+		String errorMsg = "Declaration Error at line " + node.getId().getLine();
+		throw new TypeException(errorMsg);
+	}
+	
+	//////////////////////////////////////////////////////////////////////////////////////
 	
 	@Override
 	public void caseAIdAstExp(AIdAstExp node) {

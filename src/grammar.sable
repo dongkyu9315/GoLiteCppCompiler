@@ -27,10 +27,11 @@ Helpers
 	oct			= '0' (oct_digit)*;
 	hex			= '0' ('x' | 'X') (hex_digit)+;
 	char_but_sin_quote	= [char - '''];
+	char_but_dou_quote 	= [char - '"'];
 	escaped_char 		= '\' ('a' | 'b' | 'f' | 'n' | 'r' | 't' | 'v' | '\' | ''' | '"');
 	rune_content		= ''' (char_but_sin_quote | escaped_char)* ''';
 	raw_string 			= ''' (char_but_sin_quote | newline)* ''';
-	interpreted_string 	= '"' (char_but_sin_quote | newline)* '"';
+	interpreted_string 	= '"' (char_but_dou_quote | newline)* '"';
 
 
 /*==========================*/
