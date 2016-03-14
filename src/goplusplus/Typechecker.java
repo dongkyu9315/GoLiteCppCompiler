@@ -28,6 +28,7 @@ public class Typechecker extends DepthFirstAdapter{
 		}
 	}
 	
+	// print the symbol table to the console
 	public static void printSymbolTable() {
 		for (int i = 0; i < symbolTable.size(); i++) {
 			HashMap<String, String> temp = symbolTable.get(i);
@@ -93,69 +94,64 @@ public class Typechecker extends DepthFirstAdapter{
 				symbolTable.getFirst().put(d.getText().trim(), varType);
 			} else {
 				printSymbolTable();
-				String errorMsg = "1Declaration Error at line " + d.getLine();
+				String errorMsg = "Declaration Error at line " + d.getLine();
 				throw new TypeException(errorMsg);
 			}
 		}
 	}
 	
-//	@Override
-//	public void caseAExpAstVarDecl(AExpAstVarDecl node) {
-//		LinkedList<TId> idlist = node.getId();
-//		LinkedList<PAstExp> exps = node.getAstExp();
-////		System.out.println(idlist.size());
-////		System.out.println(exps.size());
-////		System.out.println(exps.getFirst().toString());
-//		if (idlist.size() != exps.size()) {
-//			printSymbolTable();
-//			String errorMsg = "2Declaration Error at line " + idlist.getFirst().getLine();
-//			throw new TypeException(errorMsg);
-//		}
-//		
-//		for (int i = 0; i < idlist.size(); i++) {
-//			TId d = idlist.get(i);
-//			PAstExp t = exps.get(i);
-////			String varType = getType(t);
-////			if (!symbolTable.getFirst().containsKey(d.getText().trim())) {
-////				symbolTable.getFirst().put(d.getText().trim(), varType);
-////			} else {
-////				printSymbolTable();
-////				String errorMsg = "3Declaration Error at line " + d.getLine();
-////				throw new TypeException(errorMsg);
-////			}
-//		}
-//	}
-//	
-//	@Override
-//	public void caseATypeExpAstVarDecl(ATypeExpAstVarDecl node) {
-//		LinkedList<TId> idlist = node.getId();
-//		String varType = node.getAstTypeExp().toString().trim();
-//		LinkedList<PAstExp> exps = node.getAstExp();
-//		
-//		if (idlist.size() != exps.size()) {
-//			printSymbolTable();
-//			String errorMsg = "4Declaration Error at line " + idlist.getFirst().getLine();
-//			throw new TypeException(errorMsg);
-//		}
-//		
-//		for (int i = 0; i < idlist.size(); i++) {
-//			TId d = idlist.get(i);
-//			PAstExp t = exps.get(i);
-//			t.apply(this);
-////			if (!varType.equals(typeT)) {
-////				printSymbolTable();
-////				String errorMsg = "5Declaration Error at line " + d.getLine();
-////				throw new TypeException(errorMsg);
-////			}
-//			if (!symbolTable.getFirst().containsKey(d.getText().trim())) {
-//				symbolTable.getFirst().put(d.getText().trim(), varType);
-//			} else {
-//				printSymbolTable();
-//				String errorMsg = "6Declaration Error at line " + d.getLine();
-//				throw new TypeException(errorMsg);
-//			}
-//		}
-//	}
+	@Override
+	public void caseAExpAstVarDecl(AExpAstVarDecl node) {
+		LinkedList<TId> idlist = node.getId();
+		LinkedList<PAstExp> exps = node.getAstExp();
+		if (idlist.size() != exps.size()) {
+			printSymbolTable();
+			String errorMsg = "Declaration Error at line " + idlist.getFirst().getLine();
+			throw new TypeException(errorMsg);
+		}
+		
+		for (int i = 0; i < idlist.size(); i++) {
+			TId d = idlist.get(i);
+			String varType = forPAstExp(exps.get(i));
+			if (!symbolTable.getFirst().containsKey(d.getText().trim())) {
+				symbolTable.getFirst().put(d.getText().trim(), varType);
+			} else {
+				printSymbolTable();
+				String errorMsg = "Declaration Error at line " + d.getLine();
+				throw new TypeException(errorMsg);
+			}
+		}
+	}
+	
+	@Override
+	public void caseATypeExpAstVarDecl(ATypeExpAstVarDecl node) {
+		LinkedList<TId> idlist = node.getId();
+		String typeExp = forPAstTypeExp(node.getAstTypeExp());
+		LinkedList<PAstExp> exps = node.getAstExp();
+		
+		if (idlist.size() != exps.size()) {
+			printSymbolTable();
+			String errorMsg = "Declaration Error at line " + idlist.getFirst().getLine();
+			throw new TypeException(errorMsg);
+		}
+		
+		for (int i = 0; i < idlist.size(); i++) {
+			TId d = idlist.get(i);
+			String varType = forPAstExp(exps.get(i));
+			if (!varType.equals(typeExp)) {
+				printSymbolTable();
+				String errorMsg = "Declaration Error at line " + d.getLine();
+				throw new TypeException(errorMsg);
+			}
+			if (!symbolTable.getFirst().containsKey(d.getText().trim())) {
+				symbolTable.getFirst().put(d.getText().trim(), varType);
+			} else {
+				printSymbolTable();
+				String errorMsg = "Declaration Error at line " + d.getLine();
+				throw new TypeException(errorMsg);
+			}
+		}
+	}
 	
 	// ast_type_decl	---------------------------------------------------
 	@Override
@@ -168,7 +164,7 @@ public class Typechecker extends DepthFirstAdapter{
 				symbolTable.getFirst().put(d.getText().trim(), varType);
 			} else {
 				printSymbolTable();
-				String errorMsg = "1Declaration Error at line " + d.getLine();
+				String errorMsg = "Declaration Error at line " + d.getLine();
 				throw new TypeException(errorMsg);
 			}
 		}
@@ -224,7 +220,7 @@ public class Typechecker extends DepthFirstAdapter{
 				symbolTable.getFirst().put(d.getText().trim(), varType);
 			} else {
 				printSymbolTable();
-				String errorMsg = "1Declaration Error at line " + d.getLine();
+				String errorMsg = "Declaration Error at line " + d.getLine();
 				throw new TypeException(errorMsg);
 			}
 		}
@@ -242,12 +238,11 @@ public class Typechecker extends DepthFirstAdapter{
 		} else if (node.getClass().isInstance(new AArrayAstTypeExp())) {
 			AArrayAstTypeExp temp = (AArrayAstTypeExp) node;
 			return forPAstTypeExp(temp.getAstTypeExp());
-		// not working for the fields inside the struct!!!!!!!!!!!!!!!!!!!!!!!
 		} else if (node.getClass().isInstance(new AStructAstTypeExp())) {
 			AStructAstTypeExp temp = (AStructAstTypeExp) node;
 			LinkedList<PAstStructField> structList = temp.getAstStructField();
 			for (Iterator iterator = structList.iterator(); iterator.hasNext();) {
-				PAstStructField field = (PAstStructField) iterator.next();
+				AAstStructField field = (AAstStructField) iterator.next();
 				field.apply(this);
 			}
 			return "struct";
@@ -283,14 +278,14 @@ public class Typechecker extends DepthFirstAdapter{
 //		node.getAstTypeExp().apply(this);
 //	}
 //	
-	@Override
-	public void caseAStructAstTypeExp(AStructAstTypeExp node) {
-		LinkedList fields = node.getAstStructField();
-		for (Iterator iterator = fields.iterator(); iterator.hasNext();) {
-			PAstStructField field = (PAstStructField) iterator.next();
-			field.apply(this);
-		}
-	}
+//	@Override
+//	public void caseAStructAstTypeExp(AStructAstTypeExp node) {
+//		LinkedList fields = node.getAstStructField();
+//		for (Iterator iterator = fields.iterator(); iterator.hasNext();) {
+//			PAstStructField field = (PAstStructField) iterator.next();
+//			field.apply(this);
+//		}
+//	}
 //	
 //	@Override
 //	public void caseAAstStructField(AAstStructField node) {
@@ -303,7 +298,67 @@ public class Typechecker extends DepthFirstAdapter{
 //		print(node.getId().getText().trim());
 //	}
 //	
-//	// ast_stm			---------------------------------------------------
+	
+	// ast_struct_field ---------------------------------------------------
+	@Override
+	public void caseAAstStructField(AAstStructField node) {
+		LinkedList<TId> idlist = node.getId();
+		String varType = forPAstTypeExp(node.getAstTypeExp());
+		for (Iterator iterator = idlist.iterator(); iterator.hasNext();) {
+			TId d = (TId) iterator.next();
+			if (!symbolTable.getFirst().containsKey(d.getText().trim())) {
+				symbolTable.getFirst().put(d.getText().trim(), varType);
+			} else {
+				printSymbolTable();
+				String errorMsg = "Declaration Error at line " + d.getLine();
+				throw new TypeException(errorMsg);
+			}
+		}
+	}
+	
+	// ast_stm			---------------------------------------------------
+	// return the type of PAstStm
+	public String forPAstStm(PAstStm node) {
+		if (node.getClass().isInstance(new AEmptyAstStm())) {
+			
+		} else if (node.getClass().isInstance(new AExpAstStm())) {
+			
+		} else if (node.getClass().isInstance(new AAssignAstStm())) {
+			
+		} else if (node.getClass().isInstance(new AOpAssignAstStm())) {
+			
+		} else if (node.getClass().isInstance(new AVarDeclAstStm())) {
+			
+		} else if (node.getClass().isInstance(new AShortDeclAstStm())) {
+			
+		} else if (node.getClass().isInstance(new ATypeDeclAstStm())) {
+			
+		} else if (node.getClass().isInstance(new AIncDecAstStm())) {
+			
+		} else if (node.getClass().isInstance(new APrintAstStm())) {
+			
+		} else if (node.getClass().isInstance(new APrintlnAstStm())) {
+			
+		} else if (node.getClass().isInstance(new AReturnAstStm())) {
+			
+		} else if (node.getClass().isInstance(new AShortifAstStm())) {
+			
+		} else if (node.getClass().isInstance(new ALongifAstStm())) {
+			
+		} else if (node.getClass().isInstance(new ASwitchAstStm())) {
+			
+		} else if (node.getClass().isInstance(new AForAstStm())) {
+			
+		} else if (node.getClass().isInstance(new ABlockAstStm())) {
+			
+		} else if (node.getClass().isInstance(new ABreakAstStm())) {
+			
+		} else if (node.getClass().isInstance(new AContinueAstStm())) {
+			
+		}
+		return null;
+	}
+	
 //	@Override
 //	public void caseAEmptyAstStm(AEmptyAstStm node) {
 //		//do nothing
@@ -606,7 +661,7 @@ public class Typechecker extends DepthFirstAdapter{
 			return forPAstLiteral(temp.getAstLiteral());
 		} else if (node.getClass().isInstance(new AUnaryOpAstExp())) {
 			AUnaryOpAstExp temp = (AUnaryOpAstExp) node;
-			String unop = temp.getAstUnaryOp().toString().trim();
+			String unop = forPAstUnaryOp(temp.getAstUnaryOp());
 			if (unop.equals("+")) {
 				String check = forPAstExp(temp.getAstExp());
 				if (!(check.equals("int") || check.equals("float64") || check.equals("rune"))) {
@@ -645,6 +700,106 @@ public class Typechecker extends DepthFirstAdapter{
 				throw new TypeException(errorMsg);
 			}
 		} else if (node.getClass().isInstance(new ABinaryOpAstExp())) {
+			ABinaryOpAstExp temp = (ABinaryOpAstExp) node;
+			String leftType = forPAstExp(temp.getLeft());
+			String binOp = forPAstBinaryOp(temp.getAstBinaryOp());
+			String rightType = forPAstExp(temp.getRight());
+			
+			if (leftType.equals(rightType) && leftType.equals("bool")) {
+				if (binOp.equals("||")) {
+					return "bool";
+				} else if (binOp.equals("&&")) {
+					return "bool";
+				}
+				System.out.println("In forPAstTypeExp");
+				String errorMsg = "Binary Operator Error";
+				throw new TypeException(errorMsg);
+			} else if (leftType.equals(rightType) && leftType.equals("string")) {
+				if (binOp.equals("==")) {
+					return "bool";
+				} else if (binOp.equals("!=")) {
+					return "bool";
+				} else if (binOp.equals("<")) {
+					return "bool";
+				} else if (binOp.equals("<=")) {
+					return "bool";
+				} else if (binOp.equals(">")) {
+					return "bool";
+				} else if (binOp.equals(">=")) {
+					return "bool";
+				} else if (binOp.equals("+")) {
+					return "string";
+				}
+				System.out.println("In forPAstTypeExp");
+				String errorMsg = "Binary Operator Error";
+				throw new TypeException(errorMsg);
+			} else if (leftType.equals(rightType) && leftType.equals("float64")) {
+				if (binOp.equals("==")) {
+					return "bool";
+				} else if (binOp.equals("!=")) {
+					return "bool";
+				} else if (binOp.equals("<")) {
+					return "bool";
+				} else if (binOp.equals("<=")) {
+					return "bool";
+				} else if (binOp.equals(">")) {
+					return "bool";
+				} else if (binOp.equals(">=")) {
+					return "bool";
+				} else if (binOp.equals("+")) {
+					return leftType;
+				} else if (binOp.equals("-")) {
+					return leftType;
+				} else if (binOp.equals("*")) {
+					return leftType;
+				} else if (binOp.equals("/")) {
+					return leftType;
+				} else if (binOp.equals("%")) {
+					return leftType;
+				}
+				System.out.println("In forPAstTypeExp");
+				String errorMsg = "Binary Operator Error";
+				throw new TypeException(errorMsg);
+			} else if (leftType.equals(rightType) && leftType.equals("int")) {
+				if (binOp.equals("==")) {
+					return "bool";
+				} else if (binOp.equals("!=")) {
+					return "bool";
+				} else if (binOp.equals("<")) {
+					return "bool";
+				} else if (binOp.equals("<=")) {
+					return "bool";
+				} else if (binOp.equals(">")) {
+					return "bool";
+				} else if (binOp.equals(">=")) {
+					return "bool";
+				} else if (binOp.equals("+")) {
+					return leftType;
+				} else if (binOp.equals("-")) {
+					return leftType;
+				} else if (binOp.equals("*")) {
+					return leftType;
+				} else if (binOp.equals("/")) {
+					return leftType;
+				} else if (binOp.equals("%")) {
+					return leftType;
+				} else if (binOp.equals("|")) {
+					return leftType;
+				} else if (binOp.equals("&")) {
+					return leftType;
+				} else if (binOp.equals("<<")) {
+					return leftType;
+				} else if (binOp.equals(">>")) {
+					return leftType;
+				} else if (binOp.equals("&^")) {
+					return leftType;
+				} else if (binOp.equals("^")) {
+					return leftType;
+				}
+				System.out.println("In forPAstTypeExp");
+				String errorMsg = "Binary Operator Error";
+				throw new TypeException(errorMsg);
+			}
 			
 		} else if (node.getClass().isInstance(new AFuncCallAstExp())) {
 			
@@ -660,7 +815,6 @@ public class Typechecker extends DepthFirstAdapter{
 		return null;
 	}
 	
-//	
 //	@Override
 //	public void caseAParenAstExp(AParenAstExp node) {
 //		print("(");
@@ -810,7 +964,51 @@ public class Typechecker extends DepthFirstAdapter{
 //		print(node.getStringLit().toString().trim());
 //	}
 //	
-//	// ast_binary_op	---------------------------------------------------
+	// ast_binary_op	---------------------------------------------------
+	// return the binary_op of PAstBinaryOp
+	public String forPAstBinaryOp(PAstBinaryOp node) {
+		if (node.getClass().isInstance(new AAddAstBinaryOp())) {
+			return "+";
+		} else if (node.getClass().isInstance(new ASubAstBinaryOp())) {
+			return "-";
+		} else if (node.getClass().isInstance(new AMulAstBinaryOp())) {
+			return "*";
+		} else if (node.getClass().isInstance(new ADivAstBinaryOp())) {
+			return "/";
+		} else if (node.getClass().isInstance(new AModAstBinaryOp())) {
+			return "%";
+		} else if (node.getClass().isInstance(new ABitorAstBinaryOp())) {
+			return "|";
+		} else if (node.getClass().isInstance(new ABitandAstBinaryOp())) {
+			return "&";
+		} else if (node.getClass().isInstance(new AEqAstBinaryOp())) {
+			return "==";
+		} else if (node.getClass().isInstance(new ANoteqAstBinaryOp())) {
+			return "!+";
+		} else if (node.getClass().isInstance(new ALtAstBinaryOp())) {
+			return "<";
+		} else if (node.getClass().isInstance(new ALeqAstBinaryOp())) {
+			return "<=";
+		} else if (node.getClass().isInstance(new AGtAstBinaryOp())) {
+			return ">";
+		} else if (node.getClass().isInstance(new AGeqAstBinaryOp())) {
+			return ">=";
+		} else if (node.getClass().isInstance(new ACaretAstBinaryOp())) {
+			return "^";
+		} else if (node.getClass().isInstance(new ALshiftAstBinaryOp())) {
+			return "<<";
+		} else if (node.getClass().isInstance(new ARshiftAstBinaryOp())) {
+			return ">>";
+		} else if (node.getClass().isInstance(new ABitclearAstBinaryOp())) {
+			return "&^";
+		} else if (node.getClass().isInstance(new AOrAstBinaryOp())) {
+			return "||";
+		} else if (node.getClass().isInstance(new AAndAstBinaryOp())) {
+			return "&&";
+		}
+		return null;
+	}
+	
 //	@Override
 //	public void caseAAddAstBinaryOp(AAddAstBinaryOp node) {
 //		print("+");
@@ -906,7 +1104,35 @@ public class Typechecker extends DepthFirstAdapter{
 //		print("&&");
 //	}
 //	
-//	// ast_op_assign	---------------------------------------------------
+	// ast_op_assign	---------------------------------------------------
+	// return op_assign of PAstOpAssign
+	public String forPAstOpAssign(PAstOpAssign node) {
+		if (node.getClass().isInstance(new AAddEqAstOpAssign())) {
+			return "+=";
+		} else if (node.getClass().isInstance(new ASubEqAstOpAssign())) {
+			return "-=";
+		} else if (node.getClass().isInstance(new AMulEqAstOpAssign())) {
+			return "*=";
+		} else if (node.getClass().isInstance(new ADivEqAstOpAssign())) {
+			return "/=";
+		} else if (node.getClass().isInstance(new AModEqAstOpAssign())) {
+			return "%=";
+		} else if (node.getClass().isInstance(new ABitorEqAstOpAssign())) {
+			return "|=";
+		} else if (node.getClass().isInstance(new ABitandEqAstOpAssign())) {
+			return "^=";
+		} else if (node.getClass().isInstance(new ACaretEqAstOpAssign())) {
+			return "^=";
+		} else if (node.getClass().isInstance(new ALshiftEqAstOpAssign())) {
+			return "<<=";
+		} else if (node.getClass().isInstance(new ARshiftEqAstOpAssign())) {
+			return ">>=";
+		} else if (node.getClass().isInstance(new ABitclearEqAstOpAssign())) {
+			return "&^=";
+		}
+		return null;
+	}
+	
 //	@Override
 //	public void caseAAddEqAstOpAssign(AAddEqAstOpAssign node) {
 //		print("+=");
@@ -962,7 +1188,21 @@ public class Typechecker extends DepthFirstAdapter{
 //		print("&^=");
 //	}
 //	
-//	// ast_unary_op		---------------------------------------------------
+	// ast_unary_op		---------------------------------------------------
+	// return the unary_op of PAstUnaryOp
+	public String forPAstUnaryOp(PAstUnaryOp node) {
+		if (node.getClass().isInstance(new APlusAstUnaryOp())) {
+			return "+";
+		} else if (node.getClass().isInstance(new AMinusAstUnaryOp())) {
+			return "-";
+		} else if (node.getClass().isInstance(new ANotAstUnaryOp())) {
+			return "!";
+		} else if (node.getClass().isInstance(new ACaretAstUnaryOp())) {
+			return "^";
+		}
+		return null;
+	}
+	
 //	@Override
 //	public void caseAPlusAstUnaryOp(APlusAstUnaryOp node) {
 //		print("+");
@@ -983,7 +1223,17 @@ public class Typechecker extends DepthFirstAdapter{
 //		print("^");
 //	}
 //	
-//	// ast_post_op	---------------------------------------------------
+	// ast_post_op	---------------------------------------------------
+	// return the post_op of PAstPostOp
+	public String forPAstPostOp(PAstPostOp node) {
+		if (node.getClass().isInstance(new AIncAstPostOp())) {
+			return "++";
+		} else if (node.getClass().isInstance(new ADecAstPostOp())) {
+			return "--";
+		}
+		return null;
+	}
+	
 //	@Override
 //	public void caseAIncAstPostOp(AIncAstPostOp node) {
 //		print("++");
@@ -994,7 +1244,15 @@ public class Typechecker extends DepthFirstAdapter{
 //		print("--");
 //	}
 //	
-//	// ast_fallthrough_stm	---------------------------------------------------
+	// ast_fallthrough_stm	---------------------------------------------------
+	// return fallthrough_stm of PAstFallthroughStm
+	public String forPAstFallthroughStm(PAstFallthroughStm node) {
+		if (node.getClass().isInstance(new AAstFallthroughStm())) {
+			return "fallthrough";
+		}
+		return null;
+	}
+	
 //	@Override
 //	public void caseAAstFallthroughStm(AAstFallthroughStm node) {
 //		print("fallthrough");
