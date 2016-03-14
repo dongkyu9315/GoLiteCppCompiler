@@ -332,9 +332,9 @@ Productions
 	|	{expression}	prod_exp
 			{-> New ast_stm.exp(prod_exp.ast_exp)}
 	|	{increment}		prod_exp increment
-			{-> New ast_stm.inc_dec(prod_exp.ast_exp, New post_op.inc())}
+			{-> New ast_stm.inc_dec(prod_exp.ast_exp, New ast_post_op.inc())}
 	|	{decrement}		prod_exp decrement
-			{-> New ast_stm.inc_dec(prod_exp.ast_exp, New post_op.dec())}
+			{-> New ast_stm.inc_dec(prod_exp.ast_exp, New ast_post_op.dec())}
 	|	{assign}		[left]:prod_exp_list assign [right]:prod_exp_list
 			{-> New ast_stm.assign([left.ast_exp], [right.ast_exp])}
 	|	{short_var_decl}[ids]:prod_exp_list shortdecl [exps]:prod_exp_list
@@ -520,7 +520,7 @@ Abstract Syntax Tree
 	|	{var_decl}		ast_var_decl+
 	|	{short_decl}	[ids]:ast_exp+ ast_exp+
 	|	{type_decl}		ast_type_decl+
-	|	{inc_dec}		ast_exp post_op
+	|	{inc_dec}		ast_exp ast_post_op
 	|	{print}			ast_exp*
 	|	{println}		ast_exp*
 	|	{return}		ast_exp?
@@ -604,7 +604,7 @@ Abstract Syntax Tree
 	|	{caret}	
 	;
 	
-	post_op =
+	ast_post_op =
 		{inc}
 	|	{dec}
 	;
