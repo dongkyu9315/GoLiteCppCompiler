@@ -1,6 +1,7 @@
 package goplusplus;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 import goplusplus.analysis.DepthFirstAdapter;
@@ -612,186 +613,200 @@ public class Typechecker extends DepthFirstAdapter{
 	
 	@Override
 	public void caseAAddAstBinaryOp(AAddAstBinaryOp node) {
-		print("+");
 	}
 	
 	@Override
 	public void caseASubAstBinaryOp(ASubAstBinaryOp node) {
-		print("-");
 	}
 	
 	@Override
 	public void caseAMulAstBinaryOp(AMulAstBinaryOp node) {
-		print("*");
 	}
 	
 	@Override
 	public void caseADivAstBinaryOp(ADivAstBinaryOp node) {
-		print("/");
 	}
 	
 	@Override
 	public void caseAModAstBinaryOp(AModAstBinaryOp node) {
-		print("%");
 	}
 	
 	@Override
 	public void caseABitorAstBinaryOp(ABitorAstBinaryOp node) {
-		print("|");
 	}
 	
 	@Override
 	public void caseABitandAstBinaryOp(ABitandAstBinaryOp node) {
-		print("&");
 	}
 	
 	@Override
 	public void caseAEqAstBinaryOp(AEqAstBinaryOp node) {
-		print("==");
 	}
 	
 	@Override
 	public void caseANoteqAstBinaryOp(ANoteqAstBinaryOp node) {
-		print("!=");
 	}
 	
 	@Override
 	public void caseALtAstBinaryOp(ALtAstBinaryOp node) {
-		print("<");
 	}
 	
 	@Override
 	public void caseALeqAstBinaryOp(ALeqAstBinaryOp node) {
-		print("<=");
 	}
 	
 	@Override
 	public void caseAGtAstBinaryOp(AGtAstBinaryOp node) {
-		print(">");
 	}
 	
 	@Override
 	public void caseAGeqAstBinaryOp(AGeqAstBinaryOp node) {
-		print(">=");
 	}
 	
 	@Override
 	public void caseACaretAstBinaryOp(ACaretAstBinaryOp node) {
-		print("^");
 	}
 	
 	@Override
 	public void caseALshiftAstBinaryOp(ALshiftAstBinaryOp node) {
-		print("<<");
 	}
 	
 	@Override
 	public void caseARshiftAstBinaryOp(ARshiftAstBinaryOp node) {
-		print(">>");
 	}
 	
 	@Override
 	public void caseABitclearAstBinaryOp(ABitclearAstBinaryOp node) {
-		print("&^");
 	}
 	
 	@Override
 	public void caseAOrAstBinaryOp(AOrAstBinaryOp node) {
-		print("||");
 	}
 	
 	@Override
 	public void caseAAndAstBinaryOp(AAndAstBinaryOp node) {
-		print("&&");
 	}
 	
 	@Override
 	public void caseAAddEqAstOpAssign(AAddEqAstOpAssign node) {
-		print("+=");
 	}
 	
 	@Override
 	public void caseASubEqAstOpAssign(ASubEqAstOpAssign node) {
-		print("-=");
 	}
 	
 	@Override
 	public void caseAMulEqAstOpAssign(AMulEqAstOpAssign node) {
-		print("*=");
 	}
 	
 	@Override
 	public void caseADivEqAstOpAssign(ADivEqAstOpAssign node) {
-		print("/=");
 	}
 	
 	@Override
 	public void caseAModEqAstOpAssign(AModEqAstOpAssign node) {
-		print("%=");
 	}
 	
 	@Override
 	public void caseABitorEqAstOpAssign(ABitorEqAstOpAssign node) {
-		print("|=");
 	}
 	
 	@Override
 	public void caseABitandEqAstOpAssign(ABitandEqAstOpAssign node) {
-		print("&=");
 	}
 	
 	@Override
 	public void caseACaretEqAstOpAssign(ACaretEqAstOpAssign node) {
-		print("^=");
 	}
 	
 	@Override
 	public void caseALshiftEqAstOpAssign(ALshiftEqAstOpAssign node) {
-		print("<<=");
 	}
 	
 	@Override
 	public void caseARshiftEqAstOpAssign(ARshiftEqAstOpAssign node) {
-		print(">>=");
 	}
 	
 	@Override
 	public void caseABitclearEqAstOpAssign(ABitclearEqAstOpAssign node) {
-		print("&^=");
 	}
 	
 	@Override
 	public void caseAPlusAstUnaryOp(APlusAstUnaryOp node) {
-		print("+");
 	}
 	
 	@Override
 	public void caseAMinusAstUnaryOp(AMinusAstUnaryOp node) {
-		print("-");
 	}
 	
 	@Override
 	public void caseANotAstUnaryOp(ANotAstUnaryOp node) {
-		print("!");
 	}
 	
 	@Override
 	public void caseACaretAstUnaryOp(ACaretAstUnaryOp node) {
-		print("^");
 	}
 	
 	@Override
 	public void caseAIncPostOp(AIncPostOp node) {
-		print("++");
 	}
 	
 	@Override
 	public void caseADecPostOp(ADecPostOp node) {
-		print("--");
 	}
 	
 	@Override
 	public void caseAAstFallthroughStm(AAstFallthroughStm node) {
-		print("fallthrough");
+	}
+	
+	private String getType(Node n) {
+		if (n instanceof AParenAstExp) {
+			AParenAstExp t = (AParenAstExp)n;
+			return getType(t.getAstExp());
+		}
+		else if (n instanceof AIdAstExp) {
+			AIdAstExp t = (AIdAstExp)n;
+			String id = t.getId().getText().trim();
+			for (Iterator iterator = symbolTable.iterator(); iterator.hasNext();) {
+				HashMap<String, String> hashMap = (HashMap<String, String>) iterator.next();
+				if (hashMap.containsKey(id))
+					return hashMap.get(id);
+			}
+			throw new TypeException("Identifier " + id + " undeclared");
+		}
+		else if (n instanceof ALitAstExp) {
+			ALitAstExp t = (ALitAstExp)n;
+			if (t instanceof AIntAstLiteral) {
+				return "int";
+			} else if (t instanceof AFloatAstLiteral) {
+				return "float64";
+			} else if (t instanceof ARuneAstLiteral) {
+				return "rune";
+			} else if (t instanceof AStringAstLiteral) {
+				return "string";
+			}
+		}
+		else if (n instanceof AUnaryOpAstExp) {
+			AUnaryOpAstExp t = (AUnaryOpAstExp)n;
+			return getType(t.getAstExp());
+		}
+		else if (n instanceof ABinaryOpAstExp) {
+			ABinaryOpAstExp t = (ABinaryOpAstExp)n;
+			//TODO
+		}
+		else if (n instanceof AFuncCallAstExp) {
+			AFuncCallAstExp t = (AFuncCallAstExp)n;
+			String fname = t.getName().toString().trim();
+			for (Iterator iterator = symbolTable.iterator(); iterator.hasNext();) {
+				HashMap<String, String> hashMap = (HashMap<String, String>) iterator.next();
+				if (hashMap.containsKey(fname))
+					return hashMap.get(fname);
+			}
+			throw TypeException("Function " + fname + " undeclared");
+		}
+		else if (n instanceof AAppendAstExp) {
+			AAppendAstExp t = (AAppendAstExp)n;
+			return getType(t.getAstExp());
+		}
 	}
 }
