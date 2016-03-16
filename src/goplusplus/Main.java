@@ -14,8 +14,8 @@ public class Main {
 				/* ----------------- */
 				/* Scanner and Parser */
 				/* ----------------- */
-				System.out.println("Scanner ...");
-				System.out.println("Parser ...");
+//				System.out.println("Scanner ...");
+//				System.out.println("Parser ...");
 				/* Form our AST */
 				GoLexer lexer = new GoLexer (new PushbackReader(
 						new FileReader(args[0]), 1024));
@@ -25,7 +25,7 @@ public class Main {
 //				/* Get our Interpreter going. */
 //				Interpreter interp = new Interpreter();
 //				ast.apply(interp);
-				System.out.println("VALID\n");
+//				System.out.println("VALID\n");
 				
 				/* ---------------- */
 				/* filename extract */
@@ -35,16 +35,17 @@ public class Main {
 				/* -------------- */
 				/* Pretty Printer */
 				/* -------------- */
-				System.out.println("Pretty Printer ...");
+//				System.out.println("Pretty Printer ...");
 				/* Pretty Print the AST */
 				String pathAST = filenameNoExt + ".pretty.go";
 				PrettyPrinter.print(ast, pathAST);
-				System.out.println("DONE\n");
+//				System.out.println("DONE\n");
 				
 				/* ------------ */
 				/* Type Checker */
 				/* ------------ */
-//				System.out.println("Type Checker ...");
+				System.out.println("Type Checker ...");
+				Typechecker.check(ast);
 //				String pathSymbol = filename + ".symbol";
 //				File fileSymbol = new File(pathSymbol);
 //				fileSymbol.createNewFile();
@@ -53,7 +54,7 @@ public class Main {
 //				symbolTable = SymbolTypeChecker.print(ast, writerSymbol);
 //				writerSymbol.flush();
 //				writerSymbol.close();
-//				System.out.println("VALID\n");
+				System.out.println("VALID\n");
 				
 				/* ---------------- */
 				/* C Code Generator */
