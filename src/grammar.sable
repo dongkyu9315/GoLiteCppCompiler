@@ -71,7 +71,7 @@ Tokens
 	print		= 'print';
 	println		= 'println';
 	append		= 'append';
-
+	bool_lit	= 'true' | 'false';
 /*Operators*/
 	add			= '+';
 	sub			= '-';
@@ -465,6 +465,8 @@ Productions
 			{-> New ast_literal.rune(rune_lit)}
 	|	{prod_string} 	string_lit
 			{-> New ast_literal.string(string_lit)}
+	|	{prod_bool}		bool_lit
+			{-> New ast_literal.bool(bool_lit)}
 	;
 
 
@@ -559,6 +561,7 @@ Abstract Syntax Tree
 	|	{float} 	float_lit
 	|	{rune}		rune_lit
 	|	{string}	string_lit
+	|	{bool}		bool_lit
 	;
 
 	ast_binary_op =
