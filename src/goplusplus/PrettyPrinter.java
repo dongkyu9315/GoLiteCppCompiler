@@ -314,7 +314,7 @@ public class PrettyPrinter extends DepthFirstAdapter{
 	@Override
 	public void caseAIncDecAstStm(AIncDecAstStm node) {
 		node.getAstExp().apply(this);
-		node.getPostOp().apply(this);
+		node.getAstPostOp().apply(this);
 	}
 	
 	@Override
@@ -805,12 +805,13 @@ public class PrettyPrinter extends DepthFirstAdapter{
 	}
 	
 	@Override
-	public void caseAIncPostOp(AIncPostOp node) {
+	public void caseAIncAstPostOp(AIncAstPostOp node) {
+		// TODO Auto-generated method stub
 		print("++");
 	}
 	
 	@Override
-	public void caseADecPostOp(ADecPostOp node) {
+	public void caseADecAstPostOp(ADecAstPostOp node) {
 		print("--");
 	}
 	

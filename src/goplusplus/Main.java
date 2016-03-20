@@ -1,6 +1,7 @@
 package goplusplus;
 
 import java.io.*;
+import java.util.HashMap;
 
 import goplusplus.lexer.Lexer;
 import goplusplus.node.Start;
@@ -21,6 +22,11 @@ public class Main {
 						new FileReader(args[0]), 1024));
 				Parser parser = new Parser(lexer);
 				Start ast = parser.parse();
+				
+				Position p = new Position();
+				ast.apply(p);
+				Weeder wd = new Weeder(p);
+				ast.apply(wd);
 
 //				/* Get our Interpreter going. */
 //				Interpreter interp = new Interpreter();
@@ -44,16 +50,18 @@ public class Main {
 				/* ------------ */
 				/* Type Checker */
 				/* ------------ */
-//				System.out.println("Type Checker ...");
-//				String pathSymbol = filename + ".symbol";
+				System.out.println("Type Checker ...");
+//				String pathSymbol = filenameNoExt + ".symbol";
 //				File fileSymbol = new File(pathSymbol);
 //				fileSymbol.createNewFile();
 //				FileWriter writerSymbol = new FileWriter(fileSymbol, false);
-//				HashMap<String, String> symbolTable = new HashMap<String, String>();
-//				symbolTable = SymbolTypeChecker.print(ast, writerSymbol);
+				HashMap<String, String> symbolTable = new HashMap<String, String>();
+				Typechecker typechecker = new Typechecker();
+				typechecker.check(ast);
+				typechecker.printSymbolTable();
 //				writerSymbol.flush();
 //				writerSymbol.close();
-//				System.out.println("VALID\n");
+				System.out.println("VALID\n");
 				
 				/* ---------------- */
 				/* C Code Generator */
