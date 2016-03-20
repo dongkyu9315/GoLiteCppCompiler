@@ -12,4 +12,5 @@ public abstract class Type {
 	public static RuneType RUNE = new RuneType();
 	public static StringType STRING = new StringType();
 	public static BoolType BOOL = new BoolType();
+	public static VoidType VOID = new VoidType();
 }
