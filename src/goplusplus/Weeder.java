@@ -1,6 +1,7 @@
 package goplusplus;
 
 import java.util.LinkedList;
+import java.util.List;
 
 import goplusplus.analysis.DepthFirstAdapter;
 import goplusplus.node.*;
@@ -18,13 +19,54 @@ public class Weeder extends DepthFirstAdapter {
 	 * 	in assignment check #LHS == #RHS
 	 * 	in assignment check LHS is lvalue
 	 * 	short variable decl, check LHS is id list
-	 * TODO:
-	 * 	check all paths in function(that returns a value) body have return statement
-	 * 	check operands of op-assign & increment/decrement are lvalue
 	 * 	add position/line # info in the exception
-	 *  check string or alias of string CANNOT be used for type casting
+	 * 	check operands of increment/decrement are lvalue
+	 *  check string CANNOT be used for basic type casting
+	 *  check all paths in function(that returns a value) body have return statement
+	 *  
+	 * TODO:
+	 *  check alias of string CANNOT be used for type casting
+	 *  check post statement of for loop must not be short var decl
 	 */
+	public void caseAForAstStm(AForAstStm node){
+		PAstStm post = node.getPost();
+		if(post instanceof AShortDeclAstStm){
+			error("post statement of for loop must not be short var decl", node);
+		}
+	}
 	
+	public void caseAAstFuncDecl(AAstFuncDecl node){
+		if(node.getAstTypeExp()!=null){
+			LinkedList<PAstStm> functionBody = node.getAstStm();
+			if(!checkReturn(functionBody))
+				error("missing return statement in function body",node);
+		}
+	}
+	
+	private boolean checkReturn(List<PAstStm> stms){
+		for(PAstStm stm : stms){
+			if(stm instanceof AReturnAstStm)
+				return true;
+			if(stm instanceof ALongifAstStm){
+				LinkedList<PAstStm> ifStms = ((ALongifAstStm) stm).getIfStms();
+				LinkedList<PAstStm> elseStms = ((ALongifAstStm) stm).getElseStms();
+				if(checkReturn(ifStms) && checkReturn(elseStms))
+					return true;
+			}
+		}
+		return false;
+	}
+	
+	
+	public void caseABasicCastAstExp(ABasicCastAstExp node){
+		if(node.getBasicTypes().getText().toLowerCase().equals("string"))
+			error("cannot use string type for casting", node);
+	}
+	
+	public void caseAIncDecAstStm(AIncDecAstStm node){
+		PAstExp exp = node.getAstExp();
+		checkIsLvalue(exp);
+	}
 	
 	public void caseAShortDeclAstStm(AShortDeclAstStm node) {
 		LinkedList<PAstExp> lvals = node.getIds();
