@@ -1,0 +1,57 @@
+                               ━━━━━━━━━
+                                TEAM 06
+                               ━━━━━━━━━
+
+
+Members
+═══════
+
+  • Hai Tong Yang 260453583
+  • Shaokun Deng 260638592
+  • Dong Kyu Kim 260531174
+
+
+Q1
+══
+
+  • Total: 7/10
+    • All three programs are syntactically valid
+    • The programs don't are a little too comp202-esque to be considered
+      to compute something useful (-3)
+
+
+Q2
+══
+
+  • Total: 24.8/30
+    • Valid programs: 12.8/16
+      • Recognized as valid: 216/269
+      • Recognized as invalid: 43/269
+      • Null pointer exceptions: 10/269
+    • Invalid programs: 8/10
+      • Recognized as invalid: 301/378
+    • Good error messages: 4/4
+      • Contains error position information (line + column)
+      • Contains information on the nature of the error
+
+
+Q3
+══
+
+  • Total: 8/10
+    • The paragraph on type expressions ends abruptly; did you forget to
+      finish it?
+    • I would have liked to know who worked on the scanner, the parser,
+      the AST, etc.  Even just a rough idea.
+    • You did not explain your choice of Java and SableCC
+
+
+Comments
+════════
+
+  • Before submitting, make sure to disable the debugging print
+    statements (e.g. "Scanning…", "Parsing…") as those make it harder to
+    automate counting how many programs you compiler successfully
+    processed.
+  • For the invalid programs, I removed the ones containing the strings
+    "weed", "blank", "continue" and "break".
