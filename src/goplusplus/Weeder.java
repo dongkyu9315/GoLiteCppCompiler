@@ -1,5 +1,6 @@
 package goplusplus;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -8,6 +9,7 @@ import goplusplus.node.*;
 
 public class Weeder extends DepthFirstAdapter {
 	private Position pos;
+	private HashSet<String> aliasOfStringType = new HashSet<>();
 	
 	public Weeder(Position p){
 		pos = p;
@@ -23,24 +25,57 @@ public class Weeder extends DepthFirstAdapter {
 	 * 	check operands of increment/decrement are lvalue
 	 *  check string CANNOT be used for basic type casting
 	 *  check all paths in function(that returns a value) body have return statement
+	 *  check post statement of for loop must not be short var decl
 	 *  
 	 * TODO:
 	 *  check alias of string CANNOT be used for type casting
-	 *  check post statement of for loop must not be short var decl
+	 *  
 	 */
-	public void caseAForAstStm(AForAstStm node){
+	
+	public void inAFuncCallAstExp(AFuncCallAstExp node){
+		PAstExp funcName = node.getName();
+		if(funcName instanceof AIdAstExp){
+			String name = ((AIdAstExp) funcName).getId().getText();
+			if(this.aliasOfStringType.contains(name))
+				error("alias of string cannot be used for type casting", node);
+		}
+	}
+	
+	public void inAAstTypeDecl(AAstTypeDecl node){
+		PAstTypeExp typeExp = node.getAstTypeExp();
+		// store all alias of string for later lookup
+		if(typeExp instanceof ABasicAstTypeExp){
+			if(((ABasicAstTypeExp) typeExp).getBasicTypes().getText().toLowerCase().equals("string"))
+				for(TId id : node.getId())
+					this.aliasOfStringType.add(id.getText());
+		}
+		else if(typeExp instanceof AAliasAstTypeExp){
+			String alias = ((AAliasAstTypeExp) typeExp).getId().getText();
+			if(this.aliasOfStringType.contains(alias)){
+				for(TId id : node.getId())
+					this.aliasOfStringType.add(id.getText());
+			}
+		}
+	}
+	
+	
+	
+	public void inAForAstStm(AForAstStm node) {
+		System.out.print("hahah");
 		PAstStm post = node.getPost();
 		if(post instanceof AShortDeclAstStm){
 			error("post statement of for loop must not be short var decl", node);
 		}
 	}
 	
-	public void caseAAstFuncDecl(AAstFuncDecl node){
+	
+	public void inAAstFuncDecl(AAstFuncDecl node){
 		if(node.getAstTypeExp()!=null){
 			LinkedList<PAstStm> functionBody = node.getAstStm();
 			if(!checkReturn(functionBody))
 				error("missing return statement in function body",node);
 		}
+		
 	}
 	
 	private boolean checkReturn(List<PAstStm> stms){
@@ -121,7 +156,7 @@ public class Weeder extends DepthFirstAdapter {
 		error("continue keyword not used inside enclosing for loop", node);
 	}
 	
-	public void caseASwitchAstStm(ASwitchAstStm node){
+	public void inASwitchAstStm(ASwitchAstStm node){
 		LinkedList<PAstSwitchStm> astSwitchStm = node.getAstSwitchStm();
 		boolean hasDefault = false;
 		
