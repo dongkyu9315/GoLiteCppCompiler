@@ -19,14 +19,15 @@ public class StructType extends Type{
 	
 	@Override
 	public String toString() {
-		String s = "{";
-		for (Iterator iterator = elementTypes.iterator(); iterator.hasNext();) {
-			Type type = (Type) iterator.next();
-			s += type;
-			if (iterator.hasNext())
-				s += ", ";
-		}
-		s += "}";
-		return s;
+//		String s = "{";
+//		for (Iterator iterator = elementTypes.iterator(); iterator.hasNext();) {
+//			Type type = (Type) iterator.next();
+//			s += type;
+//			if (iterator.hasNext())
+//				s += ", ";
+//		}
+//		s += "}";
+//		return s;
+		return "struct";
 	}
 }
