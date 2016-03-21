@@ -1,5 +1,6 @@
 package goplusplus;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Iterator;
@@ -13,15 +14,15 @@ public class Typechecker extends DepthFirstAdapter{
 	
 	public Typechecker() {
 		symbolTable = new LinkedList<HashMap<String, Type> >();
+		symbolTable.addFirst(new HashMap<String, Type>());
 	}
 	
 	public void check(Node node) {
-		node.apply(new Typechecker());
+		node.apply(this);
 	}
 	
 	// print the symbol table to the console
 	public void printSymbolTable() {
-//		System.out.println(symbolTable.size());
 		for (int i = 0; i < symbolTable.size(); i++) {
 			HashMap<String, Type> temp = symbolTable.get(i);
 			System.out.println("Layer " + i + ":");
@@ -34,8 +35,6 @@ public class Typechecker extends DepthFirstAdapter{
 	// ast_program		---------------------------------------------------
 	@Override
 	public void caseAAstProgram(AAstProgram node) {
-		HashMap<String, Type> newScope = new HashMap<String, Type>();
-		symbolTable.addFirst(newScope);
 		LinkedList<PAstDecl> decl = node.getDecl();
 		if (!decl.isEmpty()) {
 			for (Iterator<PAstDecl> iterator = decl.iterator(); iterator.hasNext();) {
@@ -245,15 +244,18 @@ public class Typechecker extends DepthFirstAdapter{
 			arrayType.elementType = eleType;
 			arrayType.size = Integer.parseInt(temp.getSize().toString());
 			return arrayType;
-		// TODO: implement the case below
 		} else if (node.getClass().isInstance(new AStructAstTypeExp())) {
-//			AStructAstTypeExp temp = (AStructAstTypeExp) node;
-//			LinkedList<PAstStructField> structList = temp.getAstStructField();
-//			for (Iterator iterator = structList.iterator(); iterator.hasNext();) {
-//				AAstStructField field = (AAstStructField) iterator.next();
-//				field.apply(this);
-//			}
-//			return "struct";
+			AStructAstTypeExp temp = (AStructAstTypeExp) node;
+			LinkedList<PAstStructField> structList = temp.getAstStructField();
+			ArrayList<Type> typesList = new ArrayList<Type>();
+			for (Iterator<PAstStructField> iterator = structList.iterator(); iterator.hasNext();) {
+				AAstStructField field = (AAstStructField) iterator.next();
+				Type eleType = forPAstTypeExp(field.getAstTypeExp());
+				typesList.add(eleType);
+			}
+			StructType structType = new StructType();
+			structType.elementTypes = typesList;
+			return structType;
 		} else if (node.getClass().isInstance(new AAliasAstTypeExp())) {
 			AAliasAstTypeExp temp = (AAliasAstTypeExp) node;
 			for (int i = 0; i < symbolTable.size(); i++) {
@@ -451,6 +453,20 @@ public class Typechecker extends DepthFirstAdapter{
 	// TODO: implement the method below
 //	@Override
 //	public void caseAIncDecAstStm(AIncDecAstStm node) {
+//		String temp = forPAstPostOp(node.getAstPostOp());
+//		if (temp.equals("++")) {
+//			
+//		} else if (temp.equals("--")) {
+//			
+//		} else {
+//			printSymbolTable();
+//			Position pos = new Position();
+//			pos.defaultCase(node);
+//			String errorMsg = "Declaration Error at line " + pos.getLine(node);
+//			throw new TypeException(errorMsg);
+//		}
+//		
+//		
 //		node.getAstExp().apply(this);
 //		node.getAstPostOp().apply(this);
 //	}
