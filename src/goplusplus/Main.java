@@ -55,7 +55,6 @@ public class Main {
 //				File fileSymbol = new File(pathSymbol);
 //				fileSymbol.createNewFile();
 //				FileWriter writerSymbol = new FileWriter(fileSymbol, false);
-				HashMap<String, String> symbolTable = new HashMap<String, String>();
 				Typechecker typechecker = new Typechecker();
 				typechecker.check(ast);
 				typechecker.printSymbolTable();
