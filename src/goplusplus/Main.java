@@ -51,14 +51,11 @@ public class Main {
 				/* Type Checker */
 				/* ------------ */
 				System.out.println("Type Checker ...");
-				Typechecker checker = new Typechecker();
-				checker.check(ast);
 //				String pathSymbol = filename + ".symbol";
 //				String pathSymbol = filenameNoExt + ".symbol";
 //				File fileSymbol = new File(pathSymbol);
 //				fileSymbol.createNewFile();
 //				FileWriter writerSymbol = new FileWriter(fileSymbol, false);
-				HashMap<String, String> symbolTable = new HashMap<String, String>();
 				Typechecker typechecker = new Typechecker();
 				typechecker.check(ast);
 				typechecker.printSymbolTable();
