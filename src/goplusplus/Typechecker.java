@@ -299,7 +299,8 @@ public class Typechecker extends DepthFirstAdapter{
 				typesList.add(eleType);
 			}
 			StructType structType = new StructType();
-			structType.elementTypes = typesList;
+			//TODO
+//			structType.elementTypes = typesList;
 			return structType;
 		} else if (node.getClass().isInstance(new AAliasAstTypeExp())) {
 			AAliasAstTypeExp temp = (AAliasAstTypeExp) node;

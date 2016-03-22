@@ -6,12 +6,6 @@ public class SliceType extends Type{
 	public boolean assign(Type t) {
 		return false;
 	}
-
-	@Override
-	public boolean compare(Type t) {
-		// TODO Auto-generated method stub
-		return false;
-	}
 	
 	public Type elementType;
 	
