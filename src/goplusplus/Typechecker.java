@@ -206,9 +206,6 @@ public class Typechecker extends DepthFirstAdapter{
 		
 		funcType.returnType = returnType;
 		
-		HashMap<String, Type> newScope = new HashMap<String, Type>();
-		symbolTable.addFirst(newScope);
-		
 		LinkedList<PAstFuncParam> params = node.getAstFuncParam();
 		ArrayList<Type> paramTypes = new ArrayList<Type>();
 		for (Iterator<PAstFuncParam> iterator = params.iterator(); iterator.hasNext();) {
@@ -221,6 +218,14 @@ public class Typechecker extends DepthFirstAdapter{
 		funcType.paramType = paramTypes;
 		
 		symbolTable.getFirst().put(node.getId().getText().trim(), funcType);
+		
+		HashMap<String, Type> newScope = new HashMap<String, Type>();
+		symbolTable.addFirst(newScope);
+		
+		for (Iterator<PAstFuncParam> iterator = params.iterator(); iterator.hasNext();) {
+			PAstFuncParam param = (PAstFuncParam) iterator.next();
+			param.apply(this);
+		}
 		
 		LinkedList<PAstStm> stmts = node.getAstStm();
 		for (Iterator<PAstStm> iterator = stmts.iterator(); iterator.hasNext();) {
@@ -442,7 +447,7 @@ public class Typechecker extends DepthFirstAdapter{
 		for (int i = 0; i < leftList.size(); i++) {
 			Type leftType = forPAstExp(leftList.get(i));
 			Type rightType = forPAstExp(rightList.get(i));
-			if (!leftType.is(rightType)) {
+			if (!leftType.assign(rightType)) {
 				printSymbolTable();
 				String errorMsg = "Assignment Error at line " + pos.getLine(temp);
 				throw new TypeException(errorMsg);
@@ -674,15 +679,16 @@ public class Typechecker extends DepthFirstAdapter{
 	public boolean typeCheckPAstExp(PAstExp node) {
 		if (node.getClass().isInstance(new AParenAstExp())) {
 			AParenAstExp temp = (AParenAstExp) node;
-			typeCheckPAstExp(temp);
+			return typeCheckPAstExp(temp.getAstExp());
 		} else if (node.getClass().isInstance(new AIdAstExp())) {
 			AIdAstExp temp = (AIdAstExp) node;
-			for (int i = 0; i < symbolTable.size(); i++) {
-				if (symbolTable.get(i).containsKey(temp.getId().getText().trim())) {
-					return true;
-				}
-			}
+			// just to check that forPAstExp(temp) does not give an error msg
+			forPAstExp(temp);
+			return true;
 		} else if (node.getClass().isInstance(new ALitAstExp())) {
+			ALitAstExp temp = (ALitAstExp) node;
+			// just to check that forPAstExp(temp) does not give an error msg
+			forPAstExp(temp);
 			return true;
 		} else if (node.getClass().isInstance(new AUnaryOpAstExp())) {
 			AUnaryOpAstExp temp = (AUnaryOpAstExp) node;
@@ -694,27 +700,31 @@ public class Typechecker extends DepthFirstAdapter{
 			// just to check that forPAstExp(temp) does not give an error msg
 			forPAstExp(temp);
 			return true;
-		// TODO: implement the methods below
 		} else if (node.getClass().isInstance(new AFuncCallAstExp())) {
-//			AFuncCallAstExp temp = (AFuncCallAstExp) node;
-//			
-//			HashMap<String, Type> firstMap = symbolTable.getFirst();
-//			if (firstMap.containsKey(temp.getName()))
-//			LinkedList funcParam = ;
-//			
-//			LinkedList<PAstExp> argList = temp.getArgs();
-//			for (Iterator<PAstExp> iterator = argList.iterator(); iterator.hasNext();) {
-//				Type argType = forPAstExp(iterator.next());
-//				
-//			}
+			AFuncCallAstExp temp = (AFuncCallAstExp) node;
+			// just to check that forPAstExp(temp) does not give an error msg
+			forPAstExp(temp);
+			return true;
 		} else if (node.getClass().isInstance(new AAppendAstExp())) {
-			
+			AAppendAstExp temp = (AAppendAstExp) node;
+			// just to check that forPAstExp(temp) does not give an error msg
+			forPAstExp(temp);
+			return true;
 		} else if (node.getClass().isInstance(new ABasicCastAstExp())) {
-			
+			ABasicCastAstExp temp = (ABasicCastAstExp) node;
+			// just to check that forPAstExp(temp) does not give an error msg
+			forPAstExp(temp);
+			return true;
 		} else if (node.getClass().isInstance(new AArrayAccessAstExp())) {
-			
+			AArrayAccessAstExp temp = (AArrayAccessAstExp) node;
+			// just to check that forPAstExp(temp) does not give an error msg
+			forPAstExp(temp);
+			return true;
 		} else if (node.getClass().isInstance(new AFieldAccessAstExp())) {
-			
+			AFieldAccessAstExp temp = (AFieldAccessAstExp) node;
+			// just to check that forPAstExp(temp) does not give an error msg
+			forPAstExp(temp);
+			return true;
 		}
 		return false;
 	}
@@ -894,15 +904,15 @@ public class Typechecker extends DepthFirstAdapter{
 				throw new TypeException(errorMsg);
 			}
 		} else if (node.getClass().isInstance(new AFuncCallAstExp())) {
-			AFuncCallAstExp temp = (AFuncCallAstExp)node;
+			AFuncCallAstExp temp = (AFuncCallAstExp) node;
 			
 			Type type = forPAstExp(temp.getName());
 			if (type.is(Type.FUNC)) {
-				FunctionType funcType = (FunctionType)type;
+				FunctionType funcType = (FunctionType) type;
 				LinkedList<PAstExp> args = temp.getArgs();
 				ArrayList<Type> params = funcType.paramType;
 				boolean match = true;
-				if(args.size() == params.size()) {
+				if (args.size() == params.size()) {
 					Iterator<PAstExp> it = args.iterator();
 					for (int i = 0; i < params.size() && it.hasNext(); i++) {
 						PAstExp exp = it.next();
@@ -926,9 +936,9 @@ public class Typechecker extends DepthFirstAdapter{
 			String errorMsg = "Type error at line " + pos.getLine(temp) + " : Not a function";
 			throw new TypeException(errorMsg);
 		} else if (node.getClass().isInstance(new AAppendAstExp())) {
-			AAppendAstExp temp = (AAppendAstExp)node;
+			AAppendAstExp temp = (AAppendAstExp) node;
 			String id = temp.getId().getText().trim();
-			for (Iterator iterator = symbolTable.iterator(); iterator.hasNext();) {
+			for (Iterator<HashMap<String, Type>> iterator = symbolTable.iterator(); iterator.hasNext();) {
 				HashMap<String, Type> table = (HashMap<String, Type>) iterator.next();
 				if (table.containsKey(id)) {
 					return forPAstExp(temp.getAstExp());
@@ -939,11 +949,12 @@ public class Typechecker extends DepthFirstAdapter{
 			String errorMsg = "Type error at line " + temp.getId().getLine() + " : Identifier " + id + " undeclared";
 			throw new TypeException(errorMsg);
 		} else if (node.getClass().isInstance(new ABasicCastAstExp())) {
-			ABasicCastAstExp temp = (ABasicCastAstExp)node;
+			ABasicCastAstExp temp = (ABasicCastAstExp) node;
 			Type basic = forPAstTypeExp(new ABasicAstTypeExp(temp.getBasicTypes()));
 			Type other = forPAstExp(temp.getAstExp());
 			if (basic.is(Type.INT)) {
-				//TODO find out casting rules
+				
+			//TODO find out casting rules
 			} else if (basic.is(Type.FLOAT64)) {
 				
 			} else if (basic.is(Type.BOOL)) {
@@ -957,7 +968,7 @@ public class Typechecker extends DepthFirstAdapter{
 				String errorMsg = "Type error at line " + temp.getBasicTypes().getLine() + " : Type " + other + " cannot be casted to " + basic;
 				throw new TypeException(errorMsg);
 			}
-			//TODO finish the following cases
+		//TODO finish the following cases
 		} else if (node.getClass().isInstance(new AArrayAccessAstExp())) {
 			
 		} else if (node.getClass().isInstance(new AFieldAccessAstExp())) {
