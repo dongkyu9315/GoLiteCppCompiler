@@ -14,10 +14,12 @@ import type.*;
 
 public class Typechecker extends DepthFirstAdapter{
 	private LinkedList<HashMap<String, Type>> symbolTable;
+	private Position pos;
 	
-	public Typechecker() {
+	public Typechecker(Position p) {
 		symbolTable = new LinkedList<HashMap<String, Type> >();
 		symbolTable.addFirst(new HashMap<String, Type>());
+		pos = p;
 	}
 	
 	public void check(Node node) {
@@ -442,8 +444,6 @@ public class Typechecker extends DepthFirstAdapter{
 			Type rightType = forPAstExp(rightList.get(i));
 			if (!leftType.is(rightType)) {
 				printSymbolTable();
-				Position pos = new Position();
-				pos.defaultCase(temp);
 				String errorMsg = "Assignment Error at line " + pos.getLine(temp);
 				throw new TypeException(errorMsg);
 			}
@@ -483,8 +483,6 @@ public class Typechecker extends DepthFirstAdapter{
 			Type rightType = forPAstExp(rightList.get(i));
 			if (!leftType.is(rightType)) {
 				printSymbolTable();
-				Position pos = new Position();
-				pos.defaultCase(temp);
 				String errorMsg = "Declaration Error at line " + pos.getLine(temp);
 				throw new TypeException(errorMsg);
 			}
@@ -507,15 +505,11 @@ public class Typechecker extends DepthFirstAdapter{
 			Type t = forPAstExp(node.getAstExp());
 			if (!t.is(Type.INT)) {
 				printSymbolTable();
-				Position pos = new Position();
-				pos.defaultCase(node);
 				String errorMsg = "Post Increment/Decrement Error at line " + pos.getLine(node);
 				throw new TypeException(errorMsg);
 			}
 		} else {
 			printSymbolTable();
-			Position pos = new Position();
-			pos.defaultCase(node);
 			String errorMsg = "Post Increment/Decrement Error at line " + pos.getLine(node);
 			throw new TypeException(errorMsg);
 		}
@@ -528,8 +522,6 @@ public class Typechecker extends DepthFirstAdapter{
 			PAstExp exp = (PAstExp) iterator.next();
 			if (!typeCheckPAstExp(exp)) {
 				printSymbolTable();
-				Position pos = new Position();
-				pos.defaultCase(exp);
 				String errorMsg = "Print Error at line " + pos.getLine(exp);
 				throw new TypeException(errorMsg);
 			}
@@ -543,8 +535,6 @@ public class Typechecker extends DepthFirstAdapter{
 			PAstExp exp = (PAstExp) iterator.next();
 			if (!typeCheckPAstExp(exp)) {
 				printSymbolTable();
-				Position pos = new Position();
-				pos.defaultCase(exp);
 				String errorMsg = "Println Error at line " + pos.getLine(exp);
 				throw new TypeException(errorMsg);
 			}
@@ -556,8 +546,6 @@ public class Typechecker extends DepthFirstAdapter{
 		if (node.getAstExp() != null) {
 			if (!typeCheckPAstExp(node.getAstExp())) {
 				printSymbolTable();
-				Position pos = new Position();
-				pos.defaultCase(node.getAstExp());
 				String errorMsg = "Return Error at line " + pos.getLine(node.getAstExp());
 				throw new TypeException(errorMsg);
 			}
@@ -573,8 +561,6 @@ public class Typechecker extends DepthFirstAdapter{
 		Type condType = forPAstExp(node.getCondition());
 		if (!condType.is(Type.BOOL)) {
 			printSymbolTable();
-			Position pos = new Position();
-			pos.defaultCase(node.getCondition());
 			String errorMsg = "If loop Condition Error at line " + pos.getLine(node.getCondition());
 			throw new TypeException(errorMsg);
 		}
@@ -595,8 +581,6 @@ public class Typechecker extends DepthFirstAdapter{
 		Type condType = forPAstExp(node.getCondition());
 		if (!condType.is(Type.BOOL)) {
 			printSymbolTable();
-			Position pos = new Position();
-			pos.defaultCase(node.getCondition());
 			String errorMsg = "If loop Condition Error at line " + pos.getLine(node.getCondition());
 			throw new TypeException(errorMsg);
 		}
@@ -645,8 +629,6 @@ public class Typechecker extends DepthFirstAdapter{
 			Type condType = forPAstExp(node.getCondition());
 			if (!condType.is(Type.BOOL)) {
 				printSymbolTable();
-				Position pos = new Position();
-				pos.defaultCase(node.getCondition());
 				String errorMsg = "For loop Condition Error at line " + pos.getLine(node.getCondition());
 				throw new TypeException(errorMsg);
 			}
@@ -763,8 +745,6 @@ public class Typechecker extends DepthFirstAdapter{
 				Type check = forPAstExp(temp.getAstExp());
 				if (!(check.is(Type.INT) || check.is(Type.FLOAT64) || check.is(Type.RUNE))) {
 					printSymbolTable();
-					Position pos = new Position();
-					pos.defaultCase(temp);
 					System.out.println("In forPAstExp");
 					String errorMsg = "Unary Operator Error at line " + pos.getLine(temp);
 					throw new TypeException(errorMsg);
@@ -774,8 +754,6 @@ public class Typechecker extends DepthFirstAdapter{
 				Type check = forPAstExp(temp.getAstExp());
 				if (!(check.is(Type.INT) || check.is(Type.FLOAT64) || check.is(Type.RUNE))) {
 					printSymbolTable();
-					Position pos = new Position();
-					pos.defaultCase(temp);
 					System.out.println("In forPAstExp");
 					String errorMsg = "Unary Operator Error at line " + pos.getLine(temp);
 					throw new TypeException(errorMsg);
@@ -785,8 +763,6 @@ public class Typechecker extends DepthFirstAdapter{
 				Type check = forPAstExp(temp.getAstExp());
 				if (!(check.is(Type.BOOL))) {
 					printSymbolTable();
-					Position pos = new Position();
-					pos.defaultCase(temp);
 					System.out.println("In forPAstExp");
 					String errorMsg = "Unary Operator Error at line " + pos.getLine(temp);
 					throw new TypeException(errorMsg);
@@ -796,8 +772,6 @@ public class Typechecker extends DepthFirstAdapter{
 				Type check = forPAstExp(temp.getAstExp());
 				if (!(check.is(Type.INT) || check.is(Type.RUNE))) {
 					printSymbolTable();
-					Position pos = new Position();
-					pos.defaultCase(temp);
 					System.out.println("In forPAstExp");
 					String errorMsg = "Unary Operator Error at line " + pos.getLine(temp);
 					throw new TypeException(errorMsg);
@@ -805,8 +779,6 @@ public class Typechecker extends DepthFirstAdapter{
 				return check; 
 			} else {
 				printSymbolTable();
-				Position pos = new Position();
-				pos.defaultCase(temp);
 				System.out.println("In forPAstExp");
 				String errorMsg = "Unary Operator Error at line " + pos.getLine(temp);
 				throw new TypeException(errorMsg);
@@ -824,8 +796,6 @@ public class Typechecker extends DepthFirstAdapter{
 					return Type.BOOL;
 				}
 				printSymbolTable();
-				Position pos = new Position();
-				pos.defaultCase(temp);
 				System.out.println("In forPAstExp");
 				String errorMsg = "Binary Operator Error at line " + pos.getLine(temp);
 				throw new TypeException(errorMsg);
@@ -846,8 +816,6 @@ public class Typechecker extends DepthFirstAdapter{
 					return Type.STRING;
 				}
 				printSymbolTable();
-				Position pos = new Position();
-				pos.defaultCase(temp);
 				System.out.println("In forPAstExp");
 				String errorMsg = "Binary Operator Error at line " + pos.getLine(temp);
 				throw new TypeException(errorMsg);
@@ -876,8 +844,6 @@ public class Typechecker extends DepthFirstAdapter{
 					return leftType;
 				}
 				printSymbolTable();
-				Position pos = new Position();
-				pos.defaultCase(temp);
 				System.out.println("In forPAstExp");
 				String errorMsg = "Binary Operator Error at line " + pos.getLine(temp);
 				throw new TypeException(errorMsg);
@@ -918,15 +884,11 @@ public class Typechecker extends DepthFirstAdapter{
 					return leftType;
 				}
 				printSymbolTable();
-				Position pos = new Position();
-				pos.defaultCase(temp);
 				System.out.println("In forPAstExp");
 				String errorMsg = "Binary Operator Error at line " + pos.getLine(temp);
 				throw new TypeException(errorMsg);
 			} else {
 				printSymbolTable();
-				Position pos = new Position();
-				pos.defaultCase(temp);
 				System.out.println("In forPAstExp");
 				String errorMsg = "Binary Operator Error at line " + pos.getLine(temp);
 				throw new TypeException(errorMsg);
@@ -955,15 +917,11 @@ public class Typechecker extends DepthFirstAdapter{
 					}
 				}
 				printSymbolTable();
-				Position pos = new Position();
-				pos.defaultCase(temp);
 				System.out.println("In forPAstExp");
 				String errorMsg = "Type error at line " + pos.getLine(temp) + " : Function parameters do not match";
 				throw new TypeException(errorMsg);
 			}
 			printSymbolTable();
-			Position pos = new Position();
-			pos.defaultCase(temp);
 			System.out.println("In forPAstExp");
 			String errorMsg = "Type error at line " + pos.getLine(temp) + " : Not a function";
 			throw new TypeException(errorMsg);
