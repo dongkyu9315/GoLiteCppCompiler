@@ -3,6 +3,9 @@ package goplusplus;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+
+import com.sun.org.apache.xpath.internal.functions.Function;
+
 import java.util.Iterator;
 
 import goplusplus.analysis.DepthFirstAdapter;
@@ -928,13 +931,75 @@ public class Typechecker extends DepthFirstAdapter{
 				String errorMsg = "Binary Operator Error at line " + pos.getLine(temp);
 				throw new TypeException(errorMsg);
 			}
-		// TODO: implement the cases below
 		} else if (node.getClass().isInstance(new AFuncCallAstExp())) {
+			AFuncCallAstExp temp = (AFuncCallAstExp)node;
 			
+			Type type = forPAstExp(temp.getName());
+			if (type.is(Type.FUNC)) {
+				FunctionType funcType = (FunctionType)type;
+				LinkedList<PAstExp> args = temp.getArgs();
+				ArrayList<Type> params = funcType.paramType;
+				boolean match = true;
+				if(args.size() == params.size()) {
+					Iterator<PAstExp> it = args.iterator();
+					for (int i = 0; i < params.size() && it.hasNext(); i++) {
+						PAstExp exp = it.next();
+						Type argType = forPAstExp(exp);
+						if (!params.get(i).assign(argType))	{
+							match = false;
+							break;
+						}
+					}
+					if (match) {
+						return funcType.returnType;
+					}
+				}
+				printSymbolTable();
+				Position pos = new Position();
+				pos.defaultCase(temp);
+				System.out.println("In forPAstExp");
+				String errorMsg = "Type error at line " + pos.getLine(temp) + " : Function parameters do not match";
+				throw new TypeException(errorMsg);
+			}
+			printSymbolTable();
+			Position pos = new Position();
+			pos.defaultCase(temp);
+			System.out.println("In forPAstExp");
+			String errorMsg = "Type error at line " + pos.getLine(temp) + " : Not a function";
+			throw new TypeException(errorMsg);
 		} else if (node.getClass().isInstance(new AAppendAstExp())) {
+			AAppendAstExp temp = (AAppendAstExp)node;
+			String id = temp.getId().getText().trim();
+			for (Iterator iterator = symbolTable.iterator(); iterator.hasNext();) {
+				HashMap<String, Type> table = (HashMap<String, Type>) iterator.next();
+				if (table.containsKey(id)) {
+					return forPAstExp(temp.getAstExp());
+				}
+			}
 			
+			System.out.println("In forPAstExp");
+			String errorMsg = "Type error at line " + temp.getId().getLine() + " : Identifier " + id + " undeclared";
+			throw new TypeException(errorMsg);
 		} else if (node.getClass().isInstance(new ABasicCastAstExp())) {
-			
+			ABasicCastAstExp temp = (ABasicCastAstExp)node;
+			Type basic = forPAstTypeExp(new ABasicAstTypeExp(temp.getBasicTypes()));
+			Type other = forPAstExp(temp.getAstExp());
+			if (basic.is(Type.INT)) {
+				//TODO find out casting rules
+			} else if (basic.is(Type.FLOAT64)) {
+				
+			} else if (basic.is(Type.BOOL)) {
+				
+			} else if (basic.is(Type.RUNE)) {
+				
+			} else if (basic.is(Type.STRING)) {
+				
+			} else {
+				System.out.println("In forPAstExp");
+				String errorMsg = "Type error at line " + temp.getBasicTypes().getLine() + " : Type " + other + " cannot be casted to " + basic;
+				throw new TypeException(errorMsg);
+			}
+			//TODO finish the following cases
 		} else if (node.getClass().isInstance(new AArrayAccessAstExp())) {
 			
 		} else if (node.getClass().isInstance(new AFieldAccessAstExp())) {

@@ -13,4 +13,5 @@ public abstract class Type {
 	public static StringType STRING = new StringType();
 	public static BoolType BOOL = new BoolType();
 	public static VoidType VOID = new VoidType();
+	public static FunctionType FUNC = new FunctionType();
 }
