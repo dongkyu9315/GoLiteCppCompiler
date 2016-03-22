@@ -226,6 +226,21 @@ public class Typechecker extends DepthFirstAdapter{
 		LinkedList<PAstStm> stmts = node.getAstStm();
 		for (Iterator<PAstStm> iterator = stmts.iterator(); iterator.hasNext();) {
 			PAstStm stm = (PAstStm) iterator.next();
+			if (stm.getClass().isInstance(new AReturnAstStm())) {
+				System.out.println("asdf");
+				AReturnAstStm returnStm = (AReturnAstStm) stm;
+				Type reType;
+				if (returnStm.getAstExp() != null) {
+					reType = forPAstExp(returnStm.getAstExp());
+				} else {
+					reType = Type.VOID;
+				}
+				if (!returnType.assign(reType)) {
+					printSymbolTable();
+					String errorMsg = "Function Return Type Incompatibility Error at line " + node.getId().getLine();
+					throw new TypeException(errorMsg);
+				}
+			}
 			stm.apply(this);
 		}
 		
@@ -292,15 +307,17 @@ public class Typechecker extends DepthFirstAdapter{
 		} else if (node.getClass().isInstance(new AStructAstTypeExp())) {
 			AStructAstTypeExp temp = (AStructAstTypeExp) node;
 			LinkedList<PAstStructField> structList = temp.getAstStructField();
-			ArrayList<Type> typesList = new ArrayList<Type>();
+			HashMap<String, Type> typesList = new HashMap<String, Type>();
 			for (Iterator<PAstStructField> iterator = structList.iterator(); iterator.hasNext();) {
 				AAstStructField field = (AAstStructField) iterator.next();
 				Type eleType = forPAstTypeExp(field.getAstTypeExp());
-				typesList.add(eleType);
+				LinkedList<TId> idList = field.getId();
+				for (Iterator<TId> iter = idList.iterator(); iter.hasNext();) {
+					typesList.put(iter.next().getText().trim(), eleType);
+				}
 			}
 			StructType structType = new StructType();
-			//TODO
-//			structType.elementTypes = typesList;
+			structType.attributes = typesList;
 			return structType;
 		} else if (node.getClass().isInstance(new AAliasAstTypeExp())) {
 			AAliasAstTypeExp temp = (AAliasAstTypeExp) node;
@@ -455,6 +472,8 @@ public class Typechecker extends DepthFirstAdapter{
 		}
 	}
 	
+	
+	// TODO: fix binary op first
 	@Override
 	public void caseAOpAssignAstStm(AOpAssignAstStm node) {
 		TId d = node.getL();
@@ -1058,7 +1077,6 @@ public class Typechecker extends DepthFirstAdapter{
 			throw new TypeException(errorMsg);
 		//TODO finish the following cases
 		} else if (node.getClass().isInstance(new AFieldAccessAstExp())) {
-			AFieldAccessAstExp temp = (AFieldAccessAstExp) node;
 			
 		}
 		return null;
@@ -1179,7 +1197,7 @@ public class Typechecker extends DepthFirstAdapter{
 		} else if (node.getClass().isInstance(new ABitorEqAstOpAssign())) {
 			return "|=";
 		} else if (node.getClass().isInstance(new ABitandEqAstOpAssign())) {
-			return "^=";
+			return "&=";
 		} else if (node.getClass().isInstance(new ACaretEqAstOpAssign())) {
 			return "^=";
 		} else if (node.getClass().isInstance(new ALshiftEqAstOpAssign())) {
