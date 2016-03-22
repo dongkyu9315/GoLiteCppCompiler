@@ -9,14 +9,6 @@ public class BoolType extends Type{
 		
 		return false;
 	}
-
-	@Override
-	public boolean compare(Type t) {
-		if (t instanceof BoolType)
-			return true;
-		
-		return false;
-	}
 	
 	@Override
 	public String toString() {

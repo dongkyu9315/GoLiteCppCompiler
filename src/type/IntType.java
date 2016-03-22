@@ -10,14 +10,6 @@ public class IntType extends Type{
 		
 		return false;
 	}
-
-	@Override
-	public boolean compare(Type t) {
-		if (t instanceof IntType)
-			return true;
-		
-		return false;
-	}
 	
 	public int value;
 	

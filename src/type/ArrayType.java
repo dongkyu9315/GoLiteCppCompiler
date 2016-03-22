@@ -7,11 +7,6 @@ public class ArrayType extends Type {
 		return false;
 	}
 
-	@Override
-	public boolean compare(Type t) {
-		return false;
-	}
-
 	public Type elementType;
 	public int size;
 	

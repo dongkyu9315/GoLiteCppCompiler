@@ -1,7 +1,6 @@
 package type;
 
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.HashMap;
 
 public class StructType extends Type{
 
@@ -10,24 +9,19 @@ public class StructType extends Type{
 		return false;
 	}
 
-	@Override
-	public boolean compare(Type t) {
-		return false;
-	}
-
-	public ArrayList<Type> elementTypes;
+	public HashMap<String, Type> attributes;
 	
 	@Override
 	public String toString() {
-//		String s = "{";
-//		for (Iterator iterator = elementTypes.iterator(); iterator.hasNext();) {
-//			Type type = (Type) iterator.next();
-//			s += type;
-//			if (iterator.hasNext())
-//				s += ", ";
-//		}
-//		s += "}";
-//		return s;
-		return "struct";
+		String s = "{";
+		for (HashMap.Entry<String, Type> entry : attributes.entrySet()) {
+			s += entry.getKey() + " ";
+			s += entry.getValue();
+			s += ", ";
+		}
+		s = s.substring(0, s.length() - 3);
+		s += "}";
+		return s;
+//		return "struct";
 	}
 }
