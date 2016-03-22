@@ -23,8 +23,4 @@ public class BoolType extends Type{
 		return "bool";
 	}
 	
-	@Override
-	public boolean is(Type t) {
-		 return t.getClass().isInstance(this.getClass());
-	}
 }

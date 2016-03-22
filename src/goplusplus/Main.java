@@ -1,9 +1,7 @@
 package goplusplus;
 
 import java.io.*;
-import java.util.HashMap;
 
-import goplusplus.lexer.Lexer;
 import goplusplus.node.Start;
 import goplusplus.parser.Parser;
 //import goplusplus.interpret.Interpreter;
@@ -56,7 +54,7 @@ public class Main {
 //				File fileSymbol = new File(pathSymbol);
 //				fileSymbol.createNewFile();
 //				FileWriter writerSymbol = new FileWriter(fileSymbol, false);
-				Typechecker typechecker = new Typechecker();
+				Typechecker typechecker = new Typechecker(p);
 				typechecker.check(ast);
 				typechecker.printSymbolTable();
 //				writerSymbol.flush();
