@@ -212,7 +212,6 @@ public class Typechecker extends DepthFirstAdapter{
 			PAstFuncParam param = (PAstFuncParam) iterator.next();
 			Type pType = forPAstFuncParam(param);
 			paramTypes.add(pType);
-			param.apply(this);
 		}
 		
 		funcType.paramType = paramTypes;
@@ -291,7 +290,7 @@ public class Typechecker extends DepthFirstAdapter{
 			Type eleType = forPAstTypeExp(temp.getAstTypeExp());
 			ArrayType arrayType = new ArrayType();
 			arrayType.elementType = eleType;
-			arrayType.size = Integer.parseInt(temp.getSize().toString());
+			arrayType.size = Integer.parseInt(temp.getSize().toString().trim());
 			return arrayType;
 		} else if (node.getClass().isInstance(new AStructAstTypeExp())) {
 			AStructAstTypeExp temp = (AStructAstTypeExp) node;
@@ -447,6 +446,9 @@ public class Typechecker extends DepthFirstAdapter{
 		for (int i = 0; i < leftList.size(); i++) {
 			Type leftType = forPAstExp(leftList.get(i));
 			Type rightType = forPAstExp(rightList.get(i));
+//			System.out.println(leftList.get(i).getClass().toString());
+//			System.out.println(leftType.getClass().toString());
+//			System.out.println(rightType.getClass().toString());
 			if (!leftType.assign(rightType)) {
 				printSymbolTable();
 				String errorMsg = "Assignment Error at line " + pos.getLine(temp);
@@ -477,20 +479,53 @@ public class Typechecker extends DepthFirstAdapter{
 		}
 	}
 	
+	// TODO: left list is problem
 	@Override
 	public void caseAShortDeclAstStm(AShortDeclAstStm node) {
 		AShortDeclAstStm temp = (AShortDeclAstStm) node;
 		LinkedList<PAstExp> leftList = temp.getIds();
 		LinkedList<PAstExp> rightList = temp.getAstExp();
 		
+		int count = 0;
 		for (int i = 0; i < leftList.size(); i++) {
-			Type leftType = forPAstExp(leftList.get(i));
-			Type rightType = forPAstExp(rightList.get(i));
-			if (!leftType.is(rightType)) {
-				printSymbolTable();
-				String errorMsg = "Declaration Error at line " + pos.getLine(temp);
-				throw new TypeException(errorMsg);
+//			System.out.println(i);
+//			System.out.println(leftList.get(i).getClass().toString());
+//			System.out.println(rightList.get(i).getClass().toString());
+//			Type leftType = forPAstExp(leftList.get(i));
+			if (helperForShortDecl(leftList.get(i))) {
+				
 			}
+			Type rightType = forPAstExp(rightList.get(i));
+//			if (!leftType.assign(rightType)) {
+//				printSymbolTable();
+//				String errorMsg = "Assignment Error at line " + pos.getLine(temp);
+//				throw new TypeException(errorMsg);
+//			}
+		}
+	}
+	
+	// return true if the variable on the left is in the current scope
+	public boolean helperForShortDecl(PAstExp node) {
+		if (node.getClass().isInstance(new AParenAstExp())) {
+			
+		} else if (node.getClass().isInstance(new AIdAstExp())) {
+			
+		} else if (node.getClass().isInstance(new ALitAstExp())) {
+			
+		} else if (node.getClass().isInstance(new AUnaryOpAstExp())) {
+			
+		} else if (node.getClass().isInstance(new ABinaryOpAstExp())) {
+			
+		} else if (node.getClass().isInstance(new AFuncCallAstExp())) {
+			
+		} else if (node.getClass().isInstance(new AAppendAstExp())) {
+			
+		} else if (node.getClass().isInstance(new ABasicCastAstExp())) {
+			
+		} else if (node.getClass().isInstance(new AArrayAccessAstExp())) {
+			
+		} else if (node.getClass().isInstance(new AFieldAccessAstExp())) {
+			
 		}
 	}
 	
@@ -968,9 +1003,36 @@ public class Typechecker extends DepthFirstAdapter{
 				String errorMsg = "Type error at line " + temp.getBasicTypes().getLine() + " : Type " + other + " cannot be casted to " + basic;
 				throw new TypeException(errorMsg);
 			}
-		//TODO finish the following cases
 		} else if (node.getClass().isInstance(new AArrayAccessAstExp())) {
-			
+			AArrayAccessAstExp temp = (AArrayAccessAstExp) node;
+			Type arrayType = forPAstExp(temp.getArray());
+			if (arrayType.is(Type.ARR)) {
+				Type indexType = forPAstExp(temp.getIndex());
+				if (indexType.is(Type.INT)) {
+					ArrayType arrT = (ArrayType) arrayType;
+					int maxIndex = arrT.size;
+					IntType intTypeIndex = (IntType) indexType;
+					int index = intTypeIndex.value;
+					if (index < maxIndex) {
+						// TODO: something to think about
+//						return arrT;
+						return indexType;
+					}
+					printSymbolTable();
+					System.out.println("In forPAstExp");
+					String errorMsg = "Type error at line " + pos.getLine(temp) + " : Index out of bound";
+					throw new TypeException(errorMsg);
+				}
+				printSymbolTable();
+				System.out.println("In forPAstExp");
+				String errorMsg = "Type error at line " + pos.getLine(temp) + " : Not an appropriate index format";
+				throw new TypeException(errorMsg);
+			}
+			printSymbolTable();
+			System.out.println("In forPAstExp");
+			String errorMsg = "Type error at line " + pos.getLine(temp) + " : Not an array";
+			throw new TypeException(errorMsg);
+		//TODO finish the following cases
 		} else if (node.getClass().isInstance(new AFieldAccessAstExp())) {
 			
 		}
@@ -1015,8 +1077,7 @@ public class Typechecker extends DepthFirstAdapter{
 //		print(": ");
 //	}
 	
-	// ast_literal	---------------------------------------------------
-	// returns the type of PAstLiteral
+	// ast_literal	---------------------------------------------------// returns the type of PAstLiteral
 	public Type forPAstLiteral(PAstLiteral node) {
 		if (node instanceof AIntAstLiteral) {
 			return Type.INT;

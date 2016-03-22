@@ -19,6 +19,8 @@ public class IntType extends Type{
 		return false;
 	}
 	
+	public int value;
+	
 	@Override
 	public String toString() {
 		return "int";
