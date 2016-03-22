@@ -3,9 +3,6 @@ package goplusplus;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
-
-import com.sun.org.apache.xpath.internal.functions.Function;
-
 import java.util.Iterator;
 
 import goplusplus.analysis.DepthFirstAdapter;
@@ -712,7 +709,6 @@ public class Typechecker extends DepthFirstAdapter{
 	
 	@Override
 	public void caseABlockAstStm(ABlockAstStm node) {
-		
 		HashMap<String, Type> newScope = new HashMap<String, Type>();
 		symbolTable.addFirst(newScope);
 		
@@ -1013,7 +1009,7 @@ public class Typechecker extends DepthFirstAdapter{
 			Type basic = forPAstTypeExp(new ABasicAstTypeExp(temp.getBasicTypes()));
 			Type other = forPAstExp(temp.getAstExp());
 			if (basic.is(Type.INT)) {
-				if(other.is(Type.FLOAT64) || other.is(Type.INT) || other.is(Type.RUNE)) {
+				if (other.is(Type.FLOAT64) || other.is(Type.INT) || other.is(Type.RUNE)) {
 					return basic;
 				}
 			} else if (basic.is(Type.FLOAT64)) {
@@ -1021,7 +1017,7 @@ public class Typechecker extends DepthFirstAdapter{
 					return basic;
 				}
 			} else if (basic.is(Type.BOOL)) {
-				if(other.is(Type.BOOL)) {
+				if (other.is(Type.BOOL)) {
 					return basic;
 				}
 			} else if (basic.is(Type.RUNE)) {
@@ -1061,6 +1057,7 @@ public class Typechecker extends DepthFirstAdapter{
 			throw new TypeException(errorMsg);
 		//TODO finish the following cases
 		} else if (node.getClass().isInstance(new AFieldAccessAstExp())) {
+			AFieldAccessAstExp temp = (AFieldAccessAstExp) node;
 			
 		}
 		return null;
