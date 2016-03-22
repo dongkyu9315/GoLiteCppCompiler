@@ -479,7 +479,6 @@ public class Typechecker extends DepthFirstAdapter{
 		}
 	}
 	
-	// TODO: left list is problem
 	@Override
 	public void caseAShortDeclAstStm(AShortDeclAstStm node) {
 		AShortDeclAstStm temp = (AShortDeclAstStm) node;
@@ -488,45 +487,71 @@ public class Typechecker extends DepthFirstAdapter{
 		
 		int count = 0;
 		for (int i = 0; i < leftList.size(); i++) {
-//			System.out.println(i);
-//			System.out.println(leftList.get(i).getClass().toString());
-//			System.out.println(rightList.get(i).getClass().toString());
-//			Type leftType = forPAstExp(leftList.get(i));
-			if (helperForShortDecl(leftList.get(i))) {
-				
-			}
+			Type leftType = Type.VOID;
 			Type rightType = forPAstExp(rightList.get(i));
-//			if (!leftType.assign(rightType)) {
-//				printSymbolTable();
-//				String errorMsg = "Assignment Error at line " + pos.getLine(temp);
-//				throw new TypeException(errorMsg);
-//			}
+			if (helperForShortDecl(leftList.get(i), rightType)) {
+				count++;
+				leftType = forPAstExp(leftList.get(i));
+			} else {
+				leftType = rightType;
+			}
+			
+			if (count == leftList.size()) {
+				printSymbolTable();
+				String errorMsg = "Assignment Error at line " + pos.getLine(temp) + " : All of the variables on the left hand side are declared in the current scope";
+				throw new TypeException(errorMsg);
+			}
+			
+			if (!leftType.assign(rightType)) {
+				printSymbolTable();
+				String errorMsg = "Assignment Error at line " + pos.getLine(temp);
+				throw new TypeException(errorMsg);
+			}
 		}
 	}
 	
 	// return true if the variable on the left is in the current scope
-	public boolean helperForShortDecl(PAstExp node) {
+	public boolean helperForShortDecl(PAstExp node, Type rightType) {
 		if (node.getClass().isInstance(new AParenAstExp())) {
-			
+			AParenAstExp temp = (AParenAstExp) node;
+			return helperForShortDecl(temp.getAstExp(), rightType);
 		} else if (node.getClass().isInstance(new AIdAstExp())) {
-			
+			AIdAstExp temp = (AIdAstExp) node;
+			if (!symbolTable.getFirst().containsKey(temp.getId().getText().trim())) {
+				symbolTable.getFirst().put(temp.getId().getText().trim(), rightType);
+				return false;
+			}
+			return true;
 		} else if (node.getClass().isInstance(new ALitAstExp())) {
-			
+			printSymbolTable();
+			String errorMsg = "Assignment Error at line " + pos.getLine(node);
+			throw new TypeException(errorMsg);
 		} else if (node.getClass().isInstance(new AUnaryOpAstExp())) {
-			
+			printSymbolTable();
+			String errorMsg = "Assignment Error at line " + pos.getLine(node);
+			throw new TypeException(errorMsg);
 		} else if (node.getClass().isInstance(new ABinaryOpAstExp())) {
-			
+			printSymbolTable();
+			String errorMsg = "Assignment Error at line " + pos.getLine(node);
+			throw new TypeException(errorMsg);
 		} else if (node.getClass().isInstance(new AFuncCallAstExp())) {
-			
+			printSymbolTable();
+			String errorMsg = "Assignment Error at line " + pos.getLine(node);
+			throw new TypeException(errorMsg);
 		} else if (node.getClass().isInstance(new AAppendAstExp())) {
-			
+			printSymbolTable();
+			String errorMsg = "Assignment Error at line " + pos.getLine(node);
+			throw new TypeException(errorMsg);
 		} else if (node.getClass().isInstance(new ABasicCastAstExp())) {
-			
+			printSymbolTable();
+			String errorMsg = "Assignment Error at line " + pos.getLine(node);
+			throw new TypeException(errorMsg);
 		} else if (node.getClass().isInstance(new AArrayAccessAstExp())) {
-			
+			return true;
 		} else if (node.getClass().isInstance(new AFieldAccessAstExp())) {
-			
+			return true;
 		}
+		return false;
 	}
 	
 	@Override
@@ -639,25 +664,25 @@ public class Typechecker extends DepthFirstAdapter{
 	}
 	
 	// TODO: implement the method below
-//	@Override
-//	public void caseASwitchAstStm(ASwitchAstStm node) {
-//		if (node.getAstStm() != null) {
-//			node.getAstStm().apply(this);
-//		}
-//		
-//		Type expType;
-//		if (node.getAstExp() != null) {
-//			expType = forPAstExp(node.getAstExp());
-//		} else {
-//			expType = Type.VOID;
-//		}
-//		
-//		LinkedList<PAstSwitchStm> stms = node.getAstSwitchStm();
-//		for (Iterator<PAstSwitchStm> iterator = stms.iterator(); iterator.hasNext();) {
-//			PAstSwitchStm stm = (PAstSwitchStm) iterator.next();
-//			stm.apply(this);
-//		}
-//	}
+	@Override
+	public void caseASwitchAstStm(ASwitchAstStm node) {
+		if (node.getAstStm() != null) {
+			node.getAstStm().apply(this);
+		}
+		
+		Type expType;
+		if (node.getAstExp() != null) {
+			expType = forPAstExp(node.getAstExp());
+		} else {
+			expType = Type.VOID;
+		}
+		
+		LinkedList<PAstSwitchStm> stms = node.getAstSwitchStm();
+		for (Iterator<PAstSwitchStm> iterator = stms.iterator(); iterator.hasNext();) {
+			PAstSwitchStm stm = (PAstSwitchStm) iterator.next();
+			stm.apply(this);
+		}
+	}
 	
 	@Override
 	public void caseAForAstStm(AForAstStm node) {
@@ -1014,8 +1039,6 @@ public class Typechecker extends DepthFirstAdapter{
 					IntType intTypeIndex = (IntType) indexType;
 					int index = intTypeIndex.value;
 					if (index < maxIndex) {
-						// TODO: something to think about
-//						return arrT;
 						return indexType;
 					}
 					printSymbolTable();
