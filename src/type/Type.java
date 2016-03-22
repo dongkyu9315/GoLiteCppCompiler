@@ -4,7 +4,7 @@ public abstract class Type {
 	public abstract boolean assign(Type t);
 	public abstract boolean compare(Type t);
 	public boolean is(Type t) {
-		return this.getClass().isInstance(t);
+		return t.getClass().equals(this.getClass());
 	}
 	
 	public static IntType INT = new IntType();
