@@ -52,14 +52,6 @@ public class Main {
 					pptype = true;
 				}
 				
-				/* -------------- */
-				/* Pretty Printer */
-				/* -------------- */
-				/* Pretty Print the AST */
-				String ppFile = filenameNoExt + ".pptype.go";
-				PrettyPrinter prettyPrinter = new PrettyPrinter(ppFile, p, pptype);
-				prettyPrinter.print(ast);
-				
 				/* ------------ */
 				/* Type Checker */
 				/* ------------ */
@@ -67,6 +59,14 @@ public class Main {
 				Typechecker typechecker = new Typechecker(flName, p, dump);
 				typechecker.check(ast);
 				typechecker.printSymbolTable();
+				
+				/* -------------- */
+				/* Pretty Printer */
+				/* -------------- */
+				/* Pretty Print the AST */
+				String ppFile = filenameNoExt + ".pptype.go";
+				PrettyPrinter prettyPrinter = new PrettyPrinter(ppFile, p, pptype);
+				prettyPrinter.print(ast);
 				
 				/* ---------------- */
 				/* C Code Generator */
