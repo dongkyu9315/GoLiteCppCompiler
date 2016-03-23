@@ -10,20 +10,22 @@ import goplusplus.analysis.DepthFirstAdapter;
 import goplusplus.node.*;
 
 public class PrettyPrinter extends DepthFirstAdapter{
-	public static void print(Node node, String filename) {
-		node.apply(new PrettyPrinter(filename));
+	public void print(Node node) {
+		node.apply(this);
 	}
 	
 	Stack<Integer> mIndentStack;
 	FileWriter mFileWriter;
+	Typechecker typechecker;
 	
-	public PrettyPrinter(String filename) {
+	public PrettyPrinter(String filename, Position pos) {
 		try {
 			mFileWriter = new FileWriter(filename);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		mIndentStack = new Stack<Integer>();
+		typechecker = new Typechecker(pos);
 	}
 	
 	private void print(String s) {
@@ -36,7 +38,7 @@ public class PrettyPrinter extends DepthFirstAdapter{
 	}
 	
 	private void print_idlist(LinkedList<TId> idlist) {
-		for (Iterator iterator = idlist.iterator(); iterator.hasNext();) {
+		for (Iterator<TId> iterator = idlist.iterator(); iterator.hasNext();) {
 			TId id = (TId) iterator.next();
 			print(id.getText().trim());
 			if (iterator.hasNext())
@@ -49,9 +51,9 @@ public class PrettyPrinter extends DepthFirstAdapter{
 		print("package");
 		print(node.getPackage().getText().trim());
 		print("\n\n");
-		LinkedList decl = node.getDecl();
+		LinkedList<?> decl = node.getDecl();
 		if (!decl.isEmpty()) {
-			for (Iterator iterator = decl.iterator(); iterator.hasNext();) {
+			for (Iterator<?> iterator = decl.iterator(); iterator.hasNext();) {
 				PAstDecl d = (PAstDecl) iterator.next();
 				d.apply(this);
 			}
@@ -60,9 +62,9 @@ public class PrettyPrinter extends DepthFirstAdapter{
 	
 	@Override
 	public void caseAVarDecAstDecl(AVarDecAstDecl node) {
-		LinkedList decl = node.getAstVarDecl();
+		LinkedList<PAstVarDecl> decl = node.getAstVarDecl();
 		if (!decl.isEmpty()) {
-			for (Iterator iterator = decl.iterator(); iterator.hasNext();) {
+			for (Iterator<PAstVarDecl> iterator = decl.iterator(); iterator.hasNext();) {
 				PAstVarDecl d = (PAstVarDecl) iterator.next();
 				d.apply(this);
 				print("\n");
@@ -72,9 +74,9 @@ public class PrettyPrinter extends DepthFirstAdapter{
 	
 	@Override
 	public void caseATypeDecAstDecl(ATypeDecAstDecl node) {
-		LinkedList decl = node.getAstTypeDecl();
+		LinkedList<?> decl = node.getAstTypeDecl();
 		if (!decl.isEmpty()) {
-			for (Iterator iterator = decl.iterator(); iterator.hasNext();) {
+			for (Iterator<?> iterator = decl.iterator(); iterator.hasNext();) {
 				PAstTypeDecl d = (PAstTypeDecl) iterator.next();
 				d.apply(this);
 				print("\n");
@@ -85,6 +87,10 @@ public class PrettyPrinter extends DepthFirstAdapter{
 	@Override
 	public void caseAFuncDecAstDecl(AFuncDecAstDecl node) {
 		node.getAstFuncDecl().apply(this);
+		print("//");
+		node.apply(typechecker);
+		AAstFuncDecl temp = (AAstFuncDecl)node.getAstFuncDecl();
+		print(typechecker.symbolTable.getLast().get(temp.getId().getText().trim()).toString());
 	}
 	
 	@Override
@@ -103,8 +109,8 @@ public class PrettyPrinter extends DepthFirstAdapter{
 		
 		print("=");
 		
-		LinkedList exps = node.getAstExp();
-		for (Iterator iterator = exps.iterator(); iterator.hasNext();) {
+		LinkedList<?> exps = node.getAstExp();
+		for (Iterator<?> iterator = exps.iterator(); iterator.hasNext();) {
 			PAstExp exp = (PAstExp) iterator.next();
 			exp.apply(this);
 			if (iterator.hasNext())
@@ -123,8 +129,8 @@ public class PrettyPrinter extends DepthFirstAdapter{
 		
 		print("=");
 		
-		LinkedList exps = node.getAstExp();
-		for (Iterator iterator = exps.iterator(); iterator.hasNext();) {
+		LinkedList<?> exps = node.getAstExp();
+		for (Iterator<?> iterator = exps.iterator(); iterator.hasNext();) {
 			PAstExp exp = (PAstExp) iterator.next();
 			exp.apply(this);
 			if (iterator.hasNext())
@@ -147,8 +153,8 @@ public class PrettyPrinter extends DepthFirstAdapter{
 		print(node.getId().getText().trim());
 		print("(");
 		
-		LinkedList params = node.getAstFuncParam();
-		for (Iterator iterator = params.iterator(); iterator.hasNext();) {
+		LinkedList<?> params = node.getAstFuncParam();
+		for (Iterator<?> iterator = params.iterator(); iterator.hasNext();) {
 			PAstFuncParam param = (PAstFuncParam) iterator.next();
 			param.apply(this);
 			if (iterator.hasNext())
@@ -165,8 +171,8 @@ public class PrettyPrinter extends DepthFirstAdapter{
 		
 		mIndentStack.push(mIndentStack.size()+1);
 		
-		LinkedList stmts = node.getAstStm();
-		for (Iterator iterator = stmts.iterator(); iterator.hasNext();) {
+		LinkedList<?> stmts = node.getAstStm();
+		for (Iterator<?> iterator = stmts.iterator(); iterator.hasNext();) {
 			for (int i = 0; i < mIndentStack.size(); i++)
 				print("\t");
 			PAstStm stm = (PAstStm) iterator.next();
@@ -203,8 +209,8 @@ public class PrettyPrinter extends DepthFirstAdapter{
 	
 	@Override
 	public void caseAStructAstTypeExp(AStructAstTypeExp node) {
-		LinkedList fields = node.getAstStructField();
-		for (Iterator iterator = fields.iterator(); iterator.hasNext();) {
+		LinkedList<?> fields = node.getAstStructField();
+		for (Iterator<?> iterator = fields.iterator(); iterator.hasNext();) {
 			PAstStructField field = (PAstStructField) iterator.next();
 			field.apply(this);
 			print("\n");
@@ -234,8 +240,8 @@ public class PrettyPrinter extends DepthFirstAdapter{
 	
 	@Override
 	public void caseAAssignAstStm(AAssignAstStm node) {
-		LinkedList lvals = node.getLval();
-		for (Iterator iterator = lvals.iterator(); iterator.hasNext();) {
+		LinkedList<?> lvals = node.getLval();
+		for (Iterator<?> iterator = lvals.iterator(); iterator.hasNext();) {
 			PAstExp exp = (PAstExp) iterator.next();
 			exp.apply(this);
 			if (iterator.hasNext())
@@ -244,8 +250,8 @@ public class PrettyPrinter extends DepthFirstAdapter{
 		
 		print("=");
 		
-		LinkedList rvals = node.getRval();
-		for (Iterator iterator = rvals.iterator(); iterator.hasNext();) {
+		LinkedList<?> rvals = node.getRval();
+		for (Iterator<?> iterator = rvals.iterator(); iterator.hasNext();) {
 			PAstExp exp = (PAstExp) iterator.next();
 			exp.apply(this);
 			if (iterator.hasNext())
@@ -262,8 +268,8 @@ public class PrettyPrinter extends DepthFirstAdapter{
 	
 	@Override
 	public void caseAVarDeclAstStm(AVarDeclAstStm node) {
-		LinkedList decls = node.getAstVarDecl();
-		for (Iterator iterator = decls.iterator(); iterator.hasNext();) {
+		LinkedList<?> decls = node.getAstVarDecl();
+		for (Iterator<?> iterator = decls.iterator(); iterator.hasNext();) {
 			PAstVarDecl exp = (PAstVarDecl) iterator.next();
 			exp.apply(this);
 			if (iterator.hasNext()){
@@ -277,8 +283,8 @@ public class PrettyPrinter extends DepthFirstAdapter{
 	
 	@Override
 	public void caseAShortDeclAstStm(AShortDeclAstStm node) {
-		LinkedList lvals = node.getIds();
-		for (Iterator iterator = lvals.iterator(); iterator.hasNext();) {
+		LinkedList<?> lvals = node.getIds();
+		for (Iterator<?> iterator = lvals.iterator(); iterator.hasNext();) {
 			PAstExp exp = (PAstExp) iterator.next();
 			exp.apply(this);
 			if (iterator.hasNext())
@@ -287,8 +293,8 @@ public class PrettyPrinter extends DepthFirstAdapter{
 		
 		print(":=");
 		
-		LinkedList rvals = node.getAstExp();
-		for (Iterator iterator = rvals.iterator(); iterator.hasNext();) {
+		LinkedList<?> rvals = node.getAstExp();
+		for (Iterator<?> iterator = rvals.iterator(); iterator.hasNext();) {
 			PAstExp exp = (PAstExp) iterator.next();
 			exp.apply(this);
 			if (iterator.hasNext())
@@ -298,8 +304,8 @@ public class PrettyPrinter extends DepthFirstAdapter{
 	
 	@Override
 	public void caseATypeDeclAstStm(ATypeDeclAstStm node) {
-		LinkedList decls = node.getAstTypeDecl();
-		for (Iterator iterator = decls.iterator(); iterator.hasNext();) {
+		LinkedList<?> decls = node.getAstTypeDecl();
+		for (Iterator<?> iterator = decls.iterator(); iterator.hasNext();) {
 			PAstTypeDecl exp = (PAstTypeDecl) iterator.next();
 			exp.apply(this);
 			if (iterator.hasNext()){
@@ -320,8 +326,8 @@ public class PrettyPrinter extends DepthFirstAdapter{
 	@Override
 	public void caseAPrintAstStm(APrintAstStm node) {
 		print("print(");
-		LinkedList exps = node.getAstExp();
-		for (Iterator iterator = exps.iterator(); iterator.hasNext();) {
+		LinkedList<?> exps = node.getAstExp();
+		for (Iterator<?> iterator = exps.iterator(); iterator.hasNext();) {
 			PAstExp exp = (PAstExp) iterator.next();
 			exp.apply(this);
 			if (iterator.hasNext())
@@ -333,8 +339,8 @@ public class PrettyPrinter extends DepthFirstAdapter{
 	@Override
 	public void caseAPrintlnAstStm(APrintlnAstStm node) {
 		print("println(");
-		LinkedList exps = node.getAstExp();
-		for (Iterator iterator = exps.iterator(); iterator.hasNext();) {
+		LinkedList<?> exps = node.getAstExp();
+		for (Iterator<?> iterator = exps.iterator(); iterator.hasNext();) {
 			PAstExp exp = (PAstExp) iterator.next();
 			exp.apply(this);
 			if (iterator.hasNext())
@@ -363,8 +369,8 @@ public class PrettyPrinter extends DepthFirstAdapter{
 		
 		mIndentStack.push(mIndentStack.size()+1);
 		
-		LinkedList stmts = node.getAstStm();
-		for (Iterator iterator = stmts.iterator(); iterator.hasNext();) {
+		LinkedList<?> stmts = node.getAstStm();
+		for (Iterator<?> iterator = stmts.iterator(); iterator.hasNext();) {
 			for (int i = 0; i < mIndentStack.size(); i++)
 				print("\t");
 			PAstStm stm = (PAstStm) iterator.next();
@@ -392,8 +398,8 @@ public class PrettyPrinter extends DepthFirstAdapter{
 		
 		mIndentStack.push(mIndentStack.size()+1);
 		
-		LinkedList if_stmts = node.getIfStms();
-		for (Iterator iterator = if_stmts.iterator(); iterator.hasNext();) {
+		LinkedList<?> if_stmts = node.getIfStms();
+		for (Iterator<?> iterator = if_stmts.iterator(); iterator.hasNext();) {
 			for (int i = 0; i < mIndentStack.size(); i++)
 				print("\t");
 			PAstStm stm = (PAstStm) iterator.next();
@@ -408,8 +414,8 @@ public class PrettyPrinter extends DepthFirstAdapter{
 		
 		print("else {\n");
 		mIndentStack.push(mIndentStack.size()+1);
-		LinkedList else_stmts = node.getElseStms();
-		for (Iterator iterator = else_stmts.iterator(); iterator.hasNext();) {
+		LinkedList<?> else_stmts = node.getElseStms();
+		for (Iterator<?> iterator = else_stmts.iterator(); iterator.hasNext();) {
 			for (int i = 0; i < mIndentStack.size(); i++)
 				print("\t");
 			PAstStm stm = (PAstStm) iterator.next();
@@ -429,8 +435,8 @@ public class PrettyPrinter extends DepthFirstAdapter{
 		node.getAstStm().apply(this);
 		node.getAstExp().apply(this);
 		print(" {\n");
-		LinkedList stms = node.getAstSwitchStm();
-		for (Iterator iterator = stms.iterator(); iterator.hasNext();) {
+		LinkedList<?> stms = node.getAstSwitchStm();
+		for (Iterator<?> iterator = stms.iterator(); iterator.hasNext();) {
 			PAstSwitchStm stm = (PAstSwitchStm) iterator.next();
 			stm.apply(this);
 			if (iterator.hasNext())
@@ -458,8 +464,8 @@ public class PrettyPrinter extends DepthFirstAdapter{
 		
 		mIndentStack.push(mIndentStack.size()+1);
 		
-		LinkedList stmts = node.getBody();
-		for (Iterator iterator = stmts.iterator(); iterator.hasNext();) {
+		LinkedList<?> stmts = node.getBody();
+		for (Iterator<?> iterator = stmts.iterator(); iterator.hasNext();) {
 			for (int i = 0; i < mIndentStack.size(); i++)
 				print("\t");
 			PAstStm stm = (PAstStm) iterator.next();
@@ -479,8 +485,8 @@ public class PrettyPrinter extends DepthFirstAdapter{
 		
 		mIndentStack.push(mIndentStack.size()+1);
 		
-		LinkedList stmts = node.getAstStm();
-		for (Iterator iterator = stmts.iterator(); iterator.hasNext();) {
+		LinkedList<?> stmts = node.getAstStm();
+		for (Iterator<?> iterator = stmts.iterator(); iterator.hasNext();) {
 			for (int i = 0; i < mIndentStack.size(); i++)
 				print("\t");
 			PAstStm stm = (PAstStm) iterator.next();
@@ -536,8 +542,8 @@ public class PrettyPrinter extends DepthFirstAdapter{
 	public void caseAFuncCallAstExp(AFuncCallAstExp node) {
 		node.getName().apply(this);
 		print("(");
-		LinkedList exps = node.getArgs();
-		for (Iterator iterator = exps.iterator(); iterator.hasNext();) {
+		LinkedList<?> exps = node.getArgs();
+		for (Iterator<?> iterator = exps.iterator(); iterator.hasNext();) {
 			PAstExp exp = (PAstExp) iterator.next();
 			exp.apply(this);
 			if (iterator.hasNext())
@@ -582,9 +588,9 @@ public class PrettyPrinter extends DepthFirstAdapter{
 	public void caseAAstSwitchStm(AAstSwitchStm node) {
 		node.getAstSwitchCase().apply(this);
 		
-		LinkedList stms = node.getAstStm();
+		LinkedList<?> stms = node.getAstStm();
 		if (!stms.isEmpty()) {
-			for (Iterator iterator = stms.iterator(); iterator.hasNext();) {
+			for (Iterator<?> iterator = stms.iterator(); iterator.hasNext();) {
 				PAstStm d = (PAstStm) iterator.next();
 				d.apply(this);
 				print("\n");
@@ -603,9 +609,9 @@ public class PrettyPrinter extends DepthFirstAdapter{
 	@Override
 	public void caseACaseAstSwitchCase(ACaseAstSwitchCase node) {
 		print("case ");
-		LinkedList exps = node.getAstExp();
+		LinkedList<?> exps = node.getAstExp();
 		if (!exps.isEmpty()) {
-			for (Iterator iterator = exps.iterator(); iterator.hasNext();) {
+			for (Iterator<?> iterator = exps.iterator(); iterator.hasNext();) {
 				PAstExp d = (PAstExp) iterator.next();
 				d.apply(this);
 				print(", ");
