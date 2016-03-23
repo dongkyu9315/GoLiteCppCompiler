@@ -149,6 +149,7 @@ public class Typechecker extends DepthFirstAdapter{
 	@Override
 	public void caseAAstTypeDecl(AAstTypeDecl node) {
 		LinkedList<TId> idlist = node.getId();
+		System.out.println(node.getAstTypeExp().getClass().toString());
 		Type varType = forPAstTypeExp(node.getAstTypeExp());
 		for (Iterator<TId> iterator = idlist.iterator(); iterator.hasNext();) {
 			TId d = (TId) iterator.next();
@@ -323,6 +324,7 @@ public class Typechecker extends DepthFirstAdapter{
 		} else if (node.getClass().isInstance(new AAliasAstTypeExp())) {
 			AAliasAstTypeExp temp = (AAliasAstTypeExp) node;
 			for (int i = 0; i < symbolTable.size(); i++) {
+				System.out.println("hello :" + symbolTable.get(i).get(temp.getId().getText().trim()));
 				if (symbolTable.get(i).containsKey(temp.getId().getText().trim())) {
 					Type attType = symbolTable.get(i).get(temp.getId().getText().trim());
 					if (attType.is(Type.ALIAS)) {
@@ -1131,12 +1133,22 @@ public class Typechecker extends DepthFirstAdapter{
 					IntType intTypeIndex = (IntType) indexType;
 					int index = intTypeIndex.value;
 					if (index < maxIndex) {
-						return indexType;
+						return intTypeIndex;
 					}
 					printSymbolTable();
 					System.out.println("In forPAstExp");
 					String errorMsg = "Type error at line " + pos.getLine(temp) + " : Index out of bound";
 					throw new TypeException(errorMsg);
+				}
+				printSymbolTable();
+				System.out.println("In forPAstExp");
+				String errorMsg = "Type error at line " + pos.getLine(temp) + " : Not an appropriate index format";
+				throw new TypeException(errorMsg);
+			} else if (arrayType.is(Type.SLICE)) {
+				Type indexType = forPAstExp(temp.getIndex());
+				if (indexType.is(Type.INT)) {
+					IntType intTypeIndex = (IntType) indexType;
+					return intTypeIndex;
 				}
 				printSymbolTable();
 				System.out.println("In forPAstExp");
