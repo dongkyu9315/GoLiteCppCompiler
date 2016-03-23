@@ -1113,9 +1113,26 @@ public class Typechecker extends DepthFirstAdapter{
 				printSymbolTable();
 				String errorMsg = "Type error at line " + pos.getLine(temp) + " : Function parameters do not match";
 				throw new TypeException(errorMsg);
+			} else if (temp.getName() instanceof AIdAstExp){
+				String id = ((AIdAstExp) temp.getName()).getId().getText().trim();
+				for (int i = 0; i < symbolTable.size(); i++) {
+					if (symbolTable.get(i).containsKey(id)) {
+						Type t = symbolTable.get(i).get(id);
+						if (t.is(Type.ALIAS)) {
+							return ((AliasType)t).type;
+						} else {
+							printSymbolTable();
+							String errorMsg = "Type error at line " + pos.getLine(temp) + " : Identifier " + id + " is not an alias";
+							throw new TypeException(errorMsg);
+						}
+					}
+				}
+				printSymbolTable();
+				String errorMsg = "Type error at line " + pos.getLine(temp) + " : Identifier " + id + " undeclared";
+				throw new TypeException(errorMsg);
 			}
 			printSymbolTable();
-			String errorMsg = "Type error at line " + pos.getLine(temp) + " : Not a function";
+			String errorMsg = "Type error at line " + pos.getLine(temp) + " : Not a function call or a alias type cast";
 			throw new TypeException(errorMsg);
 		} else if (node.getClass().isInstance(new AAppendAstExp())) {
 			AAppendAstExp temp = (AAppendAstExp) node;
