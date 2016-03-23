@@ -1111,7 +1111,7 @@ public class Typechecker extends DepthFirstAdapter{
 		} else if (node.getClass().isInstance(new AArrayAccessAstExp())) {
 			AArrayAccessAstExp temp = (AArrayAccessAstExp) node;
 			Type arrayType = forPAstExp(temp.getArray());
-			if (arrayType.is(Type.ARR)) {
+			if (arrayType.is(Type.ARRAY)) {
 				Type indexType = forPAstExp(temp.getIndex());
 				if (indexType.is(Type.INT)) {
 					ArrayType arrT = (ArrayType) arrayType;

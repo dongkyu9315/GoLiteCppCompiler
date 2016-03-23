@@ -4,7 +4,7 @@ public class ArrayType extends Type {
 
 	@Override
 	public boolean assign(Type t) {
-		if (t.is(Type.ARR)) {
+		if (t.is(Type.ARRAY)) {
 			ArrayType temp = (ArrayType) t;
 			if (temp.size == size && temp.elementType == elementType) {
 				return true;
