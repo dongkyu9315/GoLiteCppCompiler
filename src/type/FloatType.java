@@ -8,6 +8,8 @@ public class FloatType extends Type{
 			return true;
 		else if (t instanceof IntType)
 			return true;
+		else if (t instanceof AliasType) 
+			return assign(((AliasType) t).type);
 		
 		return false;
 	}
