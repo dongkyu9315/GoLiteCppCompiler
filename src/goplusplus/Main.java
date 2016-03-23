@@ -46,11 +46,11 @@ public class Main {
 				/* ------------ */
 				/* Type Checker */
 				/* ------------ */
-//				System.out.println("Type Checker ...");
-//				Typechecker typechecker = new Typechecker(p);
-//				typechecker.check(ast);
-//				typechecker.printSymbolTable();
-//				System.out.println("VALID\n");
+				System.out.println("Type Checker ...");
+				Typechecker typechecker = new Typechecker(p, true);
+				typechecker.check(ast);
+				typechecker.printSymbolTable();
+				System.out.println("VALID\n");
 				
 				/* ---------------- */
 				/* C Code Generator */

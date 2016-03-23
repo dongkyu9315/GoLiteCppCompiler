@@ -25,7 +25,7 @@ public class PrettyPrinter extends DepthFirstAdapter{
 			e.printStackTrace();
 		}
 		mIndentStack = new Stack<Integer>();
-		typechecker = new Typechecker(pos);
+		typechecker = new Typechecker(pos, false);
 	}
 	
 	private void print(String s) {
@@ -87,10 +87,10 @@ public class PrettyPrinter extends DepthFirstAdapter{
 	@Override
 	public void caseAFuncDecAstDecl(AFuncDecAstDecl node) {
 		node.getAstFuncDecl().apply(this);
-		print("//");
-		node.apply(typechecker);
-		AAstFuncDecl temp = (AAstFuncDecl)node.getAstFuncDecl();
-		print(typechecker.symbolTable.getLast().get(temp.getId().getText().trim()).toString());
+//		print("//");
+//		node.apply(typechecker);
+//		AAstFuncDecl temp = (AAstFuncDecl)node.getAstFuncDecl();
+//		print(typechecker.symbolTable.getLast().get(temp.getId().getText().trim()).toString());
 	}
 	
 	@Override
