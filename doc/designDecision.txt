@@ -1,0 +1,29 @@
+Design Decision for the Symbol Table and the Type Checker
+	Symbol Table
+	- We used a linked list of HashMap instead of a stack of HashMap
+	- The first element of the linked list is always the current scope
+	- HashMap is structured as HashMap<String, Type> where String is the name of a variable and Type is the type of that variable
+	
+	Type
+	- We created a Type class which encapsulates all the types, such as int, float64, function, slice, etc.
+	- We have implemented "is(Type t)" method in the Type class to check if the two Types are the same Type.
+	- We also have implemented "assign(Type t)" method in each of basic type classes to check if t can be assigned to each of the basic type.
+	- AliasType
+		- It has a Type attribute, which is the real type of the alias
+	- ArrayType
+		- It has a Type attribute, which is the Type of element
+		- It has an int attribute, which is the size of the array
+	- FunctionType
+		- It has an ArrayList<Type> attribute, which contain the Types of parameters
+		- It has a Type attribute, which is the Type of return value
+	- SliceType
+		- It has a Type attribute, which is the Type of element
+	- StructType
+		- It has a HashMap<String, Type> attribute, which contain the name and the Type of the fields
+		- For the fields of the struct, instead of putting "x.a" into the symbol table,
+		  we put the Struct type with the linked list of attributes into the symbol table.
+	
+	Stuff for code gen
+	- We have decided not to change alias type casting from function call node to type casting node. 
+	  We do return the correct type for the type cast. The decision was made because we find changing, 
+	  adding and deleting nodes quite messy and decided to do the same checks during the code generation phase.
