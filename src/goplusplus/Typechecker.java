@@ -161,7 +161,7 @@ public class Typechecker extends DepthFirstAdapter{
 			}
 			
 			// for the fields of a struct
-			if (varType.toString().equals("struct")) {
+			if (varType.is(Type.STRUCT)) {
 				AStructAstTypeExp tempNode = (AStructAstTypeExp) node.getAstTypeExp();
 				LinkedList<PAstStructField> fieldList = tempNode.getAstStructField();
 				for (Iterator<PAstStructField> iter = fieldList.iterator(); iter.hasNext();) {
@@ -227,7 +227,6 @@ public class Typechecker extends DepthFirstAdapter{
 		for (Iterator<PAstStm> iterator = stmts.iterator(); iterator.hasNext();) {
 			PAstStm stm = (PAstStm) iterator.next();
 			if (stm.getClass().isInstance(new AReturnAstStm())) {
-				System.out.println("asdf");
 				AReturnAstStm returnStm = (AReturnAstStm) stm;
 				Type reType;
 				if (returnStm.getAstExp() != null) {
@@ -323,7 +322,14 @@ public class Typechecker extends DepthFirstAdapter{
 			AAliasAstTypeExp temp = (AAliasAstTypeExp) node;
 			for (int i = 0; i < symbolTable.size(); i++) {
 				if (symbolTable.get(i).containsKey(temp.getId().getText().trim())) {
-					return symbolTable.get(i).get(temp.getId().getText().trim());
+					Type attType = symbolTable.get(i).get(temp.getId().getText().trim());
+					if (attType.is(Type.ALIAS)) {
+						return ((AliasType) attType).type;
+					}
+					printSymbolTable();
+					System.out.println("In forPAstTypeExp");
+					String errorMsg = "Declaration Error at line " + temp.getId().getLine();
+					throw new TypeException(errorMsg);
 				}
 			}
 			printSymbolTable();
