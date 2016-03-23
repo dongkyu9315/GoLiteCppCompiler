@@ -1132,6 +1132,11 @@ public class Typechecker extends DepthFirstAdapter{
 				System.out.println("In forPAstExp");
 				String errorMsg = "Type error at line " + pos.getLine(temp) + " : Not an appropriate index format";
 				throw new TypeException(errorMsg);
+			} else if (arrayType.is(Type.SLICE)) {
+				Type indexType = forPAstExp(temp.getIndex());
+				if (indexType.is(Type.INT)) {
+					
+				}
 			}
 			printSymbolTable();
 			System.out.println("In forPAstExp");
