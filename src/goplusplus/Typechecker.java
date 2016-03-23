@@ -552,7 +552,6 @@ public class Typechecker extends DepthFirstAdapter{
 		AShortDeclAstStm temp = (AShortDeclAstStm) node;
 		LinkedList<PAstExp> leftList = temp.getIds();
 		LinkedList<PAstExp> rightList = temp.getAstExp();
-		System.out.println("=================");
 		boolean good = false;
 		for (int i = 0; i < leftList.size(); i++) {
 			Type leftType = Type.VOID;
@@ -784,7 +783,7 @@ public class Typechecker extends DepthFirstAdapter{
 			LinkedList<PAstExp> exps = temp.getAstExp();
 			for (Iterator<PAstExp> iterator = exps.iterator(); iterator.hasNext();) {
 				PAstExp pAstExp = (PAstExp) iterator.next();
-				if (!compareType.assign(forPAstExp(pAstExp))) {
+				if (!compareType.is(forPAstExp(pAstExp))) {
 					printSymbolTable();
 					String errorMsg = "Switch case error at line " + pos.getLine(temp) + " : case type cannot be converted to " + compareType;
 					throw new TypeException(errorMsg);

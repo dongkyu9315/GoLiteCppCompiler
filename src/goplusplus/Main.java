@@ -79,7 +79,8 @@ public class Main {
 //				CCodeGenerator.print(ast2, writerCGen, symbolTable);
 //				writerCGen.flush();
 //				writerCGen.close();
-//				System.out.println("DONE\n");
+				
+				System.out.println("DONE\n");
 				
 			} catch (Exception e) {
 				System.out.println("INVALID\n");
