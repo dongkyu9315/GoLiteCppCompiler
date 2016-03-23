@@ -552,7 +552,7 @@ public class Typechecker extends DepthFirstAdapter{
 		AShortDeclAstStm temp = (AShortDeclAstStm) node;
 		LinkedList<PAstExp> leftList = temp.getIds();
 		LinkedList<PAstExp> rightList = temp.getAstExp();
-		System.out.println("=============");
+		System.out.println("=================");
 		boolean good = false;
 		for (int i = 0; i < leftList.size(); i++) {
 			Type leftType = Type.VOID;
@@ -585,7 +585,6 @@ public class Typechecker extends DepthFirstAdapter{
 			return helperForShortDecl(temp.getAstExp(), rightType);
 		} else if (node.getClass().isInstance(new AIdAstExp())) {
 			AIdAstExp temp = (AIdAstExp) node;
-			System.err.println(temp.getId().getText().trim());
 			if (!symbolTable.getFirst().containsKey(temp.getId().getText().trim())) {
 				symbolTable.getFirst().put(temp.getId().getText().trim(), rightType);
 				return false;
@@ -1167,8 +1166,10 @@ public class Typechecker extends DepthFirstAdapter{
 				if (table.containsKey(id)) {
 					Type sliceType = table.get(id);
 					Type astType = forPAstExp(temp.getAstExp());
-					if (sliceType.assign(astType)) {
-						return astType;
+					AppendType appendType = new AppendType();
+					appendType.type = astType;
+					if (sliceType.assign(appendType)) {
+						return appendType;
 					}
 					System.out.println("In forPAstExp");
 					String errorMsg = "Type error at line " + temp.getId().getLine() + " : Slice type and the argument type incompatibility";
