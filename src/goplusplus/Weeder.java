@@ -26,8 +26,6 @@ public class Weeder extends DepthFirstAdapter {
 	 *  check string CANNOT be used for basic type casting
 	 *  check all paths in function(that returns a value) body have return statement
 	 *  check post statement of for loop must not be short var decl
-	 *  
-	 * TODO:
 	 *  check alias of string CANNOT be used for type casting
 	 *  
 	 */
@@ -61,7 +59,6 @@ public class Weeder extends DepthFirstAdapter {
 	
 	
 	public void inAForAstStm(AForAstStm node) {
-		System.out.print("hahah");
 		PAstStm post = node.getPost();
 		if(post instanceof AShortDeclAstStm){
 			error("post statement of for loop must not be short var decl", node);

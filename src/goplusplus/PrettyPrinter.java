@@ -87,10 +87,10 @@ public class PrettyPrinter extends DepthFirstAdapter{
 	@Override
 	public void caseAFuncDecAstDecl(AFuncDecAstDecl node) {
 		node.getAstFuncDecl().apply(this);
-		print("//");
-		node.apply(typechecker);
-		AAstFuncDecl temp = (AAstFuncDecl)node.getAstFuncDecl();
-		print(typechecker.symbolTable.getLast().get(temp.getId().getText().trim()).toString());
+//		print("//");
+//		node.apply(typechecker);
+//		AAstFuncDecl temp = (AAstFuncDecl)node.getAstFuncDecl();
+//		print(typechecker.symbolTable.getLast().get(temp.getId().getText().trim()).toString());
 	}
 	
 	@Override
