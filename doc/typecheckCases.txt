@@ -39,6 +39,8 @@ float64 YES	YES		NO	   NO	YES
 string	NO  NO		YES	   NO	NO
 bool	NO	NO		NO	   YES	NO
 rune	YES	YES		NO	   NO	YES
+	
+	test files:cast_booToRune.go, cast_intToBool.go, cast_stringToInt.go
 
 Binary operators:
 
@@ -50,8 +52,7 @@ string	NO  NO		YES	   NO	NO
 bool	NO	NO		NO	   NO	NO
 rune	YES	NO		NO	   NO	YES
 
-Test files:
-op_assign_plus.go
+	test files: op_assign_plus.go
 
 
 =-,*=,/=,%=
@@ -61,6 +62,7 @@ float64 YES	YES		NO	   NO	YES
 string	NO  NO		NO	   NO	NO
 bool	NO	NO		NO	   NO	NO
 rune	YES	NO		NO	   NO	YES
+	test files: op_assign_sub_stringToString.go
 
 
 |=,^=,&=

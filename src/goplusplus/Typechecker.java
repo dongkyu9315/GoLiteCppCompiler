@@ -749,7 +749,6 @@ public class Typechecker extends DepthFirstAdapter{
 		symbolTable.removeFirst();
 	}
 	
-	// TODO: implement the method below
 	@Override
 	public void caseASwitchAstStm(ASwitchAstStm node) {
 		if (node.getAstStm() != null) {
@@ -780,7 +779,18 @@ public class Typechecker extends DepthFirstAdapter{
 	}
 	
 	public void forAstSwitchCase (PAstSwitchCase node, Type compareType) {
-		
+		if (node instanceof ACaseAstSwitchCase) {
+			ACaseAstSwitchCase temp = (ACaseAstSwitchCase) node;
+			LinkedList<PAstExp> exps = temp.getAstExp();
+			for (Iterator<PAstExp> iterator = exps.iterator(); iterator.hasNext();) {
+				PAstExp pAstExp = (PAstExp) iterator.next();
+				if (!compareType.assign(forPAstExp(pAstExp))) {
+					printSymbolTable();
+					String errorMsg = "Switch case error at line " + pos.getLine(temp) + " : case type cannot be converted to " + compareType;
+					throw new TypeException(errorMsg);
+				}
+			}
+		}
 	}
 	
 	@Override
