@@ -249,6 +249,54 @@ public class Typechecker extends DepthFirstAdapter{
 		symbolTable.removeFirst();
 	}
 	
+	// recursively call to get the return ast stm
+	public AReturnAstStm findReturn(PAstStm node) {
+		if (node.getClass().isInstance(new AShortifAstStm())) {
+			AShortifAstStm temp = (AShortifAstStm) node;
+			LinkedList<PAstStm> list = temp.getAstStm();
+			for (Iterator<PAstStm> iter = list.iterator(); iter.hasNext();) {
+				PAstStm ele = iter.next();
+				if (ele.getClass().isInstance(new AReturnAstStm())) {
+					AReturnAstStm returnTemp = (AReturnAstStm) ele;
+					return returnTemp;
+				} else {
+					return findReturn(ele);
+				}
+			}
+		} else if (node.getClass().isInstance(new ALongifAstStm())) {
+			ALongifAstStm temp = (ALongifAstStm) node;
+			LinkedList<PAstStm> list = temp.getIfStms();
+			list.addAll(temp.getElseStms());
+			for (Iterator<PAstStm> iter = list.iterator(); iter.hasNext();) {
+				PAstStm ele = iter.next();
+				if (ele.getClass().isInstance(new AReturnAstStm())) {
+					AReturnAstStm returnTemp = (AReturnAstStm) ele;
+					return returnTemp;
+				} else {
+					return findReturn(ele);
+				}
+			}
+		} else if (node.getClass().isInstance(new ASwitchAstStm())) {
+			ASwitchAstStm temp = (ASwitchAstStm) node;
+			LinkedList<PAstStm> list = temp.getAstSwitchStm();
+			for (Iterator<PAstStm> iter = list.iterator(); iter.hasNext();) {
+				PAstStm ele = iter.next();
+				if (ele.getClass().isInstance(new AReturnAstStm())) {
+					AReturnAstStm returnTemp = (AReturnAstStm) ele;
+					return returnTemp;
+				} else {
+					return findReturn(ele);
+				}
+			}
+		} else if (node.getClass().isInstance(new AForAstStm())) {
+			AForAstStm temp = (AForAstStm) node;
+		} else if (node.getClass().isInstance(new AReturnAstStm())) {
+			AReturnAstStm temp = (AReturnAstStm) node;
+			return temp;
+		}
+		return null;
+	}
+	
 	// ast_func_param	---------------------------------------------------
 	public Type forPAstFuncParam(PAstFuncParam node) {
 		if (node.getClass().isInstance(new AAstFuncParam())) {
@@ -647,6 +695,9 @@ public class Typechecker extends DepthFirstAdapter{
 	
 	@Override
 	public void caseAShortifAstStm(AShortifAstStm node) {
+		HashMap<String, Type> newScope = new HashMap<String, Type>();
+		symbolTable.addFirst(newScope);
+		
 		if (node.getInit() != null) {
 			node.getInit().apply(this);
 		}
@@ -663,10 +714,15 @@ public class Typechecker extends DepthFirstAdapter{
 			PAstStm stm = (PAstStm) iterator.next();
 			stm.apply(this);
 		}
+		
+		symbolTable.removeFirst();
 	}
 	
 	@Override
 	public void caseALongifAstStm(ALongifAstStm node) {
+		HashMap<String, Type> newScope = new HashMap<String, Type>();
+		symbolTable.addFirst(newScope);
+		
 		if (node.getInit() != null) {
 			node.getInit().apply(this);
 		}
@@ -689,6 +745,8 @@ public class Typechecker extends DepthFirstAdapter{
 			PAstStm stm = (PAstStm) iterator.next();
 			stm.apply(this);
 		}
+		
+		symbolTable.removeFirst();
 	}
 	
 	// TODO: implement the method below
@@ -727,6 +785,9 @@ public class Typechecker extends DepthFirstAdapter{
 	
 	@Override
 	public void caseAForAstStm(AForAstStm node) {
+		HashMap<String, Type> newScope = new HashMap<String, Type>();
+		symbolTable.addFirst(newScope);
+		
 		if (node.getInit() != null) {
 			node.getInit().apply(this);
 		}
@@ -749,6 +810,8 @@ public class Typechecker extends DepthFirstAdapter{
 			PAstStm stm = (PAstStm) iterator.next();
 			stm.apply(this);
 		}
+		
+		symbolTable.removeFirst();
 	}
 	
 	@Override
