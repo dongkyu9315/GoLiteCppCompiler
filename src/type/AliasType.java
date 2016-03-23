@@ -8,4 +8,9 @@ public class AliasType extends Type {
 	}
 
 	Type type;
+	
+	@Override
+	public String toString() {
+		return "alias " + type.toString();
+	}
 }

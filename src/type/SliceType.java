@@ -4,6 +4,13 @@ public class SliceType extends Type{
 
 	@Override
 	public boolean assign(Type t) {
+		if (t instanceof SliceType) {
+			if (((SliceType) t).elementType == elementType) {
+				return true;
+			}
+		} else if (t instanceof AliasType) { 
+			return assign(((AliasType) t).type);
+		}
 		return false;
 	}
 	

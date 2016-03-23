@@ -14,4 +14,5 @@ public abstract class Type {
 	public static VoidType VOID = new VoidType();
 	public static FunctionType FUNC = new FunctionType();
 	public static ArrayType ARR = new ArrayType();
+	public static StructType STRUCT = new StructType();
 }

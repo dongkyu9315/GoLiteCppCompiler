@@ -461,9 +461,6 @@ public class Typechecker extends DepthFirstAdapter{
 		for (int i = 0; i < leftList.size(); i++) {
 			Type leftType = forPAstExp(leftList.get(i));
 			Type rightType = forPAstExp(rightList.get(i));
-//			System.out.println(leftList.get(i).getClass().toString());
-//			System.out.println(leftType.getClass().toString());
-//			System.out.println(rightType.getClass().toString());
 			if (!leftType.assign(rightType)) {
 				printSymbolTable();
 				String errorMsg = "Assignment Error at line " + pos.getLine(temp);
@@ -472,19 +469,23 @@ public class Typechecker extends DepthFirstAdapter{
 		}
 	}
 	
-	
-	// TODO: fix binary op first
 	@Override
 	public void caseAOpAssignAstStm(AOpAssignAstStm node) {
 		TId d = node.getL();
-		Type varType = forPAstExp(node.getR());
-		if (!symbolTable.getFirst().containsKey(d.getText().trim())) {
-			symbolTable.getFirst().put(d.getText().trim(), varType);
-		} else {
-			printSymbolTable();
-			String errorMsg = "Assignment Error at line " + d.getLine();
-			throw new TypeException(errorMsg);
+		Type rType = forPAstExp(node.getR());
+		
+		
+		for (int i = 0; i < symbolTable.size(); i++) {
+			if (symbolTable.get(i).containsKey(d.getText().trim())) {
+				Type lType = symbolTable.get(i).get(d.getText().trim());
+				if (lType.assign(rType))
+					return;
+			}
 		}
+		
+		printSymbolTable();
+		String errorMsg = "Assignment Error at line " + d.getLine() + " : Identifier " + d.getText().trim() + " undeclared";
+		throw new TypeException(errorMsg);
 	}
 	
 	@Override
@@ -690,15 +691,28 @@ public class Typechecker extends DepthFirstAdapter{
 		Type expType;
 		if (node.getAstExp() != null) {
 			expType = forPAstExp(node.getAstExp());
-		} else {
-			expType = Type.VOID;
+		} else {	
+			expType = Type.BOOL;
 		}
 		
 		LinkedList<PAstSwitchStm> stms = node.getAstSwitchStm();
 		for (Iterator<PAstSwitchStm> iterator = stms.iterator(); iterator.hasNext();) {
-			PAstSwitchStm stm = (PAstSwitchStm) iterator.next();
-			stm.apply(this);
+			AAstSwitchStm stm = (AAstSwitchStm) iterator.next();
+			forAstSwitchStm(stm, expType);
 		}
+	}
+	
+	public void forAstSwitchStm (AAstSwitchStm node, Type compareType) {
+		forAstSwitchCase(node.getAstSwitchCase(), compareType);
+		
+		LinkedList<PAstStm> stmt = node.getAstStm();
+		for (PAstStm pAstStm : stmt) {
+			pAstStm.apply(this);
+		}
+	}
+	
+	public void forAstSwitchCase (PAstSwitchCase node, Type compareType) {
+		
 	}
 	
 	@Override
@@ -875,7 +889,7 @@ public class Typechecker extends DepthFirstAdapter{
 			String binOp = forPAstBinaryOp(temp.getAstBinaryOp());
 			Type rightType = forPAstExp(temp.getRight());
 			
-			if (leftType.is(rightType) && leftType.is(Type.BOOL)) {
+			if (leftType.assign(Type.BOOL) && rightType.assign(Type.BOOL)) {
 				if (binOp.equals("||")) {
 					return Type.BOOL;
 				} else if (binOp.equals("&&")) {
@@ -885,7 +899,47 @@ public class Typechecker extends DepthFirstAdapter{
 				System.out.println("In forPAstExp");
 				String errorMsg = "Binary Operator Error at line " + pos.getLine(temp);
 				throw new TypeException(errorMsg);
-			} else if (leftType.is(rightType) && leftType.is(Type.STRING)) {
+			} else if (leftType.assign(Type.INT) && rightType.assign(Type.INT)) {
+				if (binOp.equals("==")) {
+					return Type.BOOL;
+				} else if (binOp.equals("!=")) {
+					return Type.BOOL;
+				} else if (binOp.equals("<")) {
+					return Type.BOOL;
+				} else if (binOp.equals("<=")) {
+					return Type.BOOL;
+				} else if (binOp.equals(">")) {
+					return Type.BOOL;
+				} else if (binOp.equals(">=")) {
+					return Type.BOOL;
+				} else if (binOp.equals("+")) {
+					return leftType;
+				} else if (binOp.equals("-")) {
+					return leftType;
+				} else if (binOp.equals("*")) {
+					return leftType;
+				} else if (binOp.equals("/")) {
+					return leftType;
+				} else if (binOp.equals("%")) {
+					return leftType;
+				} else if (binOp.equals("|")) {
+					return leftType;
+				} else if (binOp.equals("&")) {
+					return leftType;
+				} else if (binOp.equals("<<")) {
+					return leftType;
+				} else if (binOp.equals(">>")) {
+					return leftType;
+				} else if (binOp.equals("&^")) {
+					return leftType;
+				} else if (binOp.equals("^")) {
+					return leftType;
+				}
+				printSymbolTable();
+				System.out.println("In forPAstExp");
+				String errorMsg = "Binary Operator Error at line " + pos.getLine(temp);
+				throw new TypeException(errorMsg);
+			} else if (leftType.assign(Type.STRING) && rightType.assign(Type.STRING)) {
 				if (binOp.equals("==")) {
 					return Type.BOOL;
 				} else if (binOp.equals("!=")) {
@@ -905,7 +959,7 @@ public class Typechecker extends DepthFirstAdapter{
 				System.out.println("In forPAstExp");
 				String errorMsg = "Binary Operator Error at line " + pos.getLine(temp);
 				throw new TypeException(errorMsg);
-			} else if (leftType.is(rightType) && leftType.is(Type.FLOAT64)) {
+			} else if (leftType.assign(Type.FLOAT64) && rightType.assign(Type.FLOAT64)) {
 				if (binOp.equals("==")) {
 					return Type.BOOL;
 				} else if (binOp.equals("!=")) {
@@ -933,7 +987,7 @@ public class Typechecker extends DepthFirstAdapter{
 				System.out.println("In forPAstExp");
 				String errorMsg = "Binary Operator Error at line " + pos.getLine(temp);
 				throw new TypeException(errorMsg);
-			} else if (leftType.is(rightType) && leftType.is(Type.INT)) {
+			} else if (leftType.assign(Type.RUNE) && rightType.assign(Type.RUNE)) {
 				if (binOp.equals("==")) {
 					return Type.BOOL;
 				} else if (binOp.equals("!=")) {
@@ -1075,9 +1129,22 @@ public class Typechecker extends DepthFirstAdapter{
 			System.out.println("In forPAstExp");
 			String errorMsg = "Type error at line " + pos.getLine(temp) + " : Not an array";
 			throw new TypeException(errorMsg);
-		//TODO finish the following cases
 		} else if (node.getClass().isInstance(new AFieldAccessAstExp())) {
-			
+			AFieldAccessAstExp temp = (AFieldAccessAstExp)node;
+			Type t = forPAstExp(temp.getStruct());
+			if (t.is(Type.STRUCT)) {
+				StructType struct = (StructType)t;
+				String field = temp.getField().getText().trim();
+				if (struct.attributes.containsKey(field)) {
+					return struct.attributes.get(field);
+				}
+				printSymbolTable();
+				String errorMsg = "Type error at line " + pos.getLine(temp) + " : " + field + " is not a valid field";
+				throw new TypeException(errorMsg);
+			}
+			printSymbolTable();
+			String errorMsg = "Type error at line " + pos.getLine(temp) + " : Not a struct";
+			throw new TypeException(errorMsg);
 		}
 		return null;
 	}
