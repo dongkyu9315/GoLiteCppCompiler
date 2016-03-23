@@ -1,5 +1,5 @@
 package test
 
 func main(array int){
-	append(array, 2)
+	var x = append(array, 2)
 }
