@@ -32,6 +32,21 @@ Assignment capability:
 
 	test files: assign_floatToInt.go, assign_stringToFloat.go, assign_stringToInt.go
 	
+For loop
+	check condition is type bool
+	test file: for_condition.go
+	
+If statement
+	check condition is type bool
+	test file: if_condition.go, elseif_condition.go
+
+Switch statement
+	check expression in cases has same type as in the beginning of the switch statement
+	test file: switch_type_match.go
+
+===========
+Expression
+===========
 Casting capability:
 to\from int float64 string bool rune
 int		YES	YES		NO	   NO	YES
@@ -44,7 +59,7 @@ rune	YES	YES		NO	   NO	YES
 
 Binary operators:
 
-+=
++=,+
 lhs\rhs int float64 string bool rune
 int		YES	NO		NO	   NO	YES
 float64 YES	YES		NO	   NO	YES
@@ -55,7 +70,7 @@ rune	YES	NO		NO	   NO	YES
 	test files: op_assign_plus.go
 
 
-=-,*=,/=,%=
+=-,*=,/=,%=, -, *, /, %
 lhs\rhs int float64 string bool rune
 int		YES	NO		NO	   NO	YES
 float64 YES	YES		NO	   NO	YES
@@ -65,10 +80,15 @@ rune	YES	NO		NO	   NO	YES
 	test files: op_assign_sub_stringToString.go
 
 
-|=,^=,&=
+|=,^=,&=, ||, && 
 both lhs and rhs must be bool
 
 <<=,>>=,&^=
 both lhs and rhs must be int
 
-		
+
+
+	
+Unary operator
++: expr must be numeric (int, float64, rune)
+
