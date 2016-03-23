@@ -39,9 +39,21 @@ public class Typechecker extends DepthFirstAdapter{
 	public void caseAAstProgram(AAstProgram node) {
 		LinkedList<PAstDecl> decl = node.getDecl();
 		if (!decl.isEmpty()) {
+			//first pass to collect root level vars and functions			
 			for (Iterator<PAstDecl> iterator = decl.iterator(); iterator.hasNext();) {
 				PAstDecl d = (PAstDecl) iterator.next();
-				d.apply(this);
+				if (d instanceof AFuncDecAstDecl) {
+					addFunction((AAstFuncDecl) ((AFuncDecAstDecl)d).getAstFuncDecl());
+				} else {
+					d.apply(this);
+				}
+			}
+			
+			for (Iterator<PAstDecl> iterator = decl.iterator(); iterator.hasNext();) {
+				PAstDecl d = (PAstDecl) iterator.next();
+				if (d instanceof AFuncDecAstDecl) {
+					d.apply(this);
+				}
 			}
 		}
 	}
@@ -190,6 +202,42 @@ public class Typechecker extends DepthFirstAdapter{
 	// ast_func_decl	---------------------------------------------------
 	@Override
 	public void caseAAstFuncDecl(AAstFuncDecl node) {
+		
+		FunctionType fType = (FunctionType) symbolTable.getLast().get(node.getId().getText().trim());
+		
+		HashMap<String, Type> newScope = new HashMap<String, Type>();
+		symbolTable.addFirst(newScope);
+		
+		LinkedList<PAstFuncParam> params = node.getAstFuncParam();
+		for (Iterator<PAstFuncParam> iterator = params.iterator(); iterator.hasNext();) {
+			PAstFuncParam param = (PAstFuncParam) iterator.next();
+			param.apply(this);
+		}
+		
+		LinkedList<PAstStm> stmts = node.getAstStm();
+		for (Iterator<PAstStm> iterator = stmts.iterator(); iterator.hasNext();) {
+			PAstStm stm = (PAstStm) iterator.next();
+			if (stm.getClass().isInstance(new AReturnAstStm())) {
+				AReturnAstStm returnStm = (AReturnAstStm) stm;
+				Type reType;
+				if (returnStm.getAstExp() != null) {
+					reType = forPAstExp(returnStm.getAstExp());
+				} else {
+					reType = Type.VOID;
+				}
+				if (!fType.returnType.assign(reType)) {
+					printSymbolTable();
+					String errorMsg = "Function Return Type Incompatibility Error at line " + node.getId().getLine();
+					throw new TypeException(errorMsg);
+				}
+			}
+			stm.apply(this);
+		}
+		
+		symbolTable.removeFirst();
+	}
+	
+	public void addFunction(AAstFuncDecl node) {
 		FunctionType funcType = new FunctionType();
 		Type returnType;
 		if (!symbolTable.getFirst().containsKey(node.getId().getText().trim())) {
@@ -217,36 +265,6 @@ public class Typechecker extends DepthFirstAdapter{
 		funcType.paramType = paramTypes;
 		
 		symbolTable.getFirst().put(node.getId().getText().trim(), funcType);
-		
-		HashMap<String, Type> newScope = new HashMap<String, Type>();
-		symbolTable.addFirst(newScope);
-		
-		for (Iterator<PAstFuncParam> iterator = params.iterator(); iterator.hasNext();) {
-			PAstFuncParam param = (PAstFuncParam) iterator.next();
-			param.apply(this);
-		}
-		
-		LinkedList<PAstStm> stmts = node.getAstStm();
-		for (Iterator<PAstStm> iterator = stmts.iterator(); iterator.hasNext();) {
-			PAstStm stm = (PAstStm) iterator.next();
-			if (stm.getClass().isInstance(new AReturnAstStm())) {
-				AReturnAstStm returnStm = (AReturnAstStm) stm;
-				Type reType;
-				if (returnStm.getAstExp() != null) {
-					reType = forPAstExp(returnStm.getAstExp());
-				} else {
-					reType = Type.VOID;
-				}
-				if (!returnType.assign(reType)) {
-					printSymbolTable();
-					String errorMsg = "Function Return Type Incompatibility Error at line " + node.getId().getLine();
-					throw new TypeException(errorMsg);
-				}
-			}
-			stm.apply(this);
-		}
-		
-		symbolTable.removeFirst();
 	}
 	
 	// ast_func_param	---------------------------------------------------
