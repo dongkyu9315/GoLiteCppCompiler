@@ -10,7 +10,7 @@ import goplusplus.node.*;
 import type.*;
 
 public class Typechecker extends DepthFirstAdapter{
-	private LinkedList<HashMap<String, Type>> symbolTable;
+	public LinkedList<HashMap<String, Type>> symbolTable;
 	private Position pos;
 	private boolean printSymTab;
 	

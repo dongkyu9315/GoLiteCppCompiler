@@ -10,11 +10,10 @@ public class Main {
 	public static void main(String[] args) {
 		if (args.length > 0) {
 			try {
-				/* ----------------- */
+				
+				/* ------------------ */
 				/* Scanner and Parser */
-				/* ----------------- */
-//				System.out.println("Scanner ...");
-//				System.out.println("Parser ...");
+				/* ------------------ */
 				/* Form our AST */
 				GoLexer lexer = new GoLexer (new PushbackReader(
 						new FileReader(args[0]), 1024));
@@ -39,27 +38,19 @@ public class Main {
 				/* -------------- */
 				/* Pretty Printer */
 				/* -------------- */
-//				System.out.println("Pretty Printer ...");
 				/* Pretty Print the AST */
-				String pathAST = filenameNoExt + ".pretty.go";
-				PrettyPrinter.print(ast, pathAST);
-//				System.out.println("DONE\n");
+				String ppFile = filenameNoExt + ".pretty.go";
+				PrettyPrinter prettyPrinter = new PrettyPrinter(ppFile, p);
+				prettyPrinter.print(ast);
 				
 				/* ------------ */
 				/* Type Checker */
 				/* ------------ */
-				System.out.println("Type Checker ...");
-//				String pathSymbol = filename + ".symbol";
-//				String pathSymbol = filenameNoExt + ".symbol";
-//				File fileSymbol = new File(pathSymbol);
-//				fileSymbol.createNewFile();
-//				FileWriter writerSymbol = new FileWriter(fileSymbol, false);
-				Typechecker typechecker = new Typechecker(p);
-				typechecker.check(ast);
-				typechecker.printSymbolTable();
-//				writerSymbol.flush();
-//				writerSymbol.close();
-				System.out.println("VALID\n");
+//				System.out.println("Type Checker ...");
+//				Typechecker typechecker = new Typechecker(p);
+//				typechecker.check(ast);
+//				typechecker.printSymbolTable();
+//				System.out.println("VALID\n");
 				
 				/* ---------------- */
 				/* C Code Generator */
@@ -79,7 +70,7 @@ public class Main {
 				System.out.println(e);
 			}
 		} else {
-			System.err.println("usage: java goplusplus inputFile");
+			System.err.println("No input file");
 			System.exit(1);
 		}
 	}
