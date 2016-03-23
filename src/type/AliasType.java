@@ -7,5 +7,5 @@ public class AliasType extends Type {
 		return type.assign(t);
 	}
 
-	Type type;
+	public Type type;
 }

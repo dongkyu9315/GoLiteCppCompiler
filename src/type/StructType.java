@@ -19,9 +19,8 @@ public class StructType extends Type{
 			s += entry.getValue();
 			s += ", ";
 		}
-		s = s.substring(0, s.length() - 3);
+		s = s.substring(0, s.length() - 2);
 		s += "}";
 		return s;
-//		return "struct";
 	}
 }
