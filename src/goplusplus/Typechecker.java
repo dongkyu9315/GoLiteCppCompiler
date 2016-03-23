@@ -27,11 +27,13 @@ public class Typechecker extends DepthFirstAdapter{
 	
 	// print the symbol table to the console
 	public void printSymbolTable() {
-		for (int i = 0; i < symbolTable.size(); i++) {
-			HashMap<String, Type> temp = symbolTable.get(i);
-			System.out.println("Layer " + i + ":");
-			for (HashMap.Entry<String, Type> entry : temp.entrySet()) {
-				System.out.println("Key = " + entry.getKey() + ", Type = " + entry.getValue());
+		if (printSymTab) {
+			for (int i = 0; i < symbolTable.size(); i++) {
+				HashMap<String, Type> temp = symbolTable.get(i);
+				System.out.println("Layer " + i + ":");
+				for (HashMap.Entry<String, Type> entry : temp.entrySet()) {
+					System.out.println("Key = " + entry.getKey() + ", Type = " + entry.getValue());
+				}
 			}
 		}
 	}
@@ -98,12 +100,6 @@ public class Typechecker extends DepthFirstAdapter{
 		LinkedList<TId> idlist = node.getId();
 		LinkedList<PAstExp> exps = node.getAstExp();
 		
-//		if (idlist.size() != exps.size()) {
-//			printSymbolTable();
-//			String errorMsg = "Declaration Error at line " + idlist.getFirst().getLine();
-//			throw new TypeException(errorMsg);
-//		}
-		
 		for (int i = 0; i < idlist.size(); i++) {
 			TId d = idlist.get(i);
 			Type varType = forPAstExp(exps.get(i));
@@ -122,12 +118,6 @@ public class Typechecker extends DepthFirstAdapter{
 		LinkedList<TId> idlist = node.getId();
 		Type typeExp = forPAstTypeExp(node.getAstTypeExp());
 		LinkedList<PAstExp> exps = node.getAstExp();
-		
-//		if (idlist.size() != exps.size()) {
-//			printSymbolTable();
-//			String errorMsg = "Declaration Error at line " + idlist.getFirst().getLine();
-//			throw new TypeException(errorMsg);
-//		}
 		
 		for (int i = 0; i < idlist.size(); i++) {
 			TId d = idlist.get(i);
@@ -151,7 +141,6 @@ public class Typechecker extends DepthFirstAdapter{
 	@Override
 	public void caseAAstTypeDecl(AAstTypeDecl node) {
 		LinkedList<TId> idlist = node.getId();
-		System.out.println(node.getAstTypeExp().getClass().toString());
 		Type varType = forPAstTypeExp(node.getAstTypeExp());
 		for (Iterator<TId> iterator = idlist.iterator(); iterator.hasNext();) {
 			TId d = (TId) iterator.next();
@@ -389,7 +378,6 @@ public class Typechecker extends DepthFirstAdapter{
 		} else if (node.getClass().isInstance(new AAliasAstTypeExp())) {
 			AAliasAstTypeExp temp = (AAliasAstTypeExp) node;
 			for (int i = 0; i < symbolTable.size(); i++) {
-				System.out.println("hello :" + symbolTable.get(i).get(temp.getId().getText().trim()));
 				if (symbolTable.get(i).containsKey(temp.getId().getText().trim())) {
 					Type attType = symbolTable.get(i).get(temp.getId().getText().trim());
 					if (attType.is(Type.ALIAS)) {
