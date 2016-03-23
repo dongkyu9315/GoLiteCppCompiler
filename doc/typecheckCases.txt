@@ -7,6 +7,7 @@ Variable declaration
 		struct: type_decl_struct.go
 		array: type_decl_struct.go
 Function declaration
+	check function with same name cannot be repeatedly declared in same scope
 		function: func_decl.go, func_param.go
 Type declaration
 	checks alias types are well defined
@@ -67,7 +68,7 @@ string	NO  NO		YES	   NO	NO
 bool	NO	NO		NO	   NO	NO
 rune	YES	NO		NO	   NO	YES
 
-	test files: op_assign_plus.go
+	test files: op_assign_plus.go, binary_intAddString.go
 
 
 =-,*=,/=,%=, -, *, /, %
@@ -82,6 +83,7 @@ rune	YES	NO		NO	   NO	YES
 
 |=,^=,&=, ||, && 
 both lhs and rhs must be bool
+test files: 
 
 <<=,>>=,&^=
 both lhs and rhs must be int
@@ -91,4 +93,24 @@ both lhs and rhs must be int
 	
 Unary operator
 +: expr must be numeric (int, float64, rune)
+test file: unary_plus_string.go
+-:expr must be numeric (int, float64, rune)
+test file: unary_neg_string.go
+!:expr must be a bool
+test file: unary_not_int.go, unary_not_string.go
 
+Indexing
+check index is well-typed and has type int.
+test file:index_float.go
+check the result of the indexing expression is the type of the array/slice
+test file:index_expressionMatch.go
+
+Field selection (expr.id)
+check expr is of type struct and has field named id
+test file:fieldSelect_notStruct.go, fieldSelect_hasField.go
+
+Append append(id, expr)
+check id is found in the symbol table and maps to a Slice<T>
+test file:append_notSlice.go
+check type of expr is compatible with type of the slice
+test file:append_incompatibleType.go
