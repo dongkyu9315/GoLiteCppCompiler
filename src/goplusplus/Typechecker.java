@@ -1123,7 +1123,7 @@ public class Typechecker extends DepthFirstAdapter{
 					IntType intTypeIndex = (IntType) indexType;
 					int index = intTypeIndex.value;
 					if (index < maxIndex) {
-						return indexType;
+						return intTypeIndex;
 					}
 					printSymbolTable();
 					System.out.println("In forPAstExp");
@@ -1137,8 +1137,13 @@ public class Typechecker extends DepthFirstAdapter{
 			} else if (arrayType.is(Type.SLICE)) {
 				Type indexType = forPAstExp(temp.getIndex());
 				if (indexType.is(Type.INT)) {
-					
+					IntType intTypeIndex = (IntType) indexType;
+					return intTypeIndex;
 				}
+				printSymbolTable();
+				System.out.println("In forPAstExp");
+				String errorMsg = "Type error at line " + pos.getLine(temp) + " : Not an appropriate index format";
+				throw new TypeException(errorMsg);
 			}
 			printSymbolTable();
 			System.out.println("In forPAstExp");
