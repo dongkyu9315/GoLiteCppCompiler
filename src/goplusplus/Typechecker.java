@@ -149,6 +149,7 @@ public class Typechecker extends DepthFirstAdapter{
 	@Override
 	public void caseAAstTypeDecl(AAstTypeDecl node) {
 		LinkedList<TId> idlist = node.getId();
+		System.out.println(node.getAstTypeExp().getClass().toString());
 		Type varType = forPAstTypeExp(node.getAstTypeExp());
 		for (Iterator<TId> iterator = idlist.iterator(); iterator.hasNext();) {
 			TId d = (TId) iterator.next();
@@ -321,6 +322,7 @@ public class Typechecker extends DepthFirstAdapter{
 		} else if (node.getClass().isInstance(new AAliasAstTypeExp())) {
 			AAliasAstTypeExp temp = (AAliasAstTypeExp) node;
 			for (int i = 0; i < symbolTable.size(); i++) {
+				System.out.println("hello :" + symbolTable.get(i).get(temp.getId().getText().trim()));
 				if (symbolTable.get(i).containsKey(temp.getId().getText().trim())) {
 					Type attType = symbolTable.get(i).get(temp.getId().getText().trim());
 					if (attType.is(Type.ALIAS)) {
