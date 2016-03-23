@@ -10,6 +10,10 @@ public class SliceType extends Type{
 			}
 		} else if (t instanceof AliasType) { 
 			return assign(((AliasType) t).type);
+		} else if (t instanceof AppendType) {
+			if (((AppendType) t).type == elementType) {
+				return true;
+			}
 		}
 		return false;
 	}

@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="GoLite" default="build" basedir="..">
   <property name="program" value="${basedir}/programs/valid/valid1.go"/>
+  <property name="flag1" value=""/>
+  <property name="flag2" value=""/>
 	
   <target name ="clean">
   	<delete includeemptydirs="true">
@@ -42,6 +44,8 @@
 	                <pathelement location="${basedir}/src"/>
 	            </classpath>
 	            <arg value="${program}"/>
+	        	<arg value="${flag1}"/>
+	        	<arg value="${flag2}"/>
 	        </java>
 	</target>
 

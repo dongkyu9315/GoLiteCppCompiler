@@ -56,7 +56,7 @@ public class Main {
 				/* Pretty Printer */
 				/* -------------- */
 				/* Pretty Print the AST */
-				String ppFile = filenameNoExt + ".pretty.go";
+				String ppFile = filenameNoExt + ".pptype.go";
 				PrettyPrinter prettyPrinter = new PrettyPrinter(ppFile, p, pptype);
 				prettyPrinter.print(ast);
 				
@@ -79,7 +79,8 @@ public class Main {
 //				CCodeGenerator.print(ast2, writerCGen, symbolTable);
 //				writerCGen.flush();
 //				writerCGen.close();
-//				System.out.println("DONE\n");
+				
+				System.out.println("DONE\n");
 				
 			} catch (Exception e) {
 				System.out.println("INVALID\n");
