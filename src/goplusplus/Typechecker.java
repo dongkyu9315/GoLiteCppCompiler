@@ -154,7 +154,9 @@ public class Typechecker extends DepthFirstAdapter{
 		for (Iterator<TId> iterator = idlist.iterator(); iterator.hasNext();) {
 			TId d = (TId) iterator.next();
 			if (!symbolTable.getFirst().containsKey(d.getText().trim())) {
-				symbolTable.getFirst().put(d.getText().trim(), varType);
+				AliasType aType = new AliasType();
+				aType.type = varType;
+				symbolTable.getFirst().put(d.getText().trim(), aType);
 			} else {
 				printSymbolTable();
 				String errorMsg = "Declaration Error at line " + d.getLine();
