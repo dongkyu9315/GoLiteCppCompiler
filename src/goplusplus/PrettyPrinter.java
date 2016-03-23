@@ -25,7 +25,7 @@ public class PrettyPrinter extends DepthFirstAdapter{
 			e.printStackTrace();
 		}
 		mIndentStack = new Stack<Integer>();
-		typechecker = new Typechecker(pos);
+		typechecker = new Typechecker(pos, false);
 	}
 	
 	private void print(String s) {

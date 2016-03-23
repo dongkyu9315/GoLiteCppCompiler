@@ -237,8 +237,8 @@ public class Typechecker extends DepthFirstAdapter{
 			}
 			stm.apply(this);
 		}
-		
-		symbolTable.removeFirst();
+		//TODO:
+//		symbolTable.removeFirst();
 	}
 	
 	// recursively call to get the return ast stm
@@ -1128,7 +1128,6 @@ public class Typechecker extends DepthFirstAdapter{
 			}
 		} else if (node.getClass().isInstance(new AFuncCallAstExp())) {
 			AFuncCallAstExp temp = (AFuncCallAstExp) node;
-			
 			Type type = forPAstExp(temp.getName());
 			if (type.is(Type.FUNC)) {
 				FunctionType funcType = (FunctionType) type;
@@ -1164,7 +1163,14 @@ public class Typechecker extends DepthFirstAdapter{
 			for (Iterator<HashMap<String, Type>> iterator = symbolTable.iterator(); iterator.hasNext();) {
 				HashMap<String, Type> table = (HashMap<String, Type>) iterator.next();
 				if (table.containsKey(id)) {
-					return forPAstExp(temp.getAstExp());
+					Type sliceType = table.get(id);
+					Type astType = forPAstExp(temp.getAstExp());
+					if (sliceType.assign(astType)) {
+						return astType;
+					}
+					System.out.println("In forPAstExp");
+					String errorMsg = "Type error at line " + temp.getId().getLine() + " : Slice type and the argument type incompatibility";
+					throw new TypeException(errorMsg);
 				}
 			}
 			
