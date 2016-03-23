@@ -10,7 +10,6 @@ public class Main {
 	public static void main(String[] args) {
 		if (args.length > 0) {
 			try {
-				
 				/* ------------------ */
 				/* Scanner and Parser */
 				/* ------------------ */
@@ -35,22 +34,39 @@ public class Main {
 				/* ---------------- */
 				String filenameNoExt = args[0].replaceFirst("[.][^.]+$", "");
 				
+				/* ----------------- */
+				/* flag verification */
+				/* ----------------- */
+				String firstFlag = args[1];
+				String secondFlag = args[2];
+				boolean dump = false;
+				boolean pptype = false;
+				if (firstFlag.equals("dumpsymtab")) {
+					dump = true;
+				} else if (secondFlag.equals("dumpsymtab")) {
+					dump = true;
+				}
+				if (firstFlag.equals("pptype")) {
+					pptype = true;
+				} else if (secondFlag.equals("pptype")) {
+					pptype = true;
+				}
+				
 				/* -------------- */
 				/* Pretty Printer */
 				/* -------------- */
 				/* Pretty Print the AST */
 				String ppFile = filenameNoExt + ".pretty.go";
-				PrettyPrinter prettyPrinter = new PrettyPrinter(ppFile, p);
+				PrettyPrinter prettyPrinter = new PrettyPrinter(ppFile, p, pptype);
 				prettyPrinter.print(ast);
 				
 				/* ------------ */
 				/* Type Checker */
 				/* ------------ */
-//				System.out.println("Type Checker ...");
-				Typechecker typechecker = new Typechecker(p, true);
+				String flName = filenameNoExt + ".symtab";
+				Typechecker typechecker = new Typechecker(flName, p, dump);
 				typechecker.check(ast);
 				typechecker.printSymbolTable();
-//				System.out.println("VALID\n");
 				
 				/* ---------------- */
 				/* C Code Generator */

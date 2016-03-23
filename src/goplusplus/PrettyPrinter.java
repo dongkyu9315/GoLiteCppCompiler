@@ -17,20 +17,22 @@ public class PrettyPrinter extends DepthFirstAdapter{
 	Stack<Integer> mIndentStack;
 	FileWriter mFileWriter;
 	Typechecker typechecker;
+	boolean pptype;
 	
-	public PrettyPrinter(String filename, Position pos) {
+	public PrettyPrinter(String filename, Position pos, boolean pptype) {
 		try {
 			mFileWriter = new FileWriter(filename);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		mIndentStack = new Stack<Integer>();
-		typechecker = new Typechecker(pos, false);
+		typechecker = new Typechecker(filename, pos, false);
+		this.pptype = pptype;
 	}
 	
 	private void print(String s) {
 		try {
-			mFileWriter.append(s+" ");
+			mFileWriter.append(s);
 			mFileWriter.flush();
 		} catch (IOException e) {
 			e.printStackTrace();

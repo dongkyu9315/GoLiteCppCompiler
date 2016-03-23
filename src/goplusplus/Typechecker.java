@@ -1,5 +1,7 @@
 package goplusplus;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -11,14 +13,20 @@ import type.*;
 
 public class Typechecker extends DepthFirstAdapter{
 	public LinkedList<HashMap<String, Type>> symbolTable;
+	FileWriter mFileWriter;
 	private Position pos;
 	private boolean printSymTab;
 	
-	public Typechecker(Position p, boolean print) {
+	public Typechecker(String filename, Position p, boolean print) {
 		symbolTable = new LinkedList<HashMap<String, Type> >();
 		symbolTable.addFirst(new HashMap<String, Type>());
 		pos = p;
 		printSymTab = print;
+		try {
+			mFileWriter = new FileWriter(filename);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public void check(Node node) {
@@ -28,12 +36,24 @@ public class Typechecker extends DepthFirstAdapter{
 	// print the symbol table to the console
 	public void printSymbolTable() {
 		if (printSymTab) {
-			for (int i = 0; i < symbolTable.size(); i++) {
-				HashMap<String, Type> temp = symbolTable.get(i);
-				System.out.println("Layer " + i + ":");
+			try {
+				String s = "";
+//				for (int i = 0; i < symbolTable.size(); i++) {
+//					HashMap<String, Type> temp = symbolTable.get(i);
+//					for (HashMap.Entry<String, Type> entry : temp.entrySet()) {
+//						s += "Key = " + entry.getKey() + ", Type = " + entry.getValue() + "\n";
+//					}
+//					s += "\n";
+//				}
+				HashMap<String, Type> temp = symbolTable.getFirst();
 				for (HashMap.Entry<String, Type> entry : temp.entrySet()) {
-					System.out.println("Key = " + entry.getKey() + ", Type = " + entry.getValue());
+					s += "Key = " + entry.getKey() + ", Type = " + entry.getValue() + "\n";
 				}
+				s += "\n";
+				mFileWriter.append(s+" ");
+				mFileWriter.flush();
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
 		}
 	}
@@ -227,7 +247,8 @@ public class Typechecker extends DepthFirstAdapter{
 			stm.apply(this);
 		}
 		//TODO:
-//		symbolTable.removeFirst();
+		printSymbolTable();
+		symbolTable.removeFirst();
 	}
 	
 	public void addFunction(AAstFuncDecl node) {
@@ -687,6 +708,7 @@ public class Typechecker extends DepthFirstAdapter{
 			stm.apply(this);
 		}
 		
+		printSymbolTable();
 		symbolTable.removeFirst();
 	}
 	
@@ -718,6 +740,7 @@ public class Typechecker extends DepthFirstAdapter{
 			stm.apply(this);
 		}
 		
+		printSymbolTable();
 		symbolTable.removeFirst();
 	}
 	
@@ -743,6 +766,7 @@ public class Typechecker extends DepthFirstAdapter{
 			forAstSwitchStm(stm, expType);
 		}
 		
+		printSymbolTable();
 		symbolTable.removeFirst();
 	}
 	
@@ -798,6 +822,7 @@ public class Typechecker extends DepthFirstAdapter{
 			stm.apply(this);
 		}
 		
+		printSymbolTable();
 		symbolTable.removeFirst();
 	}
 	
@@ -812,6 +837,7 @@ public class Typechecker extends DepthFirstAdapter{
 			stm.apply(this);
 		}
 		
+		printSymbolTable();
 		symbolTable.removeFirst();
 	}
 	
