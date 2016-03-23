@@ -19,6 +19,7 @@ public class GoLexer extends Lexer {
 		|| last_token instanceof TFloatLit
 		|| last_token instanceof TStringLit
 		|| last_token instanceof TRuneLit
+		|| last_token instanceof TBoolLit
 		
 		|| last_token instanceof TBreak
 		|| last_token instanceof TContinue

@@ -1,0 +1,72 @@
+============
+Declaration
+============
+Variable declaration
+	checks variables with same name cannot be repeatedly declared in same scope
+		basic types: var_decl_exp.go, var_decl_type_exp.go, var_decl_type.go
+		struct: type_decl_struct.go
+		array: type_decl_struct.go
+Function declaration
+		function: func_decl.go, func_param.go
+Type declaration
+	checks alias types are well defined
+		type_decl_badAlias.go
+		
+==========
+Statement
+==========
+Return
+	*for a function of non-void return type, check the return type on every execution path is assignable 
+	to the function signature.
+	test file: return_nonvoid.go
+	*for a function of void return type, check the return type on every execution path is void(i.e. just "return").
+	test file: return_void.go
+	
+Assignment capability:
+	lhs\rhs int float64 string bool rune
+	int		YES NO		NO	   NO	YES	
+	float64 YES YES		NO	   NO	YES	 
+	string  NO  NO		YES	   NO	NO	
+	bool	NO	NO		NO	   YES	NO
+	rune	YES NO		NO	   NO	YES
+
+	test files: assign_floatToInt.go, assign_stringToFloat.go, assign_stringToInt.go
+	
+Casting capability:
+to\from int float64 string bool rune
+int		YES	YES		NO	   NO	YES
+float64 YES	YES		NO	   NO	YES
+string	NO  NO		YES	   NO	NO
+bool	NO	NO		NO	   YES	NO
+rune	YES	YES		NO	   NO	YES
+
+Binary operators:
+
++=
+lhs\rhs int float64 string bool rune
+int		YES	NO		NO	   NO	YES
+float64 YES	YES		NO	   NO	YES
+string	NO  NO		YES	   NO	NO
+bool	NO	NO		NO	   NO	NO
+rune	YES	NO		NO	   NO	YES
+
+Test files:
+op_assign_plus.go
+
+
+=-,*=,/=,%=
+lhs\rhs int float64 string bool rune
+int		YES	NO		NO	   NO	YES
+float64 YES	YES		NO	   NO	YES
+string	NO  NO		NO	   NO	NO
+bool	NO	NO		NO	   NO	NO
+rune	YES	NO		NO	   NO	YES
+
+
+|=,^=,&=
+both lhs and rhs must be bool
+
+<<=,>>=,&^=
+both lhs and rhs must be int
+
+		
