@@ -4,17 +4,10 @@ public class RuneType extends Type{
 
 	@Override
 	public boolean assign(Type t) {
-		if (t instanceof RuneType)
+		if (t.is(Type.RUNE) || t.is(Type.INT))
 			return true;
-		
-		return false;
-	}
-
-	@Override
-	public boolean compare(Type t) {
-		if (t instanceof RuneType)
-			return true;
-		
+		else if (t instanceof AliasType) 
+			return assign(((AliasType) t).type);
 		return false;
 	}
 

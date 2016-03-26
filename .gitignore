@@ -2,6 +2,9 @@ src/goplusplus/*/*
 bin
 #*.class
 
+*.pretty.go
+*.symtab
+
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 

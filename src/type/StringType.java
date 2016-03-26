@@ -6,15 +6,8 @@ public class StringType extends Type{
 	public boolean assign(Type t) {
 		if (t instanceof StringType)
 			return true;
-		
-		return false;
-	}
-
-	@Override
-	public boolean compare(Type t) {
-		if (t instanceof StringType)
-			return true;
-		
+		else if (t instanceof AliasType) 
+			return assign(((AliasType) t).type);
 		return false;
 	}
 	

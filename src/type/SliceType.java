@@ -4,12 +4,17 @@ public class SliceType extends Type{
 
 	@Override
 	public boolean assign(Type t) {
-		return false;
-	}
-
-	@Override
-	public boolean compare(Type t) {
-		// TODO Auto-generated method stub
+		if (t instanceof SliceType) {
+			if (((SliceType) t).elementType == elementType) {
+				return true;
+			}
+		} else if (t instanceof AliasType) { 
+			return assign(((AliasType) t).type);
+		} else if (t instanceof AppendType) {
+			if (((AppendType) t).type == elementType) {
+				return true;
+			}
+		}
 		return false;
 	}
 	

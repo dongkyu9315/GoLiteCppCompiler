@@ -10,11 +10,9 @@ public class Main {
 	public static void main(String[] args) {
 		if (args.length > 0) {
 			try {
-				/* ----------------- */
+				/* ------------------ */
 				/* Scanner and Parser */
-				/* ----------------- */
-//				System.out.println("Scanner ...");
-//				System.out.println("Parser ...");
+				/* ------------------ */
 				/* Form our AST */
 				GoLexer lexer = new GoLexer (new PushbackReader(
 						new FileReader(args[0]), 1024));
@@ -36,30 +34,39 @@ public class Main {
 				/* ---------------- */
 				String filenameNoExt = args[0].replaceFirst("[.][^.]+$", "");
 				
-				/* -------------- */
-				/* Pretty Printer */
-				/* -------------- */
-//				System.out.println("Pretty Printer ...");
-				/* Pretty Print the AST */
-				String pathAST = filenameNoExt + ".pretty.go";
-				PrettyPrinter.print(ast, pathAST);
-//				System.out.println("DONE\n");
+				/* ----------------- */
+				/* flag verification */
+				/* ----------------- */
+				String firstFlag = args[1];
+				String secondFlag = args[2];
+				boolean dump = false;
+				boolean pptype = false;
+				if (firstFlag.equals("dumpsymtab")) {
+					dump = true;
+				} else if (secondFlag.equals("dumpsymtab")) {
+					dump = true;
+				}
+				if (firstFlag.equals("pptype")) {
+					pptype = true;
+				} else if (secondFlag.equals("pptype")) {
+					pptype = true;
+				}
 				
 				/* ------------ */
 				/* Type Checker */
 				/* ------------ */
-				System.out.println("Type Checker ...");
-//				String pathSymbol = filename + ".symbol";
-//				String pathSymbol = filenameNoExt + ".symbol";
-//				File fileSymbol = new File(pathSymbol);
-//				fileSymbol.createNewFile();
-//				FileWriter writerSymbol = new FileWriter(fileSymbol, false);
-				Typechecker typechecker = new Typechecker(p);
+				String flName = filenameNoExt + ".symtab";
+				Typechecker typechecker = new Typechecker(flName, p, dump);
 				typechecker.check(ast);
 				typechecker.printSymbolTable();
-//				writerSymbol.flush();
-//				writerSymbol.close();
-				System.out.println("VALID\n");
+				
+				/* -------------- */
+				/* Pretty Printer */
+				/* -------------- */
+				/* Pretty Print the AST */
+				String ppFile = filenameNoExt + ".pptype.go";
+				PrettyPrinter prettyPrinter = new PrettyPrinter(ppFile, p, pptype);
+				prettyPrinter.print(ast);
 				
 				/* ---------------- */
 				/* C Code Generator */
@@ -72,14 +79,15 @@ public class Main {
 //				CCodeGenerator.print(ast2, writerCGen, symbolTable);
 //				writerCGen.flush();
 //				writerCGen.close();
-//				System.out.println("DONE\n");
+				
+				System.out.println("DONE\n");
 				
 			} catch (Exception e) {
 				System.out.println("INVALID\n");
 				System.out.println(e);
 			}
 		} else {
-			System.err.println("usage: java goplusplus inputFile");
+			System.err.println("No input file");
 			System.exit(1);
 		}
 	}

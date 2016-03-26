@@ -7,10 +7,10 @@ public class AliasType extends Type {
 		return type.assign(t);
 	}
 
+	public Type type;
+	
 	@Override
-	public boolean compare(Type t) {
-		return type.compare(t);
+	public String toString() {
+		return "alias " + type.toString();
 	}
-
-	Type type;
 }

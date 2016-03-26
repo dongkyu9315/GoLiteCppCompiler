@@ -6,15 +6,8 @@ public class BoolType extends Type{
 	public boolean assign(Type t) {
 		if (t instanceof BoolType)
 			return true;
-		
-		return false;
-	}
-
-	@Override
-	public boolean compare(Type t) {
-		if (t instanceof BoolType)
-			return true;
-		
+		else if (t instanceof AliasType) 
+			return assign(((AliasType) t).type);
 		return false;
 	}
 	
