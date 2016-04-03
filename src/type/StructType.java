@@ -29,4 +29,10 @@ public class StructType extends Type{
 		s += "}";
 		return s;
 	}
+
+	@Override
+	//do nothing, leave it to CppGenerator to print function
+	public String print() {
+		return "";
+	}
 }

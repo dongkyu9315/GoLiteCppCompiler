@@ -24,4 +24,9 @@ public class SliceType extends Type{
 	public String toString() {
 		return "[] " + elementType;
 	}
+
+	@Override
+	public String print() {
+		return "std::vector<" + elementType.print() +">";
+	}
 }
