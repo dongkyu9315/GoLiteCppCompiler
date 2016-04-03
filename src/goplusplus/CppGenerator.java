@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Stack;
 
 import type.*;
 import goplusplus.analysis.DepthFirstAdapter;
@@ -15,11 +16,18 @@ public class CppGenerator extends DepthFirstAdapter{
 	public LinkedList<HashMap<String, Type>> symbolTable;
 	private Position pos;
 	FileWriter mFileWriter;
+	Stack<Integer> mIndentStack;
+	private final String INT = "int";
+	private final String FLOAT64 = "float";
+	private final String BOOL = "boolean";
+	private final String STRING = "string";
+	private final String RUNE = "char";
 	
 	public CppGenerator(String filename, Position p) {
 		symbolTable = new LinkedList<HashMap<String, Type> >();
 		symbolTable.addFirst(new HashMap<String, Type>());
 		pos = p;
+		mIndentStack = new Stack<Integer>();
 		try {
 			mFileWriter = new FileWriter(filename);
 		} catch (IOException e) {
@@ -31,6 +39,9 @@ public class CppGenerator extends DepthFirstAdapter{
 	// ast_program		---------------------------------------------------
 	@Override
 	public void caseAAstProgram(AAstProgram node) {
+		print("#include <stdlib.h>\n");
+		print("#include <iostream>\n");
+		print("#include <string>\n");
 		LinkedList<PAstDecl> decl = node.getDecl();
 		if (!decl.isEmpty()) {
 			//first pass to collect root level vars and functions			
@@ -39,27 +50,59 @@ public class CppGenerator extends DepthFirstAdapter{
 					addFunction((AAstFuncDecl) ((AFuncDecAstDecl)d).getAstFuncDecl());
 				} else {
 					d.apply(this);
+					print(";");
 				}
 			}
 
 			for (PAstDecl d : decl) {
 				if (d instanceof AFuncDecAstDecl) {
 					d.apply(this);
+					print(";");
 				}
 			}
 		}
 	}
 
-
+	public void caseABasicAstTypeExp(ABasicAstTypeExp node){
+		Type type = forPAstTypeExp(node);
+		if(type.is(Type.INT)){
+			print(INT);
+		}
+		else if(type.is(Type.BOOL)){
+			print(BOOL);
+		}
+		else if(type.is(Type.RUNE)){
+			print(RUNE);
+		}
+		else if(type.is(Type.STRING)){
+			print(STRING);
+		}
+		else if(type.is(Type.FLOAT64)){
+			print(FLOAT64);
+		}
+	}
+	
+	public void caseTId(TId node){
+		print(node.getText());
+	}
 	// ast_var_decl		---------------------------------------------------
 	@Override
 	public void caseATypeAstVarDecl(ATypeAstVarDecl node) {
 		LinkedList<TId> idlist = node.getId();
-		Type varType = forPAstTypeExp(node.getAstTypeExp());
+		PAstTypeExp typeExp = node.getAstTypeExp();
+		typeExp.apply(this);
+		Type varType = forPAstTypeExp(typeExp);
+		
+		String sep = "";
 		for (TId d : idlist) {
 			symbolTable.getFirst().put(d.getText().trim(), varType);
+			print(sep);
+			d.apply(this);
+			sep = ",";
 		}
 	}
+	
+	
 
 	@Override
 	public void caseAExpAstVarDecl(AExpAstVarDecl node) {
@@ -116,13 +159,12 @@ public class CppGenerator extends DepthFirstAdapter{
 
 	
 	public void inAAstFuncDecl(AAstFuncDecl node) {
-		HashMap<String, Type> newScope = new HashMap<String, Type>();
-		symbolTable.addFirst(newScope);
+		newScope();
 		
 	}
 	
 	public void outAAstFuncDecl(AAstFuncDecl node) {
-		symbolTable.removeFirst();
+		exitScope();
 	}
 
 	public void addFunction(AAstFuncDecl node) {
@@ -259,52 +301,62 @@ public class CppGenerator extends DepthFirstAdapter{
 		return false;
 	}
 
-
-	public void inAShortifAstStm(AShortifAstStm node) {
+	private void newScope(){
 		HashMap<String, Type> newScope = new HashMap<String, Type>();
 		symbolTable.addFirst(newScope);
+		mIndentStack.push(mIndentStack.size()+1);
+	}
+	
+	private void exitScope(){
+		symbolTable.removeFirst();
+		mIndentStack.pop();
+	}
+	
+	private void printTab(){
+		for (int i = 0; i < mIndentStack.size(); i++)
+			print("\t");
+	}
+
+	public void inAShortifAstStm(AShortifAstStm node) {
+		newScope();
 	}
 	
 	public void outAShortifAstStm(AShortifAstStm node) {
-		symbolTable.removeFirst();
+		exitScope();
 	}
 
 	public void inALongifAstStm(ALongifAstStm node) {
-		HashMap<String, Type> newScope = new HashMap<String, Type>();
-		symbolTable.addFirst(newScope);
+		newScope();
 	}
 
 	public void outALongifAstStm(ALongifAstStm node) {
-		symbolTable.removeFirst();
+		exitScope();
 	}
 	
 
 	public void inASwitchAstStm(ASwitchAstStm node) {
-		HashMap<String, Type> newScope = new HashMap<String, Type>();
-		symbolTable.addFirst(newScope);
+		newScope();
 	}
 	
 	public void outASwitchAstStm(ASwitchAstStm node) {
-		symbolTable.removeFirst();
+		exitScope();
 	}
 	
 	public void inAForAstStm(AForAstStm node) {
-		HashMap<String, Type> newScope = new HashMap<String, Type>();
-		symbolTable.addFirst(newScope);
+		newScope();
 	}
 	
 	public void outAForAstStm(AForAstStm node) {
-		symbolTable.removeFirst();
+		exitScope();
 	}
 
 	
 	public void inABlockAstStm(ABlockAstStm node) {
-		HashMap<String, Type> newScope = new HashMap<String, Type>();
-		symbolTable.addFirst(newScope);
+		newScope();
 	}
 	
 	public void outABlockAstStm(ABlockAstStm node) {
-		symbolTable.removeFirst();
+		exitScope();
 	}
 	
 
@@ -696,5 +748,15 @@ public class CppGenerator extends DepthFirstAdapter{
 			return "fallthrough";
 		}
 		return null;
+	}
+	
+	private void print(String s) {
+		try {
+//			mFileWriter.append(s + " ");
+//			mFileWriter.flush();
+			System.out.print(s+" ");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }
