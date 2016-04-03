@@ -286,47 +286,357 @@ public class CppGenerator extends DepthFirstAdapter{
 			print(FLOAT64);
 		}
 	}
+	
+	// ast_stm
+	@Override
+	public void caseAEmptyAstStm(AEmptyAstStm node) {
+		//do nothing
+	}
+	
+	@Override
+	public void caseAExpAstStm(AExpAstStm node) {
+		node.getAstExp().apply(this);
+	}
+	
+	@Override
+	public void caseAAssignAstStm(AAssignAstStm node) {
+		LinkedList<?> lvals = node.getLval();
+		for (Iterator<?> iterator = lvals.iterator(); iterator.hasNext();) {
+			PAstExp exp = (PAstExp) iterator.next();
+			exp.apply(this);
+			if (iterator.hasNext())
+				print(",");
+		}
+		
+		print("=");
+		
+		LinkedList<?> rvals = node.getRval();
+		for (Iterator<?> iterator = rvals.iterator(); iterator.hasNext();) {
+			PAstExp exp = (PAstExp) iterator.next();
+			exp.apply(this);
+			if (iterator.hasNext())
+				print(",");
+		}
+	}
+	
+	@Override
+	public void caseAOpAssignAstStm(AOpAssignAstStm node) {
+		print(node.getL().getText().trim());
+		node.getAstOpAssign().apply(this);
+		node.getR().apply(this);
+	}
+	
+	@Override
+	public void caseAVarDeclAstStm(AVarDeclAstStm node) {
+		LinkedList<?> decls = node.getAstVarDecl();
+		for (Iterator<?> iterator = decls.iterator(); iterator.hasNext();) {
+			PAstVarDecl exp = (PAstVarDecl) iterator.next();
+			exp.apply(this);
+			if (iterator.hasNext()){
+				print("\n");
+				for(int i = 0; i < mIndentStack.size(); i++) {
+					print("\t");
+				}
+			}
+		}
+	}
+	
+	// TODO: implement this method
+	@Override
+	public void caseAShortDeclAstStm(AShortDeclAstStm node) {
+		LinkedList<?> lvals = node.getIds();
+		for (Iterator<?> iterator = lvals.iterator(); iterator.hasNext();) {
+			PAstExp exp = (PAstExp) iterator.next();
+			exp.apply(this);
+			if (iterator.hasNext())
+				print(",");
+		}
+		
+		print(":=");
+		
+		LinkedList<?> rvals = node.getAstExp();
+		for (Iterator<?> iterator = rvals.iterator(); iterator.hasNext();) {
+			PAstExp exp = (PAstExp) iterator.next();
+			exp.apply(this);
+			if (iterator.hasNext())
+				print(",");
+		}
+	}
+	
+	// return true if the variable on the left is in the current scope
+	public boolean helperForShortDecl(PAstExp node, Type rightType) {
+		if (node.getClass().isInstance(new AParenAstExp())) {
+			AParenAstExp temp = (AParenAstExp) node;
+			return helperForShortDecl(temp.getAstExp(), rightType);
+		} else if (node.getClass().isInstance(new AIdAstExp())) {
+			AIdAstExp temp = (AIdAstExp) node;
+			if (!symbolTable.getFirst().containsKey(temp.getId().getText().trim())) {
+				symbolTable.getFirst().put(temp.getId().getText().trim(), rightType);
+				return false;
+			}
+			return true;
+		} else if (node.getClass().isInstance(new AArrayAccessAstExp())) {
+			return true;
+		} else if (node.getClass().isInstance(new AFieldAccessAstExp())) {
+			return true;
+		}
+		return false;
+	}
+	
+	@Override
+	public void caseATypeDeclAstStm(ATypeDeclAstStm node) {
+		LinkedList<?> decls = node.getAstTypeDecl();
+		for (Iterator<?> iterator = decls.iterator(); iterator.hasNext();) {
+			PAstTypeDecl exp = (PAstTypeDecl) iterator.next();
+			exp.apply(this);
+			if (iterator.hasNext()){
+				print("\n");
+				for(int i = 0; i < mIndentStack.size(); i++) {
+					print("\t");
+				}
+			}
+		}
+	}
+	
+	@Override
+	public void caseAIncDecAstStm(AIncDecAstStm node) {
+		node.getAstExp().apply(this);
+		node.getAstPostOp().apply(this);
+	}
+	
+	@Override
+	public void caseAPrintAstStm(APrintAstStm node) {
+		print("print(");
+		LinkedList<?> exps = node.getAstExp();
+		for (Iterator<?> iterator = exps.iterator(); iterator.hasNext();) {
+			PAstExp exp = (PAstExp) iterator.next();
+			exp.apply(this);
+			if (iterator.hasNext())
+				print(",");
+		}
+		print(")");
+	}
+	
+	@Override
+	public void caseAPrintlnAstStm(APrintlnAstStm node) {
+		print("println(");
+		LinkedList<?> exps = node.getAstExp();
+		for (Iterator<?> iterator = exps.iterator(); iterator.hasNext();) {
+			PAstExp exp = (PAstExp) iterator.next();
+			exp.apply(this);
+			if (iterator.hasNext())
+				print(",");
+		}
+		print(")");
+	}
+	
+	@Override
+	public void caseAReturnAstStm(AReturnAstStm node) {
+		print("return");
+		if (node.getAstExp() != null)
+			node.getAstExp().apply(this);
+	}
+	
+	@Override
+	public void caseAShortifAstStm(AShortifAstStm node) {
+		print("if");
+		if (node.getInit() != null) {
+			node.getInit().apply(this);
+			print(";");
+		}
+		node.getCondition().apply(this);
+		
+		print("{\n");
+		
+		mIndentStack.push(mIndentStack.size()+1);
+		
+		LinkedList<?> stmts = node.getAstStm();
+		for (Iterator<?> iterator = stmts.iterator(); iterator.hasNext();) {
+			for (int i = 0; i < mIndentStack.size(); i++)
+				print("\t");
+			PAstStm stm = (PAstStm) iterator.next();
+			stm.apply(this);
+			print("\n");
+		}
+		
+		mIndentStack.pop();
 
+		for (int i = 0; i < mIndentStack.size(); i++)
+				print("\t");
+		print("}\n");
+	}
+	
+	@Override
 	public void inAShortifAstStm(AShortifAstStm node) {
 		newScope();
 	}
 	
+	@Override
 	public void outAShortifAstStm(AShortifAstStm node) {
 		exitScope();
 	}
-
+	
+	@Override
+	public void caseALongifAstStm(ALongifAstStm node) {
+		print("if");
+		if (node.getInit() != null) {
+			node.getInit().apply(this);
+			print(";");
+		}
+		node.getCondition().apply(this);
+		
+		print("{\n");
+		
+		mIndentStack.push(mIndentStack.size()+1);
+		
+		LinkedList<?> if_stmts = node.getIfStms();
+		for (Iterator<?> iterator = if_stmts.iterator(); iterator.hasNext();) {
+			for (int i = 0; i < mIndentStack.size(); i++)
+				print("\t");
+			PAstStm stm = (PAstStm) iterator.next();
+			stm.apply(this);
+			print("\n");
+		}
+		
+		mIndentStack.pop();
+		for (int i = 0; i < mIndentStack.size(); i++)
+				print("\t");
+		print("}\n");
+		
+		print("else {\n");
+		mIndentStack.push(mIndentStack.size()+1);
+		LinkedList<?> else_stmts = node.getElseStms();
+		for (Iterator<?> iterator = else_stmts.iterator(); iterator.hasNext();) {
+			for (int i = 0; i < mIndentStack.size(); i++)
+				print("\t");
+			PAstStm stm = (PAstStm) iterator.next();
+			stm.apply(this);
+			print("\n");
+		}
+		
+		mIndentStack.pop();
+		for (int i = 0; i < mIndentStack.size(); i++)
+				print("\t");
+		print("}\n");
+	}
+	
+	@Override
 	public void inALongifAstStm(ALongifAstStm node) {
 		newScope();
 	}
-
+	
+	@Override
 	public void outALongifAstStm(ALongifAstStm node) {
 		exitScope();
 	}
 	
-
+	@Override
+	public void caseASwitchAstStm(ASwitchAstStm node) {
+		print("switch");
+		node.getAstStm().apply(this);
+		node.getAstExp().apply(this);
+		print(" {\n");
+		LinkedList<?> stms = node.getAstSwitchStm();
+		for (Iterator<?> iterator = stms.iterator(); iterator.hasNext();) {
+			PAstSwitchStm stm = (PAstSwitchStm) iterator.next();
+			stm.apply(this);
+			if (iterator.hasNext())
+				print(",");
+		}
+		print("}\n");
+	}
+	
+	@Override
 	public void inASwitchAstStm(ASwitchAstStm node) {
 		newScope();
 	}
 	
+	@Override
 	public void outASwitchAstStm(ASwitchAstStm node) {
 		exitScope();
 	}
 	
+	@Override
+	public void caseAForAstStm(AForAstStm node) {
+		print("for");
+		if (node.getInit() != null) {
+			node.getInit().apply(this);
+			print(";");
+		}
+		if (node.getCondition() != null) {
+			node.getCondition().apply(this);
+		}
+		if (node.getPost() != null) {
+			print(";");
+			node.getPost().apply(this);
+		}
+		
+		print("{\n");
+		
+		mIndentStack.push(mIndentStack.size()+1);
+		
+		LinkedList<?> stmts = node.getBody();
+		for (Iterator<?> iterator = stmts.iterator(); iterator.hasNext();) {
+			for (int i = 0; i < mIndentStack.size(); i++)
+				print("\t");
+			PAstStm stm = (PAstStm) iterator.next();
+			stm.apply(this);
+			print("\n");
+		}
+		
+		mIndentStack.pop();
+		for (int i = 0; i < mIndentStack.size(); i++)
+				print("\t");
+		print("}\n");
+	}
+	
+	@Override
 	public void inAForAstStm(AForAstStm node) {
 		newScope();
 	}
 	
+	@Override
 	public void outAForAstStm(AForAstStm node) {
 		exitScope();
 	}
-
 	
+	@Override
+	public void caseABlockAstStm(ABlockAstStm node) {
+		print("{\n");
+		
+		mIndentStack.push(mIndentStack.size()+1);
+		
+		LinkedList<?> stmts = node.getAstStm();
+		for (Iterator<?> iterator = stmts.iterator(); iterator.hasNext();) {
+			for (int i = 0; i < mIndentStack.size(); i++)
+				print("\t");
+			PAstStm stm = (PAstStm) iterator.next();
+			stm.apply(this);
+			print("\n");
+		}
+		
+		mIndentStack.pop();
+		print("}\n");
+	}
+	
+	@Override
 	public void inABlockAstStm(ABlockAstStm node) {
 		newScope();
 	}
 	
+	@Override
 	public void outABlockAstStm(ABlockAstStm node) {
 		exitScope();
+	}
+	
+	@Override
+	public void caseABreakAstStm(ABreakAstStm node) {
+		print("break");
+	}
+	
+	@Override
+	public void caseAContinueAstStm(AContinueAstStm node) {
+		print("continue");
 	}
 	
 	// returns the type of PAstExp
@@ -589,307 +899,6 @@ public class CppGenerator extends DepthFirstAdapter{
 			}
 		}
 		return null;
-	}
-	
-	@Override
-	public void caseAEmptyAstStm(AEmptyAstStm node) {
-		//do nothing
-	}
-	
-	@Override
-	public void caseAExpAstStm(AExpAstStm node) {
-		node.getAstExp().apply(this);
-	}
-	
-	@Override
-	public void caseAAssignAstStm(AAssignAstStm node) {
-		LinkedList<?> lvals = node.getLval();
-		for (Iterator<?> iterator = lvals.iterator(); iterator.hasNext();) {
-			PAstExp exp = (PAstExp) iterator.next();
-			exp.apply(this);
-			if (iterator.hasNext())
-				print(",");
-		}
-		
-		print("=");
-		
-		LinkedList<?> rvals = node.getRval();
-		for (Iterator<?> iterator = rvals.iterator(); iterator.hasNext();) {
-			PAstExp exp = (PAstExp) iterator.next();
-			exp.apply(this);
-			if (iterator.hasNext())
-				print(",");
-		}
-	}
-	
-	@Override
-	public void caseAOpAssignAstStm(AOpAssignAstStm node) {
-		print(node.getL().getText().trim());
-		node.getAstOpAssign().apply(this);
-		node.getR().apply(this);
-	}
-	
-	@Override
-	public void caseAVarDeclAstStm(AVarDeclAstStm node) {
-		LinkedList<?> decls = node.getAstVarDecl();
-		for (Iterator<?> iterator = decls.iterator(); iterator.hasNext();) {
-			PAstVarDecl exp = (PAstVarDecl) iterator.next();
-			exp.apply(this);
-			if (iterator.hasNext()){
-				print("\n");
-				for(int i = 0; i < mIndentStack.size(); i++) {
-					print("\t");
-				}
-			}
-		}
-	}
-	
-	// TODO: implement this method
-	@Override
-	public void caseAShortDeclAstStm(AShortDeclAstStm node) {
-		LinkedList<?> lvals = node.getIds();
-		for (Iterator<?> iterator = lvals.iterator(); iterator.hasNext();) {
-			PAstExp exp = (PAstExp) iterator.next();
-			exp.apply(this);
-			if (iterator.hasNext())
-				print(",");
-		}
-		
-		print(":=");
-		
-		LinkedList<?> rvals = node.getAstExp();
-		for (Iterator<?> iterator = rvals.iterator(); iterator.hasNext();) {
-			PAstExp exp = (PAstExp) iterator.next();
-			exp.apply(this);
-			if (iterator.hasNext())
-				print(",");
-		}
-	}
-	
-	// return true if the variable on the left is in the current scope
-	public boolean helperForShortDecl(PAstExp node, Type rightType) {
-		if (node.getClass().isInstance(new AParenAstExp())) {
-			AParenAstExp temp = (AParenAstExp) node;
-			return helperForShortDecl(temp.getAstExp(), rightType);
-		} else if (node.getClass().isInstance(new AIdAstExp())) {
-			AIdAstExp temp = (AIdAstExp) node;
-			if (!symbolTable.getFirst().containsKey(temp.getId().getText().trim())) {
-				symbolTable.getFirst().put(temp.getId().getText().trim(), rightType);
-				return false;
-			}
-			return true;
-		} else if (node.getClass().isInstance(new AArrayAccessAstExp())) {
-			return true;
-		} else if (node.getClass().isInstance(new AFieldAccessAstExp())) {
-			return true;
-		}
-		return false;
-	}
-	
-	@Override
-	public void caseATypeDeclAstStm(ATypeDeclAstStm node) {
-		LinkedList<?> decls = node.getAstTypeDecl();
-		for (Iterator<?> iterator = decls.iterator(); iterator.hasNext();) {
-			PAstTypeDecl exp = (PAstTypeDecl) iterator.next();
-			exp.apply(this);
-			if (iterator.hasNext()){
-				print("\n");
-				for(int i = 0; i < mIndentStack.size(); i++) {
-					print("\t");
-				}
-			}
-		}
-	}
-	
-	@Override
-	public void caseAIncDecAstStm(AIncDecAstStm node) {
-		node.getAstExp().apply(this);
-		node.getAstPostOp().apply(this);
-	}
-	
-	@Override
-	public void caseAPrintAstStm(APrintAstStm node) {
-		print("print(");
-		LinkedList<?> exps = node.getAstExp();
-		for (Iterator<?> iterator = exps.iterator(); iterator.hasNext();) {
-			PAstExp exp = (PAstExp) iterator.next();
-			exp.apply(this);
-			if (iterator.hasNext())
-				print(",");
-		}
-		print(")");
-	}
-	
-	@Override
-	public void caseAPrintlnAstStm(APrintlnAstStm node) {
-		print("println(");
-		LinkedList<?> exps = node.getAstExp();
-		for (Iterator<?> iterator = exps.iterator(); iterator.hasNext();) {
-			PAstExp exp = (PAstExp) iterator.next();
-			exp.apply(this);
-			if (iterator.hasNext())
-				print(",");
-		}
-		print(")");
-	}
-	
-	@Override
-	public void caseAReturnAstStm(AReturnAstStm node) {
-		print("return");
-		if (node.getAstExp() != null)
-			node.getAstExp().apply(this);
-	}
-	
-	@Override
-	public void caseAShortifAstStm(AShortifAstStm node) {
-		print("if");
-		if (node.getInit() != null) {
-			node.getInit().apply(this);
-			print(";");
-		}
-		node.getCondition().apply(this);
-		
-		print("{\n");
-		
-		mIndentStack.push(mIndentStack.size()+1);
-		
-		LinkedList<?> stmts = node.getAstStm();
-		for (Iterator<?> iterator = stmts.iterator(); iterator.hasNext();) {
-			for (int i = 0; i < mIndentStack.size(); i++)
-				print("\t");
-			PAstStm stm = (PAstStm) iterator.next();
-			stm.apply(this);
-			print("\n");
-		}
-		
-		mIndentStack.pop();
-
-		for (int i = 0; i < mIndentStack.size(); i++)
-				print("\t");
-		print("}\n");
-	}
-	
-	@Override
-	public void caseALongifAstStm(ALongifAstStm node) {
-		print("if");
-		if (node.getInit() != null) {
-			node.getInit().apply(this);
-			print(";");
-		}
-		node.getCondition().apply(this);
-		
-		print("{\n");
-		
-		mIndentStack.push(mIndentStack.size()+1);
-		
-		LinkedList<?> if_stmts = node.getIfStms();
-		for (Iterator<?> iterator = if_stmts.iterator(); iterator.hasNext();) {
-			for (int i = 0; i < mIndentStack.size(); i++)
-				print("\t");
-			PAstStm stm = (PAstStm) iterator.next();
-			stm.apply(this);
-			print("\n");
-		}
-		
-		mIndentStack.pop();
-		for (int i = 0; i < mIndentStack.size(); i++)
-				print("\t");
-		print("}\n");
-		
-		print("else {\n");
-		mIndentStack.push(mIndentStack.size()+1);
-		LinkedList<?> else_stmts = node.getElseStms();
-		for (Iterator<?> iterator = else_stmts.iterator(); iterator.hasNext();) {
-			for (int i = 0; i < mIndentStack.size(); i++)
-				print("\t");
-			PAstStm stm = (PAstStm) iterator.next();
-			stm.apply(this);
-			print("\n");
-		}
-		
-		mIndentStack.pop();
-		for (int i = 0; i < mIndentStack.size(); i++)
-				print("\t");
-		print("}\n");
-	}
-	
-	@Override
-	public void caseASwitchAstStm(ASwitchAstStm node) {
-		print("switch");
-		node.getAstStm().apply(this);
-		node.getAstExp().apply(this);
-		print(" {\n");
-		LinkedList<?> stms = node.getAstSwitchStm();
-		for (Iterator<?> iterator = stms.iterator(); iterator.hasNext();) {
-			PAstSwitchStm stm = (PAstSwitchStm) iterator.next();
-			stm.apply(this);
-			if (iterator.hasNext())
-				print(",");
-		}
-		print("}\n");
-	}
-	
-	@Override
-	public void caseAForAstStm(AForAstStm node) {
-		print("for");
-		if (node.getInit() != null) {
-			node.getInit().apply(this);
-			print(";");
-		}
-		if (node.getCondition() != null) {
-			node.getCondition().apply(this);
-		}
-		if (node.getPost() != null) {
-			print(";");
-			node.getPost().apply(this);
-		}
-		
-		print("{\n");
-		
-		mIndentStack.push(mIndentStack.size()+1);
-		
-		LinkedList<?> stmts = node.getBody();
-		for (Iterator<?> iterator = stmts.iterator(); iterator.hasNext();) {
-			for (int i = 0; i < mIndentStack.size(); i++)
-				print("\t");
-			PAstStm stm = (PAstStm) iterator.next();
-			stm.apply(this);
-			print("\n");
-		}
-		
-		mIndentStack.pop();
-		for (int i = 0; i < mIndentStack.size(); i++)
-				print("\t");
-		print("}\n");
-	}
-	
-	@Override
-	public void caseABlockAstStm(ABlockAstStm node) {
-		print("{\n");
-		
-		mIndentStack.push(mIndentStack.size()+1);
-		
-		LinkedList<?> stmts = node.getAstStm();
-		for (Iterator<?> iterator = stmts.iterator(); iterator.hasNext();) {
-			for (int i = 0; i < mIndentStack.size(); i++)
-				print("\t");
-			PAstStm stm = (PAstStm) iterator.next();
-			stm.apply(this);
-			print("\n");
-		}
-		
-		mIndentStack.pop();
-		print("}\n");
-	}
-	
-	@Override
-	public void caseABreakAstStm(ABreakAstStm node) {
-		print("break");
-	}
-	
-	@Override
-	public void caseAContinueAstStm(AContinueAstStm node) {
-		print("continue");
 	}
 	
 	@Override
