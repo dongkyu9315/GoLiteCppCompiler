@@ -13,4 +13,9 @@ public class AliasType extends Type {
 	public String toString() {
 		return "alias " + type.toString();
 	}
+
+	@Override
+	public String print() {
+		return type.print();
+	}
 }

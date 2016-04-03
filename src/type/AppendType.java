@@ -8,4 +8,10 @@ public class AppendType extends Type{
 	}
 
 	public Type type;
+
+	@Override
+	//do nothing, leave it to CppGenerator to print function
+	public String print() {
+		return "";
+	}
 }

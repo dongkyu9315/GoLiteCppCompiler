@@ -2,6 +2,7 @@ package type;
 
 public abstract class Type {
 	public abstract boolean assign(Type t);
+	public abstract String print();
 	public boolean is(Type t) {
 		return t.getClass().equals(this.getClass());
 	}

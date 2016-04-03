@@ -15,4 +15,9 @@ public class RuneType extends Type{
 	public String toString() {
 		return "rune";
 	}
+
+	@Override
+	public String print() {
+		return "char";
+	}
 }

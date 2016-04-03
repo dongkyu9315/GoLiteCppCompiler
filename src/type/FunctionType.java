@@ -1,7 +1,10 @@
 package type;
 
+import goplusplus.node.TId;
+
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 public class FunctionType extends Type{
 
@@ -12,6 +15,8 @@ public class FunctionType extends Type{
 	
 	public ArrayList<Type> paramType;
 	public Type returnType;	
+	public String name;
+	public List<TId> paramId;
 	
 	@Override
 	public String toString() {
@@ -24,5 +29,11 @@ public class FunctionType extends Type{
 		}
 		s += ") : " + returnType;
 		return s;
+	}
+
+	@Override
+	//do nothing, leave it to CppGenerator to print function
+	public String print() {
+		return "";
 	}
 }
