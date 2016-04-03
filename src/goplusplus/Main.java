@@ -18,6 +18,10 @@ public class Main {
 						new FileReader(args[0]), 1024));
 				Parser parser = new Parser(lexer);
 				Start ast = parser.parse();
+				GoLexer lexer2 = new GoLexer (new PushbackReader(
+						new FileReader(args[0]), 1024));
+				Parser parser2 = new Parser(lexer2);
+				Start ast2 = parser2.parse();
 				
 				Position p = new Position();
 				ast.apply(p);
@@ -71,12 +75,13 @@ public class Main {
 				/* ---------------- */
 				/* C Code Generator */
 				/* ---------------- */
-//				System.out.println("C++ Code Generator ...");
-//				String pathCGen = filename + ".cpp";
+				System.out.println("C++ Code Generator ...");
+				String pathCGen = filenameNoExt + ".cpp";
 //				File fileCGen = new File(pathCGen);
 //				fileCGen.createNewFile();
 //				FileWriter writerCGen = new FileWriter(fileCGen, false);
-//				CCodeGenerator.print(ast2, writerCGen, symbolTable);
+				CppGenerator cppGen = new CppGenerator(pathCGen, p);
+				cppGen.print(ast2);
 //				writerCGen.flush();
 //				writerCGen.close();
 				
