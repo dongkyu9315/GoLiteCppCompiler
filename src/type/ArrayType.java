@@ -23,4 +23,9 @@ public class ArrayType extends Type {
 	public String toString() {
 		return "[" + size + "] " + elementType;
 	}
+
+	@Override
+	public String print() {
+		return "std::array<" + elementType.print() + ", " + size + ">";
+	}
 }

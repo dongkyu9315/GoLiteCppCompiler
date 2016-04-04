@@ -18,6 +18,10 @@ public class Main {
 						new FileReader(args[0]), 1024));
 				Parser parser = new Parser(lexer);
 				Start ast = parser.parse();
+				GoLexer lexer2 = new GoLexer (new PushbackReader(
+						new FileReader(args[0]), 1024));
+				Parser parser2 = new Parser(lexer2);
+				Start ast2 = parser2.parse();
 				
 				Position p = new Position();
 				ast.apply(p);
@@ -66,25 +70,22 @@ public class Main {
 				/* Pretty Print the AST */
 				String ppFile = filenameNoExt + ".pptype.go";
 				PrettyPrinter prettyPrinter = new PrettyPrinter(ppFile, p, pptype);
-				prettyPrinter.print(ast);
+				prettyPrinter.print(ast2);
 				
 				/* ---------------- */
 				/* C Code Generator */
 				/* ---------------- */
-//				System.out.println("C++ Code Generator ...");
-//				String pathCGen = filename + ".cpp";
-//				File fileCGen = new File(pathCGen);
-//				fileCGen.createNewFile();
-//				FileWriter writerCGen = new FileWriter(fileCGen, false);
-//				CCodeGenerator.print(ast2, writerCGen, symbolTable);
-//				writerCGen.flush();
-//				writerCGen.close();
+				System.out.println("C++ Code Generator ...");
+//				String pathCGen = filenameNoExt + ".cpp";
+//				CppGenerator cppGen = new CppGenerator(pathCGen, p);
+//				cppGen.print(ast2);
 				
 				System.out.println("DONE\n");
 				
 			} catch (Exception e) {
 				System.out.println("INVALID\n");
 				System.out.println(e);
+				e.printStackTrace();
 			}
 		} else {
 			System.err.println("No input file");

@@ -292,7 +292,7 @@ Productions
 		{if}			if prod_simple_stm_semi? prod_exp prod_block
 			{-> New ast_stm.shortif(prod_simple_stm_semi.ast_stm, prod_exp.ast_exp, [prod_block.ast_stm])}
 	|	{ifelse}		if prod_simple_stm_semi? prod_exp [if_block]:prod_block else [else_block]:prod_block
-			{-> New ast_stm.longif(prod_simple_stm_semi.ast_stm, prod_exp.ast_exp, [if_block.ast_stm],[else_block.ast_stm])}
+			{-> New ast_stm.longif(prod_simple_stm_semi.ast_stm, prod_exp.ast_exp, [if_block.ast_stm], [else_block.ast_stm])}
 	|	{if_else_if}	if prod_simple_stm_semi? prod_exp prod_block else if_stm
 			{-> New ast_stm.longif(prod_simple_stm_semi.ast_stm, prod_exp.ast_exp, [prod_block.ast_stm], [if_stm.ast_stm])}
 	;

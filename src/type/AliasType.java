@@ -8,9 +8,20 @@ public class AliasType extends Type {
 	}
 
 	public Type type;
+	public String alias;
 	
 	@Override
 	public String toString() {
 		return "alias " + type.toString();
+	}
+
+	@Override
+	public String print() {
+		if(type.is(Type.STRUCT)){
+			return alias;
+		}
+		else{
+			return type.print();
+		}
 	}
 }
