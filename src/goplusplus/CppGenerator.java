@@ -111,29 +111,27 @@ public class CppGenerator extends DepthFirstAdapter{
 	}
 	
 	// ast_decl			--------------------------------------------------
-//	@Override
-//	public void caseAVarDecAstDecl(AVarDecAstDecl node) {
-//		LinkedList<PAstVarDecl> decl = node.getAstVarDecl();
-//		if (!decl.isEmpty()) {
-//			for (Iterator<PAstVarDecl> iterator = decl.iterator(); iterator.hasNext();) {
-//				PAstVarDecl d = (PAstVarDecl) iterator.next();
-//				d.apply(this);
-//				print("\n");
-//			}
-//		}
-//	}
-//	
-//	@Override
-//	public void caseATypeDecAstDecl(ATypeDecAstDecl node) {
-//		LinkedList<?> decl = node.getAstTypeDecl();
-//		if (!decl.isEmpty()) {
-//			for (Iterator<?> iterator = decl.iterator(); iterator.hasNext();) {
-//				PAstTypeDecl d = (PAstTypeDecl) iterator.next();
-//				d.apply(this);
-//				print("\n");
-//			}
-//		}
-//	}
+	@Override
+	public void caseAVarDecAstDecl(AVarDecAstDecl node) {
+		LinkedList<PAstVarDecl> decl = node.getAstVarDecl();
+		if (!decl.isEmpty()) {
+			for (Iterator<PAstVarDecl> iterator = decl.iterator(); iterator.hasNext();) {
+				PAstVarDecl d = (PAstVarDecl) iterator.next();
+				d.apply(this);
+			}
+		}
+	}
+	
+	@Override
+	public void caseATypeDecAstDecl(ATypeDecAstDecl node) {
+		LinkedList<?> decl = node.getAstTypeDecl();
+		if (!decl.isEmpty()) {
+			for (Iterator<?> iterator = decl.iterator(); iterator.hasNext();) {
+				PAstTypeDecl d = (PAstTypeDecl) iterator.next();
+				d.apply(this);
+			}
+		}
+	}
 	
 	@Override
 	public void caseAFuncDecAstDecl(AFuncDecAstDecl node) {
@@ -714,7 +712,7 @@ public class CppGenerator extends DepthFirstAdapter{
 	@Override
 	public void caseASwitchAstStm(ASwitchAstStm node) {
 		//start a new scope for the short statement
-		printTab(-1); 
+		printTab(); 
 		print("{\n");	
 		newScope();
 		
