@@ -110,39 +110,37 @@ public class CppGenerator extends DepthFirstAdapter{
 		}
 	}
 	
+	// ast_decl			--------------------------------------------------
+//	@Override
+//	public void caseAVarDecAstDecl(AVarDecAstDecl node) {
+//		LinkedList<PAstVarDecl> decl = node.getAstVarDecl();
+//		if (!decl.isEmpty()) {
+//			for (Iterator<PAstVarDecl> iterator = decl.iterator(); iterator.hasNext();) {
+//				PAstVarDecl d = (PAstVarDecl) iterator.next();
+//				d.apply(this);
+//				print("\n");
+//			}
+//		}
+//	}
+//	
+//	@Override
+//	public void caseATypeDecAstDecl(ATypeDecAstDecl node) {
+//		LinkedList<?> decl = node.getAstTypeDecl();
+//		if (!decl.isEmpty()) {
+//			for (Iterator<?> iterator = decl.iterator(); iterator.hasNext();) {
+//				PAstTypeDecl d = (PAstTypeDecl) iterator.next();
+//				d.apply(this);
+//				print("\n");
+//			}
+//		}
+//	}
+	
 	@Override
 	public void caseAFuncDecAstDecl(AFuncDecAstDecl node) {
 		node.getAstFuncDecl().apply(this);
 	}
 	
 	// ast_var_decl		---------------------------------------------------
-	
-	@Override
-	public void caseABasicAstTypeExp(ABasicAstTypeExp node){
-		Type type = forPAstTypeExp(node);
-		print(type.print());
-	}
-	
-	public void caseAAliasAstTypeExp(AAliasAstTypeExp node){
-		Type type = forPAstTypeExp(node);
-		if(type.is(Type.STRUCT)){
-			print(node.getId().getText().trim());
-		}
-		else{
-			print(type.print());
-		}
-	}
-	
-	public void caseAArrayAstTypeExp(AArrayAstTypeExp node){
-		Type type = forPAstTypeExp(node);
-		print(type.print());
-	}
-	
-	public void caseASliceAstTypeExp(ASliceAstTypeExp node){
-		Type type = forPAstTypeExp(node);
-		print(type.print());
-	}
-	
 	@Override
 	public void caseATypeAstVarDecl(ATypeAstVarDecl node) {
 		LinkedList<TId> idlist = node.getId();
@@ -243,7 +241,7 @@ public class CppGenerator extends DepthFirstAdapter{
 		}
 	}
 
-	
+	// ast_func_decl	-------------------------------------------------
 	@Override
 	public void caseAAstFuncDecl(AAstFuncDecl node) {
 		HashMap<String, Type> newScope = new HashMap<String, Type>();
@@ -429,9 +427,33 @@ public class CppGenerator extends DepthFirstAdapter{
 		return null;
 	}
 	
+	@Override
+	public void caseABasicAstTypeExp(ABasicAstTypeExp node){
+		Type type = forPAstTypeExp(node);
+		print(type.print());
+	}
 	
+	public void caseAAliasAstTypeExp(AAliasAstTypeExp node){
+		Type type = forPAstTypeExp(node);
+		if(type.is(Type.STRUCT)){
+			print(node.getId().getText().trim());
+		}
+		else{
+			print(type.print());
+		}
+	}
 	
-	// ast_stm
+	public void caseAArrayAstTypeExp(AArrayAstTypeExp node){
+		Type type = forPAstTypeExp(node);
+		print(type.print());
+	}
+	
+	public void caseASliceAstTypeExp(ASliceAstTypeExp node){
+		Type type = forPAstTypeExp(node);
+		print(type.print());
+	}
+	
+	// ast_stm		----------------------------------------------
 	@Override
 	public void caseAEmptyAstStm(AEmptyAstStm node) {
 		//do nothing
@@ -716,48 +738,6 @@ public class CppGenerator extends DepthFirstAdapter{
 		exitScope(); printTab(); print("}\n");
 		
 		exitScope(); printTab(); print("}\n");
-	}
-	
-	// ast_switch_stm	-------------------------------------------------------
-	@Override
-	public void caseAAstSwitchStm(AAstSwitchStm node) {
-		node.getAstSwitchCase().apply(this);
-		
-		LinkedList<?> stms = node.getAstStm();
-		if (!stms.isEmpty()) {
-			for (Iterator<?> iterator = stms.iterator(); iterator.hasNext();) {
-				printTab(1);
-				PAstStm d = (PAstStm) iterator.next();
-				d.apply(this);
-				print("\n");
-			}
-		}
-		
-		if (node.getAstFallthroughStm() == null) {
-			printTab(1);
-			print("break;\n");
-		}
-	}
-	
-	// ast_switch_case	------------------------------------------------------
-	@Override
-	public void caseADefaultAstSwitchCase(ADefaultAstSwitchCase node) {
-		printTab();
-		print("default:\n");
-	}
-	
-	@Override
-	public void caseACaseAstSwitchCase(ACaseAstSwitchCase node) {
-		LinkedList<?> exps = node.getAstExp();
-		if (!exps.isEmpty()) {
-			for (Iterator<?> iterator = exps.iterator(); iterator.hasNext();) {
-				printTab();
-				print("case");
-				PAstExp d = (PAstExp) iterator.next();
-				d.apply(this);
-				print(":\n");
-			}
-		}
 	}
 	
 	@Override
@@ -1176,6 +1156,48 @@ public class CppGenerator extends DepthFirstAdapter{
 		node.getStruct().apply(this);
 		print(".");
 		print(node.getField().toString().trim());
+	}
+	
+	// ast_switch_stm	-------------------------------------------------------
+	@Override
+	public void caseAAstSwitchStm(AAstSwitchStm node) {
+		node.getAstSwitchCase().apply(this);
+		
+		LinkedList<?> stms = node.getAstStm();
+		if (!stms.isEmpty()) {
+			for (Iterator<?> iterator = stms.iterator(); iterator.hasNext();) {
+				printTab(1);
+				PAstStm d = (PAstStm) iterator.next();
+				d.apply(this);
+				print("\n");
+			}
+		}
+		
+		if (node.getAstFallthroughStm() == null) {
+			printTab(1);
+			print("break;\n");
+		}
+	}
+	
+	// ast_switch_case	------------------------------------------------------
+	@Override
+	public void caseADefaultAstSwitchCase(ADefaultAstSwitchCase node) {
+		printTab();
+		print("default:\n");
+	}
+	
+	@Override
+	public void caseACaseAstSwitchCase(ACaseAstSwitchCase node) {
+		LinkedList<?> exps = node.getAstExp();
+		if (!exps.isEmpty()) {
+			for (Iterator<?> iterator = exps.iterator(); iterator.hasNext();) {
+				printTab();
+				print("case");
+				PAstExp d = (PAstExp) iterator.next();
+				d.apply(this);
+				print(":\n");
+			}
+		}
 	}
 	
 	// ast_literal	---------------------------------------------------
