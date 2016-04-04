@@ -70,20 +70,15 @@ public class Main {
 				/* Pretty Print the AST */
 				String ppFile = filenameNoExt + ".pptype.go";
 				PrettyPrinter prettyPrinter = new PrettyPrinter(ppFile, p, pptype);
-				prettyPrinter.print(ast);
+				prettyPrinter.print(ast2);
 				
 				/* ---------------- */
 				/* C Code Generator */
 				/* ---------------- */
 				System.out.println("C++ Code Generator ...");
-				String pathCGen = filenameNoExt + ".cpp";
-//				File fileCGen = new File(pathCGen);
-//				fileCGen.createNewFile();
-//				FileWriter writerCGen = new FileWriter(fileCGen, false);
-				CppGenerator cppGen = new CppGenerator(pathCGen, p);
-				cppGen.print(ast2);
-//				writerCGen.flush();
-//				writerCGen.close();
+//				String pathCGen = filenameNoExt + ".cpp";
+//				CppGenerator cppGen = new CppGenerator(pathCGen, p);
+//				cppGen.print(ast2);
 				
 				System.out.println("DONE\n");
 				

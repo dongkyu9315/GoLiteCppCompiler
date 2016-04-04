@@ -9,7 +9,7 @@ import java.util.Stack;
 import goplusplus.analysis.DepthFirstAdapter;
 import goplusplus.node.*;
 
-public class PrettyPrinter extends DepthFirstAdapter{
+public class PrettyPrinter extends DepthFirstAdapter {
 	public void print(Node node) {
 		node.apply(rootTypechecker);
 		node.apply(this);
@@ -17,7 +17,6 @@ public class PrettyPrinter extends DepthFirstAdapter{
 	
 	Stack<Integer> mIndentStack;
 	FileWriter mFileWriter;
-	Typechecker typechecker;
 	Typechecker rootTypechecker;
 	boolean pptype;
 	String filename;
@@ -30,10 +29,7 @@ public class PrettyPrinter extends DepthFirstAdapter{
 			e.printStackTrace();
 		}
 		mIndentStack = new Stack<Integer>();
-		if (pptype) {
-			typechecker = new Typechecker(filename, pos, false);
-			rootTypechecker = new Typechecker(filename, pos, false);
-		}
+		rootTypechecker = new Typechecker(filename, pos, false);
 		this.pptype = pptype;
 		this.filename = filename;
 		this.pos = pos;
@@ -115,11 +111,13 @@ public class PrettyPrinter extends DepthFirstAdapter{
 		
 		// pptype
 		printType("//:");
-		node.apply(typechecker);
 		for (int i = 0; i < idlist.size(); i++) {
-			printType(typechecker.symbolTable.getFirst().get(node.getId().get(i).getText().trim()).toString());
+			if (rootTypechecker.symbolTable.getFirst().containsKey(node.getId().get(i).getText().trim())) {
+				printType(rootTypechecker.symbolTable.getFirst().get(node.getId().get(i).getText().trim()).toString());
+			} else {
+				printType(node.getAstTypeExp().toString().trim());
+			}
 		}
-		typechecker = new Typechecker(filename, pos, false);
 	}
 	
 	@Override
@@ -130,8 +128,8 @@ public class PrettyPrinter extends DepthFirstAdapter{
 		
 		print("=");
 		
-		LinkedList<?> exps = node.getAstExp();
-		for (Iterator<?> iterator = exps.iterator(); iterator.hasNext();) {
+		LinkedList<PAstExp> exps = node.getAstExp();
+		for (Iterator<PAstExp> iterator = exps.iterator(); iterator.hasNext();) {
 			PAstExp exp = (PAstExp) iterator.next();
 			exp.apply(this);
 			if (iterator.hasNext())
@@ -140,11 +138,50 @@ public class PrettyPrinter extends DepthFirstAdapter{
 		
 		// pptype
 		printType("//:");
-		node.apply(typechecker);
 		for (int i = 0; i < idlist.size(); i++) {
-			printType(typechecker.symbolTable.getFirst().get(node.getId().get(i).getText().trim()).toString());
+			if (rootTypechecker.symbolTable.getFirst().containsKey(node.getId().get(i).getText().trim())) {
+				printType(rootTypechecker.symbolTable.getFirst().get(node.getId().get(i).getText().trim()).toString());
+			} else {
+				helperPAstExp(exps.get(i));
+				if (i+1 < idlist.size()) {
+					printType(",");
+				}
+			}
 		}
-		typechecker = new Typechecker(filename, pos, false);
+	}
+	
+	public void helperPAstExp(PAstExp node) {
+		if (node instanceof AParenAstExp) {
+			AParenAstExp temp = (AParenAstExp) node;
+			helperPAstExp(temp.getAstExp());
+		} else if (node instanceof AIdAstExp) {
+			AIdAstExp temp = (AIdAstExp) node;
+			if (rootTypechecker.symbolTable.getFirst().containsKey(temp.getId().getText().trim())) {
+				printType(rootTypechecker.symbolTable.getFirst().get(temp.getId().getText().trim()).toString());
+			}
+		} else if (node instanceof ALitAstExp) {
+			ALitAstExp temp = (ALitAstExp) node;
+			if (temp.getAstLiteral() instanceof AIntAstLiteral) {
+				printType("int");
+			} else if (temp.getAstLiteral() instanceof AFloatAstLiteral) {
+				printType("float64");
+			} else if (temp.getAstLiteral() instanceof ARuneAstLiteral) {
+				printType("rune");
+			} else if (temp.getAstLiteral() instanceof AStringAstLiteral) {
+				printType("string");
+			} else if (temp.getAstLiteral() instanceof ABoolAstLiteral) {
+				printType("bool");
+			}
+		} else if (node instanceof AUnaryOpAstExp) {
+			AUnaryOpAstExp temp = (AUnaryOpAstExp) node;
+			helperPAstExp(temp.getAstExp());
+		} else if (node instanceof ABinaryOpAstExp) {
+			ABinaryOpAstExp temp = (ABinaryOpAstExp) node;
+			helperPAstExp(temp.getLeft());
+		} else if (node instanceof ABasicCastAstExp) {
+			ABasicCastAstExp temp = (ABasicCastAstExp) node;
+			helperPAstExp(temp.getAstExp());
+		}
 	}
 	
 	@Override
@@ -168,11 +205,13 @@ public class PrettyPrinter extends DepthFirstAdapter{
 		
 		// pptype
 		printType("//:");
-		node.apply(typechecker);
 		for (int i = 0; i < idlist.size(); i++) {
-			printType(typechecker.symbolTable.getFirst().get(node.getId().get(i).getText().trim()).toString());
+			if (rootTypechecker.symbolTable.getFirst().containsKey(node.getId().get(i).getText().trim())) {
+				printType(rootTypechecker.symbolTable.getFirst().get(node.getId().get(i).getText().trim()).toString());
+			} else {
+				printType(node.getAstTypeExp().toString().trim());
+			}
 		}
-		typechecker = new Typechecker(filename, pos, false);
 	}
 	
 	@Override
@@ -185,11 +224,13 @@ public class PrettyPrinter extends DepthFirstAdapter{
 		
 		// pptype
 		printType("//:");
-		node.apply(typechecker);
 		for (int i = 0; i < idlist.size(); i++) {
-			printType(typechecker.symbolTable.getFirst().get(node.getId().get(i).getText().trim()).toString());
+			if (rootTypechecker.symbolTable.getFirst().containsKey(node.getId().get(i).getText().trim())) {
+				printType(rootTypechecker.symbolTable.getFirst().get(node.getId().get(i).getText().trim()).toString());
+			} else {
+				printType(node.getAstTypeExp().toString().trim());
+			}
 		}
-		typechecker = new Typechecker(filename, pos, false);
 	}
 	
 	@Override
@@ -241,7 +282,7 @@ public class PrettyPrinter extends DepthFirstAdapter{
 		node.getAstTypeExp().apply(this);
 	}
 	
-		@Override
+	@Override
 	public void caseABasicAstTypeExp(ABasicAstTypeExp node) {
 		print(node.getBasicTypes().getText().trim());
 	}

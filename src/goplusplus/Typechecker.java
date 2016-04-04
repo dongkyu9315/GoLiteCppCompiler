@@ -425,13 +425,11 @@ public class Typechecker extends DepthFirstAdapter{
 						return ((AliasType) attType).type;
 					}
 					printSymbolTable();
-					System.out.println("In forPAstTypeExp");
 					String errorMsg = "Declaration Error at line " + temp.getId().getLine();
 					throw new TypeException(errorMsg);
 				}
 			}
 			printSymbolTable();
-			System.out.println("In forPAstTypeExp");
 			String errorMsg = "Declaration Error at line " + temp.getId().getLine();
 			throw new TypeException(errorMsg);
 		}
@@ -468,7 +466,6 @@ public class Typechecker extends DepthFirstAdapter{
 //	public void caseAAliasAstTypeExp(AAliasAstTypeExp node) {
 //		print(node.getId().getText().trim());
 //	}
-//	
 	
 	// ast_struct_field ---------------------------------------------------
 //	@Override
@@ -488,10 +485,6 @@ public class Typechecker extends DepthFirstAdapter{
 //	}
 	
 	// ast_stm			---------------------------------------------------
-//	public void casePAstStm(PAstStm node) {
-//		node.apply(this);
-//	}
-	
 	@Override
 	public void caseAEmptyAstStm(AEmptyAstStm node) {
 		//do nothing
@@ -727,14 +720,18 @@ public class Typechecker extends DepthFirstAdapter{
 		}
 		
 		LinkedList<PAstStm> if_stmts = node.getIfStms();
+		System.out.println("if_stmts size" + if_stmts.size());
 		for (Iterator<PAstStm> iterator = if_stmts.iterator(); iterator.hasNext();) {
 			PAstStm stm = (PAstStm) iterator.next();
+			System.out.println(stm.toString());
 			stm.apply(this);
 		}
 		
 		LinkedList<PAstStm> else_stmts = node.getElseStms();
+		System.out.println("else_stmts size" + else_stmts.size());
 		for (Iterator<PAstStm> iterator = else_stmts.iterator(); iterator.hasNext();) {
 			PAstStm stm = (PAstStm) iterator.next();
+			System.out.println(stm.toString());
 			stm.apply(this);
 		}
 		
@@ -768,7 +765,7 @@ public class Typechecker extends DepthFirstAdapter{
 		symbolTable.removeFirst();
 	}
 	
-	public void forAstSwitchStm (AAstSwitchStm node, Type compareType) {
+	public void forAstSwitchStm(AAstSwitchStm node, Type compareType) {
 		forAstSwitchCase(node.getAstSwitchCase(), compareType);
 		
 		LinkedList<PAstStm> stmt = node.getAstStm();
@@ -777,7 +774,7 @@ public class Typechecker extends DepthFirstAdapter{
 		}
 	}
 	
-	public void forAstSwitchCase (PAstSwitchCase node, Type compareType) {
+	public void forAstSwitchCase(PAstSwitchCase node, Type compareType) {
 		if (node instanceof ACaseAstSwitchCase) {
 			ACaseAstSwitchCase temp = (ACaseAstSwitchCase) node;
 			LinkedList<PAstExp> exps = temp.getAstExp();
@@ -916,7 +913,6 @@ public class Typechecker extends DepthFirstAdapter{
 				}
 			}
 			printSymbolTable();
-			System.out.println("In forPAstExp");
 			String errorMsg = "Declaration Error at line " + temp.getId().getLine();
 			throw new TypeException(errorMsg);
 		} else if (node.getClass().isInstance(new ALitAstExp())) {
@@ -929,7 +925,6 @@ public class Typechecker extends DepthFirstAdapter{
 				Type check = forPAstExp(temp.getAstExp());
 				if (!(check.is(Type.INT) || check.is(Type.FLOAT64) || check.is(Type.RUNE))) {
 					printSymbolTable();
-					System.out.println("In forPAstExp");
 					String errorMsg = "Unary Operator Error at line " + pos.getLine(temp);
 					throw new TypeException(errorMsg);
 				}
@@ -938,7 +933,6 @@ public class Typechecker extends DepthFirstAdapter{
 				Type check = forPAstExp(temp.getAstExp());
 				if (!(check.is(Type.INT) || check.is(Type.FLOAT64) || check.is(Type.RUNE))) {
 					printSymbolTable();
-					System.out.println("In forPAstExp");
 					String errorMsg = "Unary Operator Error at line " + pos.getLine(temp);
 					throw new TypeException(errorMsg);
 				}
@@ -947,7 +941,6 @@ public class Typechecker extends DepthFirstAdapter{
 				Type check = forPAstExp(temp.getAstExp());
 				if (!(check.is(Type.BOOL))) {
 					printSymbolTable();
-					System.out.println("In forPAstExp");
 					String errorMsg = "Unary Operator Error at line " + pos.getLine(temp);
 					throw new TypeException(errorMsg);
 				}
@@ -956,14 +949,12 @@ public class Typechecker extends DepthFirstAdapter{
 				Type check = forPAstExp(temp.getAstExp());
 				if (!(check.is(Type.INT) || check.is(Type.RUNE))) {
 					printSymbolTable();
-					System.out.println("In forPAstExp");
 					String errorMsg = "Unary Operator Error at line " + pos.getLine(temp);
 					throw new TypeException(errorMsg);
 				}
 				return check; 
 			} else {
 				printSymbolTable();
-				System.out.println("In forPAstExp");
 				String errorMsg = "Unary Operator Error at line " + pos.getLine(temp);
 				throw new TypeException(errorMsg);
 			}
@@ -1170,7 +1161,6 @@ public class Typechecker extends DepthFirstAdapter{
 					if (sliceType.assign(appendType)) {
 						return appendType;
 					}
-					System.out.println("In forPAstExp");
 					String errorMsg = "Type error at line " + temp.getId().getLine() + " : Slice type and the argument type incompatibility";
 					throw new TypeException(errorMsg);
 				}
@@ -1234,7 +1224,7 @@ public class Typechecker extends DepthFirstAdapter{
 			String errorMsg = "Type error at line " + pos.getLine(temp) + " : Not an array";
 			throw new TypeException(errorMsg);
 		} else if (node.getClass().isInstance(new AFieldAccessAstExp())) {
-			AFieldAccessAstExp temp = (AFieldAccessAstExp)node;
+			AFieldAccessAstExp temp = (AFieldAccessAstExp) node;
 			Type t = forPAstExp(temp.getStruct());
 			if (t.is(Type.STRUCT)) {
 				StructType struct = (StructType)t;
