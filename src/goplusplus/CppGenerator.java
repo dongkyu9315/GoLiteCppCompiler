@@ -248,8 +248,6 @@ public class CppGenerator extends DepthFirstAdapter{
 		
 		LinkedList<?> stmts = node.getAstStm();
 		for (Iterator<?> iterator = stmts.iterator(); iterator.hasNext();) {
-			for (int i = 0; i < mIndentStack.size(); i++)
-				print("\t");
 			PAstStm stm = (PAstStm) iterator.next();
 			stm.apply(this);
 			print("\n");

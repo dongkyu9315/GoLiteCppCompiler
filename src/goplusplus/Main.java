@@ -68,9 +68,9 @@ public class Main {
 				/* Pretty Printer */
 				/* -------------- */
 				/* Pretty Print the AST */
-//				String ppFile = filenameNoExt + ".pptype.go";
-//				PrettyPrinter prettyPrinter = new PrettyPrinter(ppFile, p, pptype);
-//				prettyPrinter.print(ast);
+				String ppFile = filenameNoExt + ".pptype.go";
+				PrettyPrinter prettyPrinter = new PrettyPrinter(ppFile, p, pptype);
+				prettyPrinter.print(ast);
 				
 				/* ---------------- */
 				/* C Code Generator */

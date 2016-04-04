@@ -20,6 +20,8 @@ public class PrettyPrinter extends DepthFirstAdapter{
 	Typechecker typechecker;
 	Typechecker rootTypechecker;
 	boolean pptype;
+	String filename;
+	Position pos;
 	
 	public PrettyPrinter(String filename, Position pos, boolean pptype) {
 		try {
@@ -33,6 +35,8 @@ public class PrettyPrinter extends DepthFirstAdapter{
 			rootTypechecker = new Typechecker(filename, pos, false);
 		}
 		this.pptype = pptype;
+		this.filename = filename;
+		this.pos = pos;
 	}
 	
 	private void print(String s) {
@@ -115,6 +119,7 @@ public class PrettyPrinter extends DepthFirstAdapter{
 		for (int i = 0; i < idlist.size(); i++) {
 			printType(typechecker.symbolTable.getFirst().get(node.getId().get(i).getText().trim()).toString());
 		}
+		typechecker = new Typechecker(filename, pos, false);
 	}
 	
 	@Override
@@ -139,6 +144,7 @@ public class PrettyPrinter extends DepthFirstAdapter{
 		for (int i = 0; i < idlist.size(); i++) {
 			printType(typechecker.symbolTable.getFirst().get(node.getId().get(i).getText().trim()).toString());
 		}
+		typechecker = new Typechecker(filename, pos, false);
 	}
 	
 	@Override
@@ -166,6 +172,7 @@ public class PrettyPrinter extends DepthFirstAdapter{
 		for (int i = 0; i < idlist.size(); i++) {
 			printType(typechecker.symbolTable.getFirst().get(node.getId().get(i).getText().trim()).toString());
 		}
+		typechecker = new Typechecker(filename, pos, false);
 	}
 	
 	@Override
@@ -182,6 +189,7 @@ public class PrettyPrinter extends DepthFirstAdapter{
 		for (int i = 0; i < idlist.size(); i++) {
 			printType(typechecker.symbolTable.getFirst().get(node.getId().get(i).getText().trim()).toString());
 		}
+		typechecker = new Typechecker(filename, pos, false);
 	}
 	
 	@Override
