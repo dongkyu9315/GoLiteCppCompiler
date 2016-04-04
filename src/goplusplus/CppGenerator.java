@@ -74,7 +74,7 @@ public class CppGenerator extends DepthFirstAdapter{
 		print(node.getText());
 	}
 	
-	private void printList(List<Node> list){
+	private void printList(List<? extends Node> list){
 		String separator = "";
 		for(Node n : list){
 			print(separator);
@@ -90,6 +90,7 @@ public class CppGenerator extends DepthFirstAdapter{
 		print("#include <iostream>\n");
 		print("#include <string>\n");
 		print("#include <vector>\n");
+		print("#include <array>\n");
 		print("\n");
 		LinkedList<PAstDecl> decl = node.getDecl();
 		if (!decl.isEmpty()) {
@@ -98,17 +99,13 @@ public class CppGenerator extends DepthFirstAdapter{
 				if (d instanceof AFuncDecAstDecl) {
 					addFunction((AAstFuncDecl) ((AFuncDecAstDecl)d).getAstFuncDecl());
 				} else {
-					printTab();
 					d.apply(this);
-					print(";\n");
 				}
 			}
 
 			for (PAstDecl d : decl) {
 				if (d instanceof AFuncDecAstDecl) {
-					printTab();
 					d.apply(this);
-					print(";\n");
 				}
 			}
 		}
@@ -138,7 +135,6 @@ public class CppGenerator extends DepthFirstAdapter{
 	}
 	
 	public void caseAArrayAstTypeExp(AArrayAstTypeExp node){
-		PAstTypeExp astTypeExp = node.getAstTypeExp();
 		Type type = forPAstTypeExp(node);
 		print(type.print());
 	}
@@ -156,6 +152,7 @@ public class CppGenerator extends DepthFirstAdapter{
 		Type varType = forPAstTypeExp(typeExp);
 		typeExp.apply(this);
 		
+		printTab();
 		String sep = "";
 		for (TId d : idlist) {
 			symbolTable.getFirst().put(d.getText().trim(), varType);
@@ -163,6 +160,7 @@ public class CppGenerator extends DepthFirstAdapter{
 			d.apply(this);
 			sep = ",";
 		}
+		print(";\n");
 	}
 	
 	@Override
@@ -174,19 +172,31 @@ public class CppGenerator extends DepthFirstAdapter{
 			TId d = idlist.get(i);
 			Type varType = forPAstExp(exps.get(i));
 			symbolTable.getFirst().put(d.getText().trim(), varType);
+			
+			printTab();
+			print(varType.print() + " " + d.getText().trim() + " = ");
+			exps.get(i).apply(this);
+			print(";\n");
 		}
 	}
 
 	@Override
 	public void caseATypeExpAstVarDecl(ATypeExpAstVarDecl node) {
 		LinkedList<TId> idlist = node.getId();
-		Type typeExp = forPAstTypeExp(node.getAstTypeExp());
+		PAstTypeExp typeExpNode = node.getAstTypeExp();
+		Type typeExp = forPAstTypeExp(typeExpNode);
 		LinkedList<PAstExp> exps = node.getAstExp();
 
 		for (int i = 0; i < idlist.size(); i++) {
 			TId d = idlist.get(i);
 			Type varType = forPAstExp(exps.get(i));
 			symbolTable.getFirst().put(d.getText().trim(), varType);
+			
+			printTab();
+			print(varType.print() + " " + d.getText().trim() + " = ");
+			exps.get(i).apply(this);
+			print(";\n");
+			
 		}
 	}
 
@@ -198,12 +208,15 @@ public class CppGenerator extends DepthFirstAdapter{
 		for (TId d : idlist) {
 			AliasType aType = new AliasType();
 			aType.type = varType;
+			aType.alias = d.getText().trim();
 			symbolTable.getFirst().put(d.getText().trim(), aType);
 
 			// for the fields of a struct
 			if (varType.is(Type.STRUCT)) {
 				AStructAstTypeExp tempNode = (AStructAstTypeExp) node.getAstTypeExp();
 				LinkedList<PAstStructField> fieldList = tempNode.getAstStructField();
+				print("struct " + d.getText().trim() + " {\n");
+				newScope();
 				for (PAstStructField f : fieldList) {
 					AAstStructField tempField = (AAstStructField) f;
 					LinkedList<TId> fieldIdList = tempField.getId();
@@ -213,7 +226,21 @@ public class CppGenerator extends DepthFirstAdapter{
 						Type fieldType = forPAstTypeExp(tempField.getAstTypeExp());
 						symbolTable.getFirst().put(fieldName, fieldType);
 					}
+				
+					printTab();
+					Type fieldType = forPAstTypeExp(tempField.getAstTypeExp());
+					print(fieldType.print());
+					printList(fieldIdList);
+					print(";\n");
 				}
+				exitScope();
+				printTab();
+				print("};\n");
+			}
+			else{
+				printTab();
+				print("typedef " + varType.print() + " " + d.getText().trim());
+				print(";\n");
 			}
 		}
 	}
@@ -335,7 +362,18 @@ public class CppGenerator extends DepthFirstAdapter{
 			return sliceType;
 		} else if (node.getClass().isInstance(new AArrayAstTypeExp())) {
 			AArrayAstTypeExp temp = (AArrayAstTypeExp) node;
-			Type eleType = forPAstTypeExp(temp.getAstTypeExp());
+			PAstTypeExp elementTypeExp = temp.getAstTypeExp();
+			
+			Type eleType;
+			if(elementTypeExp instanceof AAliasAstTypeExp){
+				AliasType aType = new AliasType();
+				aType.type = forPAstTypeExp(elementTypeExp);
+				aType.alias = ((AAliasAstTypeExp)elementTypeExp).getId().getText().trim();
+				eleType = aType;
+			}
+			else{
+				eleType = forPAstTypeExp(elementTypeExp);
+			}
 			ArrayType arrayType = new ArrayType();
 			arrayType.elementType = eleType;
 			arrayType.size = Integer.parseInt(temp.getSize().toString().trim());

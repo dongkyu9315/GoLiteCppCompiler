@@ -8,6 +8,7 @@ public class AliasType extends Type {
 	}
 
 	public Type type;
+	public String alias;
 	
 	@Override
 	public String toString() {
@@ -16,6 +17,11 @@ public class AliasType extends Type {
 
 	@Override
 	public String print() {
-		return type.print();
+		if(type.is(Type.STRUCT)){
+			return alias;
+		}
+		else{
+			return type.print();
+		}
 	}
 }
