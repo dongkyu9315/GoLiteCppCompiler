@@ -68,9 +68,9 @@ public class Main {
 				/* Pretty Printer */
 				/* -------------- */
 				/* Pretty Print the AST */
-				String ppFile = filenameNoExt + ".pptype.go";
-				PrettyPrinter prettyPrinter = new PrettyPrinter(ppFile, p, pptype);
-				prettyPrinter.print(ast);
+//				String ppFile = filenameNoExt + ".pptype.go";
+//				PrettyPrinter prettyPrinter = new PrettyPrinter(ppFile, p, pptype);
+//				prettyPrinter.print(ast);
 				
 				/* ---------------- */
 				/* C Code Generator */
@@ -90,6 +90,7 @@ public class Main {
 			} catch (Exception e) {
 				System.out.println("INVALID\n");
 				System.out.println(e);
+				e.printStackTrace();
 			}
 		} else {
 			System.err.println("No input file");
