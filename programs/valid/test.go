@@ -1,2 +1,2 @@
-package abc;
-var x,y = 5;
+package main
+var x,y,z int
