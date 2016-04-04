@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Stack;
 
 import type.*;
@@ -73,6 +74,15 @@ public class CppGenerator extends DepthFirstAdapter{
 		print(node.getText());
 	}
 	
+	private void printList(List<Node> list){
+		String separator = "";
+		for(Node n : list){
+			print(separator);
+			n.apply(this);
+			separator = ",";
+		}
+	}
+	
 	// ast_program		---------------------------------------------------
 	@Override
 	public void caseAAstProgram(AAstProgram node) {
@@ -88,14 +98,17 @@ public class CppGenerator extends DepthFirstAdapter{
 				if (d instanceof AFuncDecAstDecl) {
 					addFunction((AAstFuncDecl) ((AFuncDecAstDecl)d).getAstFuncDecl());
 				} else {
+					printTab();
 					d.apply(this);
-					print(";");
+					print(";\n");
 				}
 			}
 
 			for (PAstDecl d : decl) {
 				if (d instanceof AFuncDecAstDecl) {
+					printTab();
 					d.apply(this);
+					print(";\n");
 				}
 			}
 		}
@@ -107,12 +120,41 @@ public class CppGenerator extends DepthFirstAdapter{
 	}
 	
 	// ast_var_decl		---------------------------------------------------
+	
+	@Override
+	public void caseABasicAstTypeExp(ABasicAstTypeExp node){
+		Type type = forPAstTypeExp(node);
+		print(type.print());
+	}
+	
+	public void caseAAliasAstTypeExp(AAliasAstTypeExp node){
+		Type type = forPAstTypeExp(node);
+		if(type.is(Type.STRUCT)){
+			print(node.getId().getText().trim());
+		}
+		else{
+			print(type.print());
+		}
+	}
+	
+	public void caseAArrayAstTypeExp(AArrayAstTypeExp node){
+		PAstTypeExp astTypeExp = node.getAstTypeExp();
+		Type type = forPAstTypeExp(node);
+		print(type.print());
+	}
+	
+	public void caseASliceAstTypeExp(ASliceAstTypeExp node){
+		Type type = forPAstTypeExp(node);
+		print(type.print());
+	}
+	
 	@Override
 	public void caseATypeAstVarDecl(ATypeAstVarDecl node) {
 		LinkedList<TId> idlist = node.getId();
 		PAstTypeExp typeExp = node.getAstTypeExp();
-		typeExp.apply(this);
+		
 		Type varType = forPAstTypeExp(typeExp);
+		typeExp.apply(this);
 		
 		String sep = "";
 		for (TId d : idlist) {
@@ -227,11 +269,13 @@ public class CppGenerator extends DepthFirstAdapter{
 		}
 
 		funcType.returnType = returnType;
+		funcType.name = node.getId().getText();
 
 		LinkedList<PAstFuncParam> params = node.getAstFuncParam();
 		ArrayList<Type> paramTypes = new ArrayList<Type>();
 		for (Iterator<PAstFuncParam> iterator = params.iterator(); iterator.hasNext();) {
 			PAstFuncParam param = (PAstFuncParam) iterator.next();
+			
 			Type pType = forPAstFuncParam(param);
 			for (int i = 0; i < ((AAstFuncParam)param).getId().size(); i++)
 				paramTypes.add(pType);
@@ -327,25 +371,7 @@ public class CppGenerator extends DepthFirstAdapter{
 		return null;
 	}
 	
-	@Override
-	public void caseABasicAstTypeExp(ABasicAstTypeExp node){
-		Type type = forPAstTypeExp(node);
-		if(type.is(Type.INT)){
-			print(INT);
-		}
-		else if(type.is(Type.BOOL)){
-			print(BOOL);
-		}
-		else if(type.is(Type.RUNE)){
-			print(RUNE);
-		}
-		else if(type.is(Type.STRING)){
-			print(STRING);
-		}
-		else if(type.is(Type.FLOAT64)){
-			print(FLOAT64);
-		}
-	}
+	
 	
 	// ast_stm
 	@Override
@@ -513,107 +539,103 @@ public class CppGenerator extends DepthFirstAdapter{
 	
 	@Override
 	public void caseAShortifAstStm(AShortifAstStm node) {
+		printTab();
+		print("{\n");
+		newScope();
 		if (node.getInit() != null) {
+			printTab();
 			node.getInit().apply(this);
 			print(";\n");
 		}
 		PAstExp condExp = node.getCondition();
 		if (condExp.getClass().isInstance(new AParenAstExp())) {
+			printTab();
 			print("if");
 			condExp.apply(this);
 			print("{\n");
 		} else {
+			printTab();
 			print("if (");
 			condExp.apply(this);
 			print(") {\n");
 		}
 		
-		mIndentStack.push(mIndentStack.size()+1);
+		newScope();
 		
 		LinkedList<?> stmts = node.getAstStm();
 		for (Iterator<?> iterator = stmts.iterator(); iterator.hasNext();) {
-			for (int i = 0; i < mIndentStack.size(); i++)
-				print("\t");
+			printTab();
 			PAstStm stm = (PAstStm) iterator.next();
 			stm.apply(this);
-			print("\n");
+			print(";\n");
 		}
 		
-		mIndentStack.pop();
+		exitScope();
 
-		for (int i = 0; i < mIndentStack.size(); i++)
-				print("\t");
+		printTab();
+		print("}\n");
+		
+		exitScope();
+		printTab();
 		print("}\n");
 	}
 	
-	@Override
-	public void inAShortifAstStm(AShortifAstStm node) {
-		newScope();
-	}
-	
-	@Override
-	public void outAShortifAstStm(AShortifAstStm node) {
-		exitScope();
-	}
 	
 	@Override
 	public void caseALongifAstStm(ALongifAstStm node) {
+		printTab();
+		print("{\n");
+		newScope();
 		if (node.getInit() != null) {
+			printTab();
 			node.getInit().apply(this);
 			print(";\n");
 		}
 		PAstExp condExp = node.getCondition();
 		if (condExp.getClass().isInstance(new AParenAstExp())) {
+			printTab();
 			print("if");
 			condExp.apply(this);
 			print("{\n");
 		} else {
+			printTab();
 			print("if (");
 			condExp.apply(this);
 			print(") {\n");
 		}
 		
-		mIndentStack.push(mIndentStack.size()+1);
+		newScope();
 		
 		LinkedList<?> if_stmts = node.getIfStms();
 		for (Iterator<?> iterator = if_stmts.iterator(); iterator.hasNext();) {
-			for (int i = 0; i < mIndentStack.size(); i++)
-				print("\t");
+			printTab();
 			PAstStm stm = (PAstStm) iterator.next();
 			stm.apply(this);
 			print("\n");
 		}
 		
-		mIndentStack.pop();
-		for (int i = 0; i < mIndentStack.size(); i++)
-				print("\t");
+		exitScope();
+		printTab();
 		print("}\n");
 		
+		printTab();
 		print("else {\n");
-		mIndentStack.push(mIndentStack.size()+1);
+		newScope();
 		LinkedList<?> else_stmts = node.getElseStms();
 		for (Iterator<?> iterator = else_stmts.iterator(); iterator.hasNext();) {
-			for (int i = 0; i < mIndentStack.size(); i++)
-				print("\t");
+			printTab();
 			PAstStm stm = (PAstStm) iterator.next();
 			stm.apply(this);
 			print("\n");
 		}
 		
-		mIndentStack.pop();
-		for (int i = 0; i < mIndentStack.size(); i++)
-				print("\t");
-		print("}\n");
-	}
-	
-	@Override
-	public void inALongifAstStm(ALongifAstStm node) {
-		newScope();
-	}
-	
-	@Override
-	public void outALongifAstStm(ALongifAstStm node) {
 		exitScope();
+		printTab();
+		print("}\n");
+		
+		exitScope();
+		printTab();
+		print("}\n");
 	}
 	
 	@Override
@@ -689,11 +711,18 @@ public class CppGenerator extends DepthFirstAdapter{
 	
 	@Override
 	public void caseAForAstStm(AForAstStm node) {
-		print("for (");
+		printTab();
+		print("{\n");
+		newScope();
+		
 		if (node.getInit() != null) {
+			printTab();
 			node.getInit().apply(this);
-			print(";");
+			print(";\n");
 		}
+		printTab();
+		print("for (;");
+		
 		if (node.getCondition() != null) {
 			node.getCondition().apply(this);
 		}
@@ -704,61 +733,45 @@ public class CppGenerator extends DepthFirstAdapter{
 		
 		print(") {\n");
 		
-		mIndentStack.push(mIndentStack.size()+1);
+		newScope();
 		
 		LinkedList<?> stmts = node.getBody();
 		for (Iterator<?> iterator = stmts.iterator(); iterator.hasNext();) {
-			for (int i = 0; i < mIndentStack.size(); i++)
-				print("\t");
+			printTab();
 			PAstStm stm = (PAstStm) iterator.next();
 			stm.apply(this);
-			print("\n");
+			print(";\n");
 		}
 		
-		mIndentStack.pop();
-		for (int i = 0; i < mIndentStack.size(); i++)
-				print("\t");
+		exitScope();
+		printTab();
+		print("}\n");
+		
+		exitScope();
+		printTab();
 		print("}\n");
 	}
 	
-	@Override
-	public void inAForAstStm(AForAstStm node) {
-		newScope();
-	}
-	
-	@Override
-	public void outAForAstStm(AForAstStm node) {
-		exitScope();
-	}
 	
 	@Override
 	public void caseABlockAstStm(ABlockAstStm node) {
 		print("{\n");
 		
-		mIndentStack.push(mIndentStack.size()+1);
+		newScope();
 		
 		LinkedList<?> stmts = node.getAstStm();
 		for (Iterator<?> iterator = stmts.iterator(); iterator.hasNext();) {
-			for (int i = 0; i < mIndentStack.size(); i++)
-				print("\t");
+			printTab();
 			PAstStm stm = (PAstStm) iterator.next();
 			stm.apply(this);
 			print("\n");
 		}
 		
-		mIndentStack.pop();
+		exitScope();
+		printTab();
 		print("}\n");
 	}
 	
-	@Override
-	public void inABlockAstStm(ABlockAstStm node) {
-		newScope();
-	}
-	
-	@Override
-	public void outABlockAstStm(ABlockAstStm node) {
-		exitScope();
-	}
 	
 	@Override
 	public void caseABreakAstStm(ABreakAstStm node) {
