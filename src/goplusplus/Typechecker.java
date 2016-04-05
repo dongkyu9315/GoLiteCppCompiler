@@ -731,10 +731,8 @@ public class Typechecker extends DepthFirstAdapter{
 		symbolTable.addFirst(newIfScope);
 		
 		LinkedList<PAstStm> if_stmts = node.getIfStms();
-		System.out.println("if_stmts size" + if_stmts.size());
 		for (Iterator<PAstStm> iterator = if_stmts.iterator(); iterator.hasNext();) {
 			PAstStm stm = (PAstStm) iterator.next();
-			System.out.println(stm.toString());
 			stm.apply(this);
 		}
 		
@@ -745,10 +743,8 @@ public class Typechecker extends DepthFirstAdapter{
 		symbolTable.addFirst(newElseScope);
 		
 		LinkedList<PAstStm> else_stmts = node.getElseStms();
-		System.out.println("else_stmts size" + else_stmts.size());
 		for (Iterator<PAstStm> iterator = else_stmts.iterator(); iterator.hasNext();) {
 			PAstStm stm = (PAstStm) iterator.next();
-			System.out.println(stm.toString());
 			stm.apply(this);
 		}
 		
