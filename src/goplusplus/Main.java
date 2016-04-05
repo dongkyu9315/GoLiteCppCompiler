@@ -18,10 +18,6 @@ public class Main {
 						new FileReader(args[0]), 1024));
 				Parser parser = new Parser(lexer);
 				Start ast = parser.parse();
-				GoLexer lexer2 = new GoLexer (new PushbackReader(
-						new FileReader(args[0]), 1024));
-				Parser parser2 = new Parser(lexer2);
-				Start ast2 = parser2.parse();
 				
 				Position p = new Position();
 				ast.apply(p);
@@ -70,7 +66,7 @@ public class Main {
 				/* Pretty Print the AST */
 				String ppFile = filenameNoExt + ".pptype.go";
 				PrettyPrinter prettyPrinter = new PrettyPrinter(ppFile, p, pptype);
-				prettyPrinter.print(ast2);
+				prettyPrinter.print(ast);
 				
 				/* ---------------- */
 				/* C Code Generator */
@@ -78,7 +74,7 @@ public class Main {
 				System.out.println("C++ Code Generator ...");
 				String pathCGen = filenameNoExt + ".cpp";
 				CppGenerator cppGen = new CppGenerator(pathCGen, p);
-				cppGen.print(ast2);
+				cppGen.print(ast);
 				
 				System.out.println("DONE\n");
 				
