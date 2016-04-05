@@ -155,6 +155,7 @@ public class CppGenerator extends DepthFirstAdapter{
 		PAstTypeExp typeExp = node.getAstTypeExp();
 		
 		Type varType = forPAstTypeExp(typeExp);
+		printTab();
 		typeExp.apply(this);
 		
 		String sep = "";
@@ -526,9 +527,11 @@ public class CppGenerator extends DepthFirstAdapter{
 			Type expType = forPAstExp(expRight);
 			String type = helperForShortDeclAstStm(expType);
 			if (expType.is(new AppendType())) {
+				printTab();
 				print(type);
 				expLeft.apply(this);
 				print(";\n");
+				printTab();
 				print("*");
 				expLeft.apply(this);
 				print("=");
@@ -536,6 +539,7 @@ public class CppGenerator extends DepthFirstAdapter{
 				AAppendAstExp temp = (AAppendAstExp) expRight;
 				print(temp.getId().getText().trim());
 				print(");\n");
+				printTab();
 				expRight.apply(this);
 			} else if (type != null) {
 				printTab();
