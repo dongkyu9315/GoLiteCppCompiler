@@ -76,9 +76,9 @@ public class Main {
 				/* C Code Generator */
 				/* ---------------- */
 				System.out.println("C++ Code Generator ...");
-//				String pathCGen = filenameNoExt + ".cpp";
-//				CppGenerator cppGen = new CppGenerator(pathCGen, p);
-//				cppGen.print(ast2);
+				String pathCGen = filenameNoExt + ".cpp";
+				CppGenerator cppGen = new CppGenerator(pathCGen, p);
+				cppGen.print(ast2);
 				
 				System.out.println("DONE\n");
 				
