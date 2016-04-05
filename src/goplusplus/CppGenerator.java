@@ -82,6 +82,16 @@ public class CppGenerator extends DepthFirstAdapter{
 		}
 	}
 	
+	private boolean isPostCondition(Node node){
+		boolean childOfForStm = node.parent() instanceof AForAstStm;
+		if(childOfForStm){
+			PAstStm post = ((AForAstStm)node.parent()).getPost();
+			if(post!=null)
+				return post.equals(node);
+		}
+		return false;
+	}
+	
 	// ast_program		---------------------------------------------------
 	@Override
 	public void caseAAstProgram(AAstProgram node) {
@@ -463,13 +473,17 @@ public class CppGenerator extends DepthFirstAdapter{
 		LinkedList<PAstExp> rvals = node.getRval();
 		
 		for(int i = 0;i < lvals.size();i++){
-			printTab();
+			if(!isPostCondition(node))
+				printTab();
 			PAstExp lval = lvals.get(i);
 			PAstExp rval = rvals.get(i);
 			lval.apply(this);
 			print("=");
 			rval.apply(this);
-			print(";\n");
+			if(!isPostCondition(node))
+				print(";\n");
+			else
+				print(";");
 		}
 	}
 	
@@ -497,9 +511,7 @@ public class CppGenerator extends DepthFirstAdapter{
 	public void caseAVarDeclAstStm(AVarDeclAstStm node) {
 		LinkedList<PAstVarDecl> decls = node.getAstVarDecl();
 		for(PAstVarDecl decl : decls){
-			printTab();
 			decl.apply(this);
-			print(";\n");
 		}
 	}
 	
@@ -581,18 +593,21 @@ public class CppGenerator extends DepthFirstAdapter{
 		LinkedList<PAstTypeDecl> decls = node.getAstTypeDecl();
 		
 		for(PAstTypeDecl decl : decls){
-			printTab();
 			decl.apply(this);
-			print(";\n");
 		}
 	}
 	
 	@Override
 	public void caseAIncDecAstStm(AIncDecAstStm node) {
-		printTab();
+		if(!isPostCondition(node))
+			printTab();
 		node.getAstExp().apply(this);
 		node.getAstPostOp().apply(this);
-		print(";\n");
+		if(!isPostCondition(node))
+			print(";\n");
+		else{
+			print(";");
+		}
 	}
 	
 	@Override
@@ -765,9 +780,9 @@ public class CppGenerator extends DepthFirstAdapter{
 		
 		if (node.getCondition() != null) {
 			node.getCondition().apply(this);
+			print(";");
 		}
 		if (node.getPost() != null) {
-			print(";");
 			node.getPost().apply(this);
 		}
 		

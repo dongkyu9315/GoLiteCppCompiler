@@ -1,23 +1,24 @@
 package main
 
-import "fmt"
 var a []int
 
 func main() {
-	
-	for j:=200000;j>=1;j--{
+	var len = 200000
+	for j:=len;j>=1;j--{
 		a=append(a,j)
 	}
-	insertionSort(a)
-	fmt.Println("Sorted. Printing the first 100 sorted numbers")
-	fmt.Println(a[:100])
+	insertionSort(a,len)
+	println("Sorted. Printing the first 100 sorted numbers")
+	for i:=0;i<100;i++{
+		println(a[i])
+	}
 	
 }
 
 
-func insertionSort(arr []int) {
+func insertionSort(arr []int, size int) {
 
-for j := 1; j < len(arr); j++ {
+for j := 1; j < size; j++ {
   key := arr[j]
   i := j - 1
   for i >= 0 && arr[i] > key {
