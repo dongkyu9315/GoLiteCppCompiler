@@ -537,18 +537,13 @@ public class CppGenerator extends DepthFirstAdapter{
 				print(temp.getId().getText().trim());
 				print(");\n");
 				expRight.apply(this);
-			} else if (expType.is(new StructType())) {
+			} else if (type != null) {
 				printTab();
 				print(type);
 				expLeft.apply(this);
 				print("=");
 				expRight.apply(this);
 				print(";\n");
-			}else if (type != null) {
-				print(type);
-				expLeft.apply(this);
-				print("=");
-				expRight.apply(this);
 			}
 		}
 	}
@@ -580,7 +575,6 @@ public class CppGenerator extends DepthFirstAdapter{
 		} else if (expType.is(new StringType())) {
 			return "std::string";
 		} else if (expType.is(new StructType())) {
-			StructType temp = (StructType) expType;
 			return "auto";
 		} else if (expType.is(new VoidType())) {
 			return null;
