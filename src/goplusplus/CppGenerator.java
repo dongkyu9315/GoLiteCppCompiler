@@ -1147,6 +1147,7 @@ public class CppGenerator extends DepthFirstAdapter{
 		print(")");
 	}
 	
+	//TODO fix this shit
 	@Override
 	public void caseAAppendAstExp(AAppendAstExp node) {
 		print(node.getId().getText().trim());
