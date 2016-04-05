@@ -147,7 +147,6 @@ public class CppGenerator extends DepthFirstAdapter{
 		Type varType = forPAstTypeExp(typeExp);
 		typeExp.apply(this);
 		
-		printTab();
 		String sep = "";
 		for (TId d : idlist) {
 			symbolTable.getFirst().put(d.getText().trim(), varType);
@@ -271,13 +270,7 @@ public class CppGenerator extends DepthFirstAdapter{
 		LinkedList<?> stmts = node.getAstStm();
 		for (Iterator<?> iterator = stmts.iterator(); iterator.hasNext();) {
 			PAstStm stm = (PAstStm) iterator.next();
-			printTab();
 			stm.apply(this);
-			if(!(stm instanceof ABlockAstStm) && !(stm instanceof AForAstStm)
-				&& !(stm instanceof ALongifAstStm) && !(stm instanceof AShortifAstStm) &&
-				!(stm instanceof ASwitchAstStm) && !(stm instanceof AEmptyAstStm)){
-				print(";\n");
-			}
 			
 		}
 		
@@ -459,33 +452,31 @@ public class CppGenerator extends DepthFirstAdapter{
 	
 	@Override
 	public void caseAExpAstStm(AExpAstStm node) {
+		printTab();
 		node.getAstExp().apply(this);
+		print(";\n");
 	}
 	
 	@Override
 	public void caseAAssignAstStm(AAssignAstStm node) {
-		LinkedList<?> lvals = node.getLval();
-		for (Iterator<?> iterator = lvals.iterator(); iterator.hasNext();) {
-			PAstExp exp = (PAstExp) iterator.next();
-			exp.apply(this);
-			if (iterator.hasNext())
-				print(",");
-		}
+		LinkedList<PAstExp> lvals = node.getLval();
+		LinkedList<PAstExp> rvals = node.getRval();
 		
-		print("=");
-		
-		LinkedList<?> rvals = node.getRval();
-		for (Iterator<?> iterator = rvals.iterator(); iterator.hasNext();) {
-			PAstExp exp = (PAstExp) iterator.next();
-			exp.apply(this);
-			if (iterator.hasNext())
-				print(",");
+		for(int i = 0;i < lvals.size();i++){
+			printTab();
+			PAstExp lval = lvals.get(i);
+			PAstExp rval = rvals.get(i);
+			lval.apply(this);
+			print("=");
+			rval.apply(this);
+			print(";\n");
 		}
 	}
 	
 	@Override
 	public void caseAOpAssignAstStm(AOpAssignAstStm node) {
 		PAstOpAssign opAssign = node.getAstOpAssign();
+		printTab();
 		if (opAssign.getClass().isInstance(new ABitclearEqAstOpAssign())) {
 			print(node.getL().getText().trim());
 			print("&=");
@@ -494,24 +485,21 @@ public class CppGenerator extends DepthFirstAdapter{
 			print(node.getL().getText().trim());
 			print("^=");
 			node.getR().apply(this);
-			print(";");
 		} else {
 			print(node.getL().getText().trim());
 			opAssign.apply(this);
 			node.getR().apply(this);
 		}
+		print(";\n");
 	}
 	
 	@Override
 	public void caseAVarDeclAstStm(AVarDeclAstStm node) {
-		LinkedList<?> decls = node.getAstVarDecl();
-		for (Iterator<?> iterator = decls.iterator(); iterator.hasNext();) {
-			PAstVarDecl exp = (PAstVarDecl) iterator.next();
+		LinkedList<PAstVarDecl> decls = node.getAstVarDecl();
+		for(PAstVarDecl decl : decls){
 			printTab();
-			exp.apply(this);
-			if (iterator.hasNext()){
-				print("\n");
-			}
+			decl.apply(this);
+			print(";\n");
 		}
 	}
 	
@@ -583,25 +571,26 @@ public class CppGenerator extends DepthFirstAdapter{
 	
 	@Override
 	public void caseATypeDeclAstStm(ATypeDeclAstStm node) {
-		LinkedList<?> decls = node.getAstTypeDecl();
-		for (Iterator<?> iterator = decls.iterator(); iterator.hasNext();) {
-			PAstTypeDecl exp = (PAstTypeDecl) iterator.next();
+		LinkedList<PAstTypeDecl> decls = node.getAstTypeDecl();
+		
+		for(PAstTypeDecl decl : decls){
 			printTab();
-			exp.apply(this);
-			if (iterator.hasNext()) {
-				print("\n");
-			}
+			decl.apply(this);
+			print(";\n");
 		}
 	}
 	
 	@Override
 	public void caseAIncDecAstStm(AIncDecAstStm node) {
+		printTab();
 		node.getAstExp().apply(this);
 		node.getAstPostOp().apply(this);
+		print(";\n");
 	}
 	
 	@Override
 	public void caseAPrintAstStm(APrintAstStm node) {
+		printTab();
 		print("std::cout << ");
 		LinkedList<?> exps = node.getAstExp();
 		for (Iterator<?> iterator = exps.iterator(); iterator.hasNext();) {
@@ -610,11 +599,12 @@ public class CppGenerator extends DepthFirstAdapter{
 			if (iterator.hasNext())
 				print(" << ");
 		}
-		print(";");
+		print(";\n");
 	}
 	
 	@Override
 	public void caseAPrintlnAstStm(APrintlnAstStm node) {
+		printTab();
 		print("std::cout << ");
 		LinkedList<?> exps = node.getAstExp();
 		for (Iterator<?> iterator = exps.iterator(); iterator.hasNext();) {
@@ -623,25 +613,26 @@ public class CppGenerator extends DepthFirstAdapter{
 			if (iterator.hasNext())
 				print(" << ");
 		}
-		print("<< std::endl;");
+		print("<< std::endl;\n");
 	}
 	
 	@Override
 	public void caseAReturnAstStm(AReturnAstStm node) {
+		printTab();
 		print("return");
 		if (node.getAstExp() != null) {
 			node.getAstExp().apply(this);
 		}
+		print(";\n");
 	}
 	
 	@Override
 	public void caseAShortifAstStm(AShortifAstStm node) {
+		printTab();
 		print("{\n");
 		newScope();
-		if (node.getInit() != null) {
-			printTab();
+		if (node.getInit() != null && !(node.getInit() instanceof AEmptyAstStm)) {
 			node.getInit().apply(this);
-			print(";\n");
 		}
 		PAstExp condExp = node.getCondition();
 		if (condExp.getClass().isInstance(new AParenAstExp())) {
@@ -660,10 +651,8 @@ public class CppGenerator extends DepthFirstAdapter{
 		
 		LinkedList<?> stmts = node.getAstStm();
 		for (Iterator<?> iterator = stmts.iterator(); iterator.hasNext();) {
-			printTab();
 			PAstStm stm = (PAstStm) iterator.next();
 			stm.apply(this);
-			print(";\n");
 		}
 		
 		exitScope();
@@ -679,12 +668,11 @@ public class CppGenerator extends DepthFirstAdapter{
 	
 	@Override
 	public void caseALongifAstStm(ALongifAstStm node) {
+		printTab();
 		print("{\n");
 		newScope();
-		if (node.getInit() != null) {
-			printTab();
+		if (node.getInit() != null && !(node.getInit() instanceof AEmptyAstStm)) {
 			node.getInit().apply(this);
-			print(";\n");
 		}
 		PAstExp condExp = node.getCondition();
 		if (condExp.getClass().isInstance(new AParenAstExp())) {
@@ -703,10 +691,8 @@ public class CppGenerator extends DepthFirstAdapter{
 		
 		LinkedList<?> if_stmts = node.getIfStms();
 		for (Iterator<?> iterator = if_stmts.iterator(); iterator.hasNext();) {
-			printTab();
 			PAstStm stm = (PAstStm) iterator.next();
 			stm.apply(this);
-			print("\n");
 		}
 		
 		exitScope();
@@ -718,10 +704,8 @@ public class CppGenerator extends DepthFirstAdapter{
 		newScope();
 		LinkedList<?> else_stmts = node.getElseStms();
 		for (Iterator<?> iterator = else_stmts.iterator(); iterator.hasNext();) {
-			printTab();
 			PAstStm stm = (PAstStm) iterator.next();
 			stm.apply(this);
-			print("\n");
 		}
 		
 		exitScope();
@@ -741,9 +725,7 @@ public class CppGenerator extends DepthFirstAdapter{
 		newScope();
 		
 		if (node.getAstStm() != null) {
-			printTab();
 			node.getAstStm().apply(this);	//print the short statement
-			print(";\n");
 		}
 		
 		printTab();
@@ -764,13 +746,12 @@ public class CppGenerator extends DepthFirstAdapter{
 	
 	@Override
 	public void caseAForAstStm(AForAstStm node) {
+		printTab();
 		print("{\n");
 		newScope();
 		
-		if (node.getInit() != null) {
-			printTab();
+		if (node.getInit() != null && !(node.getInit() instanceof AEmptyAstStm)) {
 			node.getInit().apply(this);
-			print(";\n");
 		}
 		printTab();
 		print("for (;");
@@ -789,10 +770,8 @@ public class CppGenerator extends DepthFirstAdapter{
 		
 		LinkedList<?> stmts = node.getBody();
 		for (Iterator<?> iterator = stmts.iterator(); iterator.hasNext();) {
-			printTab();
 			PAstStm stm = (PAstStm) iterator.next();
 			stm.apply(this);
-			print(";\n");
 		}
 		
 		exitScope();
@@ -813,10 +792,8 @@ public class CppGenerator extends DepthFirstAdapter{
 		
 		LinkedList<?> stmts = node.getAstStm();
 		for (Iterator<?> iterator = stmts.iterator(); iterator.hasNext();) {
-			printTab();
 			PAstStm stm = (PAstStm) iterator.next();
 			stm.apply(this);
-			print("\n");
 		}
 		
 		exitScope();
@@ -827,12 +804,14 @@ public class CppGenerator extends DepthFirstAdapter{
 	
 	@Override
 	public void caseABreakAstStm(ABreakAstStm node) {
-		print("break;");
+		printTab();
+		print("break;\n");
 	}
 	
 	@Override
 	public void caseAContinueAstStm(AContinueAstStm node) {
-		print("continue;");
+		printTab();
+		print("continue;\n");
 	}
 	
 	// ast_exp ---------------------------------------------------------------------
