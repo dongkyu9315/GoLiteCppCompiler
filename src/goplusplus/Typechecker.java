@@ -174,6 +174,7 @@ public class Typechecker extends DepthFirstAdapter{
 	public void caseAAstTypeDecl(AAstTypeDecl node) {
 		LinkedList<TId> idlist = node.getId();
 		Type varType = forPAstTypeExp(node.getAstTypeExp());
+		
 		for (Iterator<TId> iterator = idlist.iterator(); iterator.hasNext();) {
 			TId d = (TId) iterator.next();
 			if (!symbolTable.getFirst().containsKey(d.getText().trim())) {
@@ -298,8 +299,11 @@ public class Typechecker extends DepthFirstAdapter{
 			}
 		} else if (node.getClass().isInstance(new ALongifAstStm())) {
 			ALongifAstStm temp = (ALongifAstStm) node;
-			LinkedList<PAstStm> list = temp.getIfStms();
-			list.addAll(temp.getElseStms());
+			LinkedList<PAstStm> ifList = temp.getIfStms();
+			LinkedList<PAstStm> elseList = temp.getElseStms();
+			LinkedList<PAstStm> list = new LinkedList<PAstStm>();
+			list.addAll(ifList);
+			list.addAll(elseList);
 			for (Iterator<PAstStm> iter = list.iterator(); iter.hasNext();) {
 				PAstStm ele = iter.next();
 				if (ele.getClass().isInstance(new AReturnAstStm())) {
@@ -550,7 +554,6 @@ public class Typechecker extends DepthFirstAdapter{
 			Type leftType = Type.VOID;
 			Type rightType = forPAstExp(rightList.get(i));
 			if (helperForShortDecl(leftList.get(i), rightType)) {
-				System.out.println("afaf");
 				leftType = forPAstExp(leftList.get(i));
 			} else {
 				leftType = rightType;
@@ -565,9 +568,6 @@ public class Typechecker extends DepthFirstAdapter{
 			}
 			
 			if (!leftType.assign(rightType)) {
-				System.out.println(leftType.toString());
-				System.out.println(rightType.toString());
-				System.out.println("asdf");
 				printSymbolTable();
 				String errorMsg = "Assignment Error at line " + pos.getLine(temp);
 				throw new TypeException(errorMsg);

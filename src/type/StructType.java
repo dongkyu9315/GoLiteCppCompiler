@@ -8,7 +8,7 @@ public class StructType extends Type{
 	public boolean assign(Type t) {
 		if (t.is(Type.STRUCT)) {
 			StructType temp = (StructType)t;
-			temp.attributes.equals(attributes);
+			return temp.attributes.equals(attributes);
 		} else if (t instanceof AliasType) {
 			return assign(((AliasType) t).type);
 		}

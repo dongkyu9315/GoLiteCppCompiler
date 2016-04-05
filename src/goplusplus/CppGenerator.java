@@ -525,7 +525,14 @@ public class CppGenerator extends DepthFirstAdapter{
 				print(temp.getId().getText().trim());
 				print(");\n");
 				expRight.apply(this);
-			} else if (type != null) {
+			} else if (expType.is(new StructType())) {
+				printTab();
+				print(type);
+				expLeft.apply(this);
+				print("=");
+				expRight.apply(this);
+				print(";\n");
+			}else if (type != null) {
 				print(type);
 				expLeft.apply(this);
 				print("=");
@@ -537,7 +544,7 @@ public class CppGenerator extends DepthFirstAdapter{
 	public String helperForShortDeclAstStm(Type expType) {
 		if (expType.is(new AliasType())) {
 			AliasType temp = (AliasType) expType;
-			//TODO
+			return temp.alias;
 		} else if (expType.is(new AppendType())) {
 			AppendType temp = (AppendType) expType;
 			return "std::vector<" + helperForShortDeclAstStm(temp.type) + "> *";
@@ -559,10 +566,10 @@ public class CppGenerator extends DepthFirstAdapter{
 			SliceType temp = (SliceType) expType;
 			return "vector<" + helperForShortDeclAstStm(temp.elementType) + "> *";
 		} else if (expType.is(new StringType())) {
-			return "string";
+			return "std::string";
 		} else if (expType.is(new StructType())) {
 			StructType temp = (StructType) expType;
-			//TODO
+			return "auto";
 		} else if (expType.is(new VoidType())) {
 			return null;
 		}
@@ -1273,7 +1280,7 @@ public class CppGenerator extends DepthFirstAdapter{
 			return "<<";
 		} else if (node.getClass().isInstance(new ARshiftAstBinaryOp())) {
 			return ">>";
-		// TODO: might need to change according to caseABitclearAstBinaryOp
+		// TODO: separate two
 		} else if (node.getClass().isInstance(new ABitclearAstBinaryOp())) {
 			return "&^";
 		} else if (node.getClass().isInstance(new AOrAstBinaryOp())) {
@@ -1364,7 +1371,7 @@ public class CppGenerator extends DepthFirstAdapter{
 		print(">>");
 	}
 	
-	// TODO: need to separate &^ to & and ^
+	// TODO: separate two
 //	@Override
 //	public void caseABitclearAstBinaryOp(ABitclearAstBinaryOp node) {
 //		print("&^");
@@ -1403,6 +1410,7 @@ public class CppGenerator extends DepthFirstAdapter{
 			return "<<=";
 		} else if (node.getClass().isInstance(new ARshiftEqAstOpAssign())) {
 			return ">>=";
+		// TODO: separate two
 		} else if (node.getClass().isInstance(new ABitclearEqAstOpAssign())) {
 			return "&^=";
 		}
@@ -1459,6 +1467,7 @@ public class CppGenerator extends DepthFirstAdapter{
 		print(">>=");
 	}
 	
+	// TODO: separate two
 //	@Override
 //	public void caseABitclearEqAstOpAssign(ABitclearEqAstOpAssign node) {
 //		print("&^=");
