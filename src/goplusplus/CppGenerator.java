@@ -518,43 +518,67 @@ public class CppGenerator extends DepthFirstAdapter{
 	// TODO: implement this method
 	@Override
 	public void caseAShortDeclAstStm(AShortDeclAstStm node) {
-		LinkedList<?> lvals = node.getIds();
-		for (Iterator<?> iterator = lvals.iterator(); iterator.hasNext();) {
-			PAstExp exp = (PAstExp) iterator.next();
-			exp.apply(this);
-			if (iterator.hasNext())
-				print(",");
-		}
-		
-		print(":=");
-		
-		LinkedList<?> rvals = node.getAstExp();
-		for (Iterator<?> iterator = rvals.iterator(); iterator.hasNext();) {
-			PAstExp exp = (PAstExp) iterator.next();
-			exp.apply(this);
-			if (iterator.hasNext())
-				print(",");
+		LinkedList<PAstExp> lvals = node.getIds();
+		LinkedList<PAstExp> rvals = node.getAstExp();
+		for (int i = 0; i < lvals.size(); i++) {
+			PAstExp expLeft = (PAstExp) lvals.get(i);
+			PAstExp expRight = (PAstExp) rvals.get(i);
+			Type expType = forPAstExp(expRight);
+			String type = helperForShortDeclAstStm(expType);
+			if (expType.is(new AppendType())) {
+				print(type);
+				expLeft.apply(this);
+				print(";\n");
+				print("*");
+				expLeft.apply(this);
+				print("=");
+				print("(*");
+				AAppendAstExp temp = (AAppendAstExp) expRight;
+				print(temp.getId().getText().trim());
+				print(");\n");
+				expRight.apply(this);
+			} else if (type != null) {
+				print(type);
+				expLeft.apply(this);
+				print("=");
+				expRight.apply(this);
+			}
 		}
 	}
 	
-	// return true if the variable on the left is in the current scope
-	public boolean helperForShortDecl(PAstExp node, Type rightType) {
-		if (node.getClass().isInstance(new AParenAstExp())) {
-			AParenAstExp temp = (AParenAstExp) node;
-			return helperForShortDecl(temp.getAstExp(), rightType);
-		} else if (node.getClass().isInstance(new AIdAstExp())) {
-			AIdAstExp temp = (AIdAstExp) node;
-			if (!symbolTable.getFirst().containsKey(temp.getId().getText().trim())) {
-				symbolTable.getFirst().put(temp.getId().getText().trim(), rightType);
-				return false;
-			}
-			return true;
-		} else if (node.getClass().isInstance(new AArrayAccessAstExp())) {
-			return true;
-		} else if (node.getClass().isInstance(new AFieldAccessAstExp())) {
-			return true;
+	public String helperForShortDeclAstStm(Type expType) {
+		if (expType.is(new AliasType())) {
+			AliasType temp = (AliasType) expType;
+			//TODO
+		} else if (expType.is(new AppendType())) {
+			AppendType temp = (AppendType) expType;
+			return "std::vector<" + helperForShortDeclAstStm(temp.type) + "> *";
+		} else if (expType.is(new ArrayType())) {
+			ArrayType temp = (ArrayType) expType;
+			return "std::array<" + helperForShortDeclAstStm(temp.elementType) + ", " + temp.size + ">";
+		} else if (expType.is(new BoolType())) {
+			return "bool";
+		} else if (expType.is(new FloatType())) {
+			return "double";
+		} else if (expType.is(new FunctionType())) {
+			FunctionType temp = (FunctionType) expType;
+			return helperForShortDeclAstStm(temp.returnType);
+		} else if (expType.is(new IntType())) {
+			return "int";
+		} else if (expType.is(new RuneType())) {
+			return "char";
+		} else if (expType.is(new SliceType())) {
+			SliceType temp = (SliceType) expType;
+			return "vector<" + helperForShortDeclAstStm(temp.elementType) + "> *";
+		} else if (expType.is(new StringType())) {
+			return "string";
+		} else if (expType.is(new StructType())) {
+			StructType temp = (StructType) expType;
+			//TODO
+		} else if (expType.is(new VoidType())) {
+			return null;
 		}
-		return false;
+		return null;
 	}
 	
 	@Override
@@ -712,7 +736,7 @@ public class CppGenerator extends DepthFirstAdapter{
 	@Override
 	public void caseASwitchAstStm(ASwitchAstStm node) {
 		//start a new scope for the short statement
-		printTab(); 
+		printTab();
 		print("{\n");	
 		newScope();
 		
@@ -1127,7 +1151,7 @@ public class CppGenerator extends DepthFirstAdapter{
 	@Override
 	public void caseAAppendAstExp(AAppendAstExp node) {
 		print(node.getId().getText().trim());
-		print(".push_back(");
+		print("->push_back(");
 		node.getAstExp().apply(this);
 		print(")");
 	}

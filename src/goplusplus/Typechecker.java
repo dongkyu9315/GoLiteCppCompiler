@@ -550,13 +550,24 @@ public class Typechecker extends DepthFirstAdapter{
 			Type leftType = Type.VOID;
 			Type rightType = forPAstExp(rightList.get(i));
 			if (helperForShortDecl(leftList.get(i), rightType)) {
+				System.out.println("afaf");
 				leftType = forPAstExp(leftList.get(i));
 			} else {
 				leftType = rightType;
 				good = true;
 			}
 			
+			if (leftType.is(new AppendType()) && rightType.is(new AppendType())) {
+				AppendType leftApp = (AppendType) leftType;
+				AppendType rightApp = (AppendType) rightType;
+				leftType = leftApp.type;
+				rightType = rightApp.type;
+			}
+			
 			if (!leftType.assign(rightType)) {
+				System.out.println(leftType.toString());
+				System.out.println(rightType.toString());
+				System.out.println("asdf");
 				printSymbolTable();
 				String errorMsg = "Assignment Error at line " + pos.getLine(temp);
 				throw new TypeException(errorMsg);
@@ -705,9 +716,6 @@ public class Typechecker extends DepthFirstAdapter{
 	
 	@Override
 	public void caseALongifAstStm(ALongifAstStm node) {
-		HashMap<String, Type> newScope = new HashMap<String, Type>();
-		symbolTable.addFirst(newScope);
-		
 		if (node.getInit() != null) {
 			node.getInit().apply(this);
 		}
@@ -719,6 +727,9 @@ public class Typechecker extends DepthFirstAdapter{
 			throw new TypeException(errorMsg);
 		}
 		
+		HashMap<String, Type> newIfScope = new HashMap<String, Type>();
+		symbolTable.addFirst(newIfScope);
+		
 		LinkedList<PAstStm> if_stmts = node.getIfStms();
 		System.out.println("if_stmts size" + if_stmts.size());
 		for (Iterator<PAstStm> iterator = if_stmts.iterator(); iterator.hasNext();) {
@@ -726,6 +737,12 @@ public class Typechecker extends DepthFirstAdapter{
 			System.out.println(stm.toString());
 			stm.apply(this);
 		}
+		
+		printSymbolTable();
+		symbolTable.removeFirst();
+		
+		HashMap<String, Type> newElseScope = new HashMap<String, Type>();
+		symbolTable.addFirst(newElseScope);
 		
 		LinkedList<PAstStm> else_stmts = node.getElseStms();
 		System.out.println("else_stmts size" + else_stmts.size());
