@@ -1,0 +1,31 @@
+Label1
+stmts
+Label2
+=> Label1 has in degree zero, this can be generated after some optimizations that moves label pointers
+Label2
+
+iconst x
+iconst y
+arithmentic operation
+=> compute and load the value directly, can be recursively applied
+iconst x op y
+
+branching true/false
+=> replace constants (any value we can precompute)
+remove dead code
+remove branch and labels
+
+iload/aload x
+iload/aload x
+=>
+iload/aload x
+dup
+
+aload x
+getfield a
+aload x
+getfield a
+=>
+aload x
+getfield a
+dup
