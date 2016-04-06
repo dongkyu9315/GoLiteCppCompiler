@@ -1,9 +1,3 @@
-Label1
-stmts
-Label2
-=> Label1 has in degree zero, this can be generated after some optimizations that moves label pointers
-Label2
-
 iconst x
 iconst y
 arithmentic operation
@@ -29,3 +23,19 @@ getfield a
 aload x
 getfield a
 dup
+
+istore x
+iload x
+=>	same for all store/load
+dup
+istore x
+
+iconst_0
+if_icmpeq
+=>
+ifeq
+
+iconst_0
+if_icmpne
+=>
+ifne
