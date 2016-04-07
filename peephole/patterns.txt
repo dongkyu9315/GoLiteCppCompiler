@@ -39,3 +39,60 @@ iconst_0
 if_icmpne
 =>
 ifne
+
+iconst_0
+ifeq goto L
+=>
+goto L
+
+iconst_1
+ifne goto L
+=>
+goto L
+
+iconst_0
+ifne goto L
+stmts
+=>
+stmts
+
+iconst_1
+ifeq goto L
+stmts
+=>
+stmts
+
+goto L
+stmts1(without label or indegree=0)
+L:
+stmts2
+=>
+stmts2
+
+ldc 0
+iload x
+idiv
+=>
+ldc 0
+
+ldc 1   
+iload x 
+imul    
+=> 
+iload x 
+
+ldc 2
+iload x
+imul
+=>
+iload x
+dup
+iadd
+
+ldc k   (0<=k<=127)
+iload x
+iadd
+istore x
+=>
+iinc x k
+
