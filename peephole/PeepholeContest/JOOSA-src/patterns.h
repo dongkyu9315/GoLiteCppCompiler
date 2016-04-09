@@ -265,23 +265,40 @@ int simplify_eq_branch(CODE **c)
 }
 
 
-/* gotoL
- * stmts1(without label or indegree=0)
- * L:
+/* goto L1
+ * stmts1(without label or only has dead labels)
+ * L2: (the first label that's not dead)
+ * stmts2
  * =>
+ * goto L1
+ * L2:
  * stmts2
  */
-// int drop_dead_code(CODE **c)
-// { int l1,count;
-//   if (is_goto(*c,&l1)) {
-//     while () {
-//       count++;
-//       if () {
-//         return 
-//       }
-//     }
-//   }
-// }
+int drop_dead_code(CODE **c)
+{ int l1,l2,count;
+  count=0;
+  if (is_goto(*c,&l1)) {
+    CODE *p = next(*c);
+    while (!is_label(p,&l2) || l2!=l1) {
+      if (is_label(p,&l2)) 
+      {
+        if(!deadlabel(l2))
+          break;
+      }
+      count++;
+      p = next(p);  
+    }
+    //printf("count: %d\n", count);
+    if (count>0){
+      printf("count: %d\n", count);
+      return replace_modified(c,count+1,makeCODEgoto(l1,NULL));
+    }
+    else
+      return 0;
+  }
+  else
+    return 0;
+}
 
 /* ldc 0
  * iload x
@@ -400,6 +417,7 @@ int init_patterns()
   ADD_PATTERN(simplify_icmpne);
   ADD_PATTERN(simplify_ne_branch);
   ADD_PATTERN(simplify_eq_branch);
+<<<<<<< Updated upstream
   // ADD_PATTERN(drop_dead_code);
   ADD_PATTERN(zero_division);
   ADD_PATTERN(simplify_multiplication_right2);
@@ -408,5 +426,11 @@ int init_patterns()
   ADD_PATTERN(redundant_label);
   ADD_PATTERN(redundant_goto);
   ADD_PATTERN(remove_nop);
+=======
+  ADD_PATTERN(drop_dead_code);
+  ADD_PATTERN(zero_division);
+  ADD_PATTERN(simplify_multiplication_right2);
+  ADD_PATTERN(positive_increment2);
+>>>>>>> Stashed changes
   return 1;
 }
