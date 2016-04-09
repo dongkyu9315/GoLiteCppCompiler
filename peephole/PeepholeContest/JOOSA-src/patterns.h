@@ -290,7 +290,7 @@ int drop_dead_code(CODE **c)
     }
     //printf("count: %d\n", count);
     if (count>0){
-      printf("count: %d\n", count);
+      printf("count: %d\nL1:%d\nL2:%d\n", count,l1,l2);
       return replace_modified(c,count+1,makeCODEgoto(l1,NULL));
     }
     else
@@ -358,7 +358,7 @@ int positive_increment2(CODE **c)
   }
   return 0;
 }
-
+//TODO : fix multiple indegree
 int redundant_label(CODE **c)
 {
 	int label;
@@ -368,8 +368,8 @@ int redundant_label(CODE **c)
 		int label2;
 		if (is_label(next(label_pos), &label2))
 		{
-			c->labelC = label2;
-			return kill_line(&pos);
+			(*c)->val.labelC = label2;
+			return kill_line(&label_pos);
 		}
 	}
 	return 0;
@@ -417,7 +417,7 @@ int init_patterns()
   ADD_PATTERN(simplify_icmpne);
   ADD_PATTERN(simplify_ne_branch);
   ADD_PATTERN(simplify_eq_branch);
-  // ADD_PATTERN(drop_dead_code);
+  ADD_PATTERN(drop_dead_code);
   ADD_PATTERN(zero_division);
   ADD_PATTERN(simplify_multiplication_right2);
   ADD_PATTERN(positive_increment2);
