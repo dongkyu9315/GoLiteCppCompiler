@@ -10,6 +10,8 @@
  * email: hendren@cs.mcgill.ca, mis@brics.dk
  */
 
+
+
 /* iload x        iload x        iload x
  * ldc 0          ldc 1          ldc 2
  * imul           imul           imul
@@ -93,7 +95,76 @@ int simplify_goto_goto(CODE **c)
   return 0;
 }
 
-<<<<<<< HEAD
+/*
+iconst x
+iconst y
+arithmentic operation
+=> compute and load the value directly, can be recursively applied
+iconst x op y
+*/
+
+int simplify_const_op_const(CODE **c){
+  int x,y;
+  if (is_ldc_int(*c,&x) && is_ldc_int(next(*c),&y))
+  {
+    int z;
+    if (is_iadd(next(next(*c))))
+    {
+      z = x+y;
+      return replace(c,3,makeCODEldc_int(z,NULL));
+    }
+    else if (is_isub(next(next(*c))))
+    {
+      z = x-y;
+      return replace(c,3,makeCODEldc_int(z,NULL));
+    }
+    else if (is_imul(next(next(*c))))
+    {
+      z = x*y;
+      return replace(c,3,makeCODEldc_int(z,NULL));
+    }
+    else if (is_idiv(next(next(*c))))
+    {
+      z = x/y;
+      return replace(c,3,makeCODEldc_int(z,NULL));
+    }
+    else if (is_irem(next(next(*c))))
+    {
+      z = x%y;
+      return replace(c,3,makeCODEldc_int(z,NULL));
+    }
+    else
+      return 0;
+  }
+}
+
+/*
+iload/aload x
+iload/aload x
+=>
+iload/aload x
+dup
+*/
+int simplify_load_twice(CODE **c){
+  int x,y;
+  if (is_iload(*c,&x) && is_iload(next(*c),&y))
+  {
+    if (x==y)
+    {
+      return replace(c,2,makeCODEiload(x,makeCODEdup(NULL)));
+    }
+  }
+  else if (is_aload(*c,&x) && is_aload(next(*c),&y))
+  {
+    if (x==y)
+    {
+      return replace(c,2,makeCODEaload(x,makeCODEdup(NULL)));
+    }
+  }
+  return 0;
+}
+
+
 /* aload x
  * getfield a
  * aload x
@@ -193,6 +264,7 @@ int simplify_eq_branch(CODE **c)
   return 0;
 }
 
+
 /* gotoL
  * stmts1(without label or indegree=0)
  * L:
@@ -270,6 +342,7 @@ int positive_increment2(CODE **c)
   return 0;
 }
 
+
 // #define OPTS 4
 
 // OPTI optimization[OPTS] = {simplify_multiplication_right,
@@ -277,20 +350,24 @@ int positive_increment2(CODE **c)
 //                            positive_increment,
 //                            simplify_goto_goto};
 
+
 int init_patterns()
 {
   ADD_PATTERN(simplify_multiplication_right);
   ADD_PATTERN(simplify_astore);
   ADD_PATTERN(positive_increment);
   ADD_PATTERN(simplify_goto_goto);
-  ADD_PATTERN(simplify_getfield_dup);
-  ADD_PATTERN(simplify_istore_iload);
-  ADD_PATTERN(simplify_icmpeq);
-  ADD_PATTERN(simplify_icmpne);
-  ADD_PATTERN(simplify_ne_branch);
-  ADD_PATTERN(simplify_eq_branch);
-  // ADD_PATTERN(drop_dead_code);
-  ADD_PATTERN(zero_division);
-  ADD_PATTERN(simplify_multiplication_right2);
-  ADD_PATTERN(positive_increment2);
+  // ADD_PATTERN(simplify_const_op_const);
+  // ADD_PATTERN(simplify_load_twice);
+  // ADD_PATTERN(simplify_getfield_dup);
+  // ADD_PATTERN(simplify_istore_iload);
+  // ADD_PATTERN(simplify_icmpeq);
+  // ADD_PATTERN(simplify_icmpne);
+  // ADD_PATTERN(simplify_ne_branch);
+  // ADD_PATTERN(simplify_eq_branch);
+  // // ADD_PATTERN(drop_dead_code);
+  // ADD_PATTERN(zero_division);
+  // ADD_PATTERN(simplify_multiplication_right2);
+  // ADD_PATTERN(positive_increment2);
   return 1;
+}
