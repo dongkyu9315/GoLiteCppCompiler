@@ -111,4 +111,3 @@ iadd
 istore x
 =>
 iinc x k
-

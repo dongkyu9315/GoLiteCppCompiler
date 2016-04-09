@@ -265,23 +265,40 @@ int simplify_eq_branch(CODE **c)
 }
 
 
-/* gotoL
- * stmts1(without label or indegree=0)
- * L:
+/* goto L1
+ * stmts1(without label or only has dead labels)
+ * L2: (the first label that's not dead)
+ * stmts2
  * =>
+ * goto L1
+ * L2:
  * stmts2
  */
-// int drop_dead_code(CODE **c)
-// { int l1,count;
-//   if (is_goto(*c,&l1)) {
-//     while () {
-//       count++;
-//       if () {
-//         return 
-//       }
-//     }
-//   }
-// }
+int drop_dead_code(CODE **c)
+{ int l1,l2,count;
+  count=0;
+  if (is_goto(*c,&l1)) {
+    CODE *p = next(*c);
+    while (!is_label(p,&l2) || l2!=l1) {
+      if (is_label(p,&l2)) 
+      {
+        if(!deadlabel(l2))
+          break;
+      }
+      count++;
+      p = next(p);  
+    }
+    //printf("count: %d\n", count);
+    if (count>0){
+      printf("count: %d\n", count);
+      return replace_modified(c,count+1,makeCODEgoto(l1,NULL));
+    }
+    else
+      return 0;
+  }
+  else
+    return 0;
+}
 
 /* ldc 0
  * iload x
@@ -342,14 +359,49 @@ int positive_increment2(CODE **c)
   return 0;
 }
 
+int redundant_label(CODE **c)
+{
+	int label;
+	if (uses_label(*c, &label))
+	{
+		CODE* label_pos = destination(label);
+		int label2;
+		if (is_label(next(label_pos), &label2))
+		{
+			c->labelC = label2;
+			return kill_line(&pos);
+		}
+	}
+	return 0;
+}
 
-// #define OPTS 4
+int redundant_goto(CODE **c)
+{
+	int label;
+	if (is_goto(*c, &label))
+	{
+		int label2;
+		if (is_label(next(*c), &label2))
+		{
+			if (label == label2)
+			{
+				return replace_modified(c, 2, NULL);
+			}
+		}
+	}
+	return 0;
+}
 
-// OPTI optimization[OPTS] = {simplify_multiplication_right,
-//                            simplify_astore,
-//                            positive_increment,
-//                            simplify_goto_goto};
-
+int remove_nop(CODE **c)
+{
+	if (is_nop(*c))
+	{
+		if (!is_return(next(*c)))
+		{
+			kill_line(c);
+		}
+	}
+}
 
 int init_patterns()
 {
@@ -369,5 +421,8 @@ int init_patterns()
   ADD_PATTERN(zero_division);
   ADD_PATTERN(simplify_multiplication_right2);
   ADD_PATTERN(positive_increment2);
+  ADD_PATTERN(redundant_label);
+  ADD_PATTERN(redundant_goto);
+  ADD_PATTERN(remove_nop);
   return 1;
 }
