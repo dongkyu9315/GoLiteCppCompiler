@@ -22,9 +22,14 @@ if ( { $PEEPDIR/joos $* } )  then
 	echo "----------------------------"
 	echo "----- Method code sizes ----"
 	echo "----------------------------"
+	echo ""
+
 	if ( $1 == "-O" ) then
-		grep -a code_length *.optdump
+		grep -a code_length *.optdump > size
 	else
-		grep -a code_length *.dump
-	end
+		grep -a code_length *.dump > size
+	endif
+
+	echo -n "Total size: "
+	awk '{sum += $3} END {print sum}' size 
 endif
