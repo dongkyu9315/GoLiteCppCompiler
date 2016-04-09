@@ -342,14 +342,49 @@ int positive_increment2(CODE **c)
   return 0;
 }
 
+int redundant_label(CODE **c)
+{
+	int label;
+	if (uses_label(*c, &label))
+	{
+		CODE* label_pos = destination(label);
+		int label2;
+		if (is_label(next(label_pos), &label2))
+		{
+			c->labelC = label2;
+			return kill_line(&pos);
+		}
+	}
+	return 0;
+}
 
-// #define OPTS 4
+int redundant_goto(CODE **c)
+{
+	int label;
+	if (is_goto(*c, &label))
+	{
+		int label2;
+		if (is_label(next(*c), &label2))
+		{
+			if (label == label2)
+			{
+				return replace_modified(c, 2, NULL);
+			}
+		}
+	}
+	return 0;
+}
 
-// OPTI optimization[OPTS] = {simplify_multiplication_right,
-//                            simplify_astore,
-//                            positive_increment,
-//                            simplify_goto_goto};
-
+int remove_nop(CODE **c)
+{
+	if (is_nop(*c))
+	{
+		if (!is_return(next(*c)))
+		{
+			kill_line(c);
+		}
+	}
+}
 
 int init_patterns()
 {
@@ -357,17 +392,21 @@ int init_patterns()
   ADD_PATTERN(simplify_astore);
   ADD_PATTERN(positive_increment);
   ADD_PATTERN(simplify_goto_goto);
-  // ADD_PATTERN(simplify_const_op_const);
-  // ADD_PATTERN(simplify_load_twice);
-  // ADD_PATTERN(simplify_getfield_dup);
-  // ADD_PATTERN(simplify_istore_iload);
-  // ADD_PATTERN(simplify_icmpeq);
-  // ADD_PATTERN(simplify_icmpne);
-  // ADD_PATTERN(simplify_ne_branch);
-  // ADD_PATTERN(simplify_eq_branch);
-  // // ADD_PATTERN(drop_dead_code);
-  // ADD_PATTERN(zero_division);
-  // ADD_PATTERN(simplify_multiplication_right2);
-  // ADD_PATTERN(positive_increment2);
+  ADD_PATTERN(simplify_const_op_const);
+  ADD_PATTERN(simplify_load_twice);
+  ADD_PATTERN(simplify_getfield_dup);
+  ADD_PATTERN(simplify_istore_iload);
+  ADD_PATTERN(simplify_icmpeq);
+  ADD_PATTERN(simplify_icmpne);
+  ADD_PATTERN(simplify_ne_branch);
+  ADD_PATTERN(simplify_eq_branch);
+  // ADD_PATTERN(drop_dead_code);
+  ADD_PATTERN(zero_division);
+  ADD_PATTERN(simplify_multiplication_right2);
+  ADD_PATTERN(positive_increment2);
+
+  ADD_PATTERN(redundant_label);
+  ADD_PATTERN(redundant_goto);
+  ADD_PATTERN(remove_nop);
   return 1;
 }
