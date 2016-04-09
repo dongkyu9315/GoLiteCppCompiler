@@ -93,9 +93,11 @@ int simplify_goto_goto(CODE **c)
   return 0;
 }
 
-#define OPTS 4
-
-OPTI optimization[OPTS] = {simplify_multiplication_right,
-                           simplify_astore,
-                           positive_increment,
-                           simplify_goto_goto};
+int init_patterns()
+{
+	ADD_PATTERN(simplify_multiplication_right);
+	ADD_PATTERN(simplify_astore);
+	ADD_PATTERN(positive_increment);
+	ADD_PATTERN(simplify_goto_goto);
+	return 1;
+}

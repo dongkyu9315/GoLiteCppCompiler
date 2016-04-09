@@ -8,15 +8,23 @@
 #        .java extensions and all external classes with .joos extensions
 
 if ( { $PEEPDIR/joos $* } )  then
-  foreach f ( $* )
-    if ( $f != "-O" && $f:e != "joos" ) then
-      java -jar $PEEPDIR/jasmin.jar $f:r.j 
-    endif
-  end
+	foreach f ( $* )
+		if ( $f != "-O" && $f:e != "joos" ) then
+			java -jar $PEEPDIR/jasmin.jar $f:r.j
+			if ( $1 == "-O" ) then
+				$PEEPDIR/djas -w $f:r.class > $f:r.optdump
+			else
+				$PEEPDIR/djas -w $f:r.class > $f:r.dump
+			endif
+		endif
+	end
 
-  if ( $1 == "-O" ) then
-    grep -a code_length *.optdump
-  else
-    grep -a code_length *.dump
-  endif
+	echo "----------------------------"
+	echo "----- Method code sizes ----"
+	echo "----------------------------"
+	if ( $1 == "-O" ) then
+		grep -a code_length *.optdump
+	else
+		grep -a code_length *.dump
+	end
 endif
