@@ -1,0 +1,7 @@
+PeepholeBenchmarks/bench*/*.class
+PeepholeBenchmarks/bench*/*.j
+PeepholeBenchmarks/bench*/*.dump
+PeepholeBenchmarks/bench*/*.optdump
+PeepholeBenchmarks/bench*/size
+JOOSA-src/joos
+JOOSA-src/*.o

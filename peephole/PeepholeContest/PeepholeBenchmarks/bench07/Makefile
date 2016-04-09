@@ -5,6 +5,9 @@ SRC = $(ROOMACTIONS) Room.java GrueHunt.java InGenerate.java
 GrueHunt: $(SRC)
 	javac $(SRC)
 
+opt: $(SRC)
+	$(PEEPDIR)/joosc -O $(SRC)
+
 joos: $(SRC)
 	$(PEEPDIR)/joosc $(SRC)
 

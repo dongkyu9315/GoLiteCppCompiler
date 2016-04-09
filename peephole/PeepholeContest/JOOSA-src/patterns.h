@@ -93,6 +93,7 @@ int simplify_goto_goto(CODE **c)
   return 0;
 }
 
+<<<<<<< HEAD
 /* aload x
  * getfield a
  * aload x
@@ -293,4 +294,3 @@ int init_patterns()
   ADD_PATTERN(simplify_multiplication_right2);
   ADD_PATTERN(positive_increment2);
   return 1;
-}
