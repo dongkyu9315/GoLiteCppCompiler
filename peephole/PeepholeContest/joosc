@@ -10,7 +10,13 @@
 if ( { $PEEPDIR/joos $* } )  then
   foreach f ( $* )
     if ( $f != "-O" && $f:e != "joos" ) then
-      java -jar jasmin.jar $f:r.j 
+      java -jar $PEEPDIR/jasmin.jar $f:r.j 
     endif
   end
+
+  if ( $1 == "-O" ) then
+    grep -a code_length *.optdump
+  else
+    grep -a code_length *.dump
+  endif
 endif
