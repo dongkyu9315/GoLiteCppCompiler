@@ -424,7 +424,7 @@ int iload_to_iconst(CODE **c)
         break;
       }
       if (is_iload(iter,&z) && x==z) {
-        return replace(iter,1,makeCODEldc_int(k,NULL));
+        return replace(&iter,1,makeCODEldc_int(k,NULL));
       }
       iter = next(iter);
     }
