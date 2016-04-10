@@ -437,12 +437,26 @@ int iload_to_iconst(CODE **c)
  * istore x
  * pop
  */
-int remove_dup_pop(CODE **c)
+int remove_dup_pop_around_istore(CODE **c)
 { int k;
   if (is_dup(*c) &&
       is_istore(next(*c),&k) &&
       is_pop(next(next(*c)))) {
     return replace(c,3,makeCODEistore(k,NULL));
+  }
+  return 0;
+}
+
+/* dup
+ * astore x
+ * pop
+ */
+int remove_dup_pop_around_astore(CODE **c)
+{ int k;
+  if (is_dup(*c) &&
+      is_astore(next(*c),&k) &&
+      is_pop(next(next(*c)))) {
+    return replace(c,3,makeCODEastore(k,NULL));
   }
   return 0;
 }
@@ -469,6 +483,7 @@ int init_patterns()
   ADD_PATTERN(redundant_goto);
   ADD_PATTERN(remove_nop);
   ADD_PATTERN(iload_to_iconst);
-  ADD_PATTERN(remove_dup_pop);
+  ADD_PATTERN(remove_dup_pop_around_istore);
+  ADD_PATTERN(remove_dup_pop_around_astore);
   return 1;
 }
