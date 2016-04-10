@@ -401,6 +401,7 @@ int remove_nop(CODE **c)
 			kill_line(c);
 		}
 	}
+  return 0;
 }
 
 /* iconst k
@@ -429,6 +430,7 @@ int iload_to_iconst(CODE **c)
       iter = next(iter);
     }
   }
+  return 0;
 }
 
 /* dup
@@ -442,6 +444,7 @@ int remove_dup_pop(CODE **c)
       is_pop(next(next(*c)))) {
     return replace(c,3,makeCODEistore(k,NULL));
   }
+  return 0;
 }
 
 int init_patterns()
