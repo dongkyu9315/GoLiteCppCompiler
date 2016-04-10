@@ -1,3 +1,4 @@
+//DONE
 iconst x
 iconst y
 arithmentic operation
@@ -9,6 +10,7 @@ branching true/false
 remove dead code
 remove branch and labels
 
+//DONE
 iload/aload x
 iload/aload x
 =>

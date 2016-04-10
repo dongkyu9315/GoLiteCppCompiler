@@ -562,6 +562,59 @@ int remove_dup_pop_around_istore(CODE **c)
   return 0;
 }
 
+
+/* dup
+ * astore x
+ * pop
+ */
+int remove_dup_pop_around_astore(CODE **c)
+{ int k;
+  if (is_dup(*c) &&
+      is_astore(next(*c),&k) &&
+      is_pop(next(next(*c)))) {
+    return replace(c,3,makeCODEastore(k,NULL));
+  }
+  return 0;
+}
+
+// ldc string/int
+// dup
+// aload_0
+// swap
+// putfield...
+// pop
+// =>
+// aload_0
+// ldc string/int
+// putfield...
+
+int simplify_setField(CODE **c)
+{ int x,o;
+  char* s = "";
+  char* putField="";
+  if (is_ldc_int(*c,&x) && is_dup(next(*c))
+      && is_aload(next(next(*c)),&o) && o==0
+      && is_swap(next(next(next(*c)))) 
+      && is_putfield(next(next(next(next(*c)))),&putField)
+      && is_pop(next(next(next(next(next(*c)))))))
+  { 
+    return replace(c,6,makeCODEaload(0,makeCODEldc_int(x,
+      makeCODEputfield(putField,NULL))));
+  }
+  else if (is_ldc_string(*c,&s) && is_dup(next(*c))
+      && is_aload(next(next(*c)),&o) && o==0
+      && is_swap(next(next(next(*c)))) 
+      && is_putfield(next(next(next(next(*c)))),&putField)
+      && is_pop(next(next(next(next(next(*c)))))))
+  {
+    return replace(c,6,makeCODEaload(0,makeCODEldc_string(s,
+      makeCODEputfield(putField,NULL))));
+  }
+  else
+    return 0;
+}
+
+
 int init_patterns()
 {
   ADD_PATTERN(simplify_cmp);
@@ -585,7 +638,8 @@ int init_patterns()
   ADD_PATTERN(redundant_goto);
   ADD_PATTERN(remove_nop);
   ADD_PATTERN(remove_deadlabel);
-  // ADD_PATTERN(iload_to_iconst);
   ADD_PATTERN(remove_dup_pop_around_istore);
+  ADD_PATTERN(simplify_setField);
+
   return 1;
 }
