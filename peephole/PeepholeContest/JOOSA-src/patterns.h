@@ -212,7 +212,7 @@ int simplify_icmpeq(CODE **c)
 { int k,l1;
   if (is_ldc_int(*c,&k) && // not sure if is_aconst_null is for iconst
       is_if_icmpeq(next(*c),&l1)) {
-    if (k==0) return replace(c,2,makeCODEgoto(l1,NULL));
+    if (k==0) return replace(c,2,makeCODEifeq(l1,NULL));
   }
   return 0;
 }
@@ -226,7 +226,7 @@ int simplify_icmpne(CODE **c)
 { int k,l1;
   if (is_ldc_int(*c,&k) && // not sure if is_aconst_null is for iconst
       is_if_icmpne(next(*c),&l1)) {
-    if (k==0) return replace(c,2,makeCODEgoto(l1,NULL));
+    if (k==0) return replace(c,2,makeCODEifne(l1,NULL));
   }
   return 0;
 }
@@ -529,24 +529,24 @@ int remove_deadlabel(CODE **c)
  * stmts
  * iconst 2
  */
-int iload_to_iconst(CODE **c)
-{ int k,x,y,z,label;
-  if (is_ldc_int(*c,&k) &&
-      is_istore(next(*c),&x)) {
-    CODE *iter = next(next(*c));
-    int count = 0;
-    while (!uses_label(iter,&label)) {
-      if (is_istore(iter,&y) && x==y) {
-        break;
-      }
-      if (is_iload(iter,&z) && x==z) {
-        return replace(&iter,1,makeCODEldc_int(k,NULL));
-      }
-      iter = next(iter);
-    }
-  }
-  return 0;
-}
+// int iload_to_iconst(CODE **c)
+// { int k,x,y,z,label;
+//   if (is_ldc_int(*c,&k) &&
+//       is_istore(next(*c),&x)) {
+//     CODE *iter = next(next(*c));
+//     int count = 0;
+//     while (!uses_label(iter,&label)) {
+//       if (is_istore(iter,&y) && x==y) {
+//         break;
+//       }
+//       if (is_iload(iter,&z) && x==z) {
+//         return replace(&iter,1,makeCODEldc_int(k,NULL));
+//       }
+//       iter = next(iter);
+//     }
+//   }
+//   return 0;
+// }
 
 /* dup
  * istore x
@@ -585,7 +585,7 @@ int init_patterns()
   ADD_PATTERN(redundant_goto);
   ADD_PATTERN(remove_nop);
   ADD_PATTERN(remove_deadlabel);
-  ADD_PATTERN(iload_to_iconst);
+  // ADD_PATTERN(iload_to_iconst);
   ADD_PATTERN(remove_dup_pop_around_istore);
   return 1;
 }
