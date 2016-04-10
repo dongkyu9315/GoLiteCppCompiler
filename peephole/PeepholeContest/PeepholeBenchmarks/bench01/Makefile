@@ -2,6 +2,7 @@ all: clean
 	$(PEEPDIR)/joosc BacktrackSolver.java SudokuSolver.java Benchmark.java
 
 opt: clean
+	cd $(PEEPDIR)/JOOSA-src && $(MAKE)
 	$(PEEPDIR)/joosc -O BacktrackSolver.java SudokuSolver.java Benchmark.java
 
 java:

@@ -133,9 +133,8 @@ int simplify_const_op_const(CODE **c){
       z = x%y;
       return replace(c,3,makeCODEldc_int(z,NULL));
     }
-    else
-      return 0;
   }
+  return 0;
 }
 
 /*
@@ -242,7 +241,11 @@ int simplify_ne_branch(CODE **c)
 { int k,l1;
   if (is_ldc_int(*c,&k) && // not sure if is_aconst_null is for iconst
       is_ifne(next(*c),&l1)) {
-    if (k==0) return replace(c,2,makeCODEnop(NULL));
+    if (k==0) 
+  	{
+  		droplabel(l1);
+  		return replace(c,2,makeCODEnop(NULL));
+  	}
     if (k==1) return replace(c,2,makeCODEgoto(l1,NULL));
   }
   return 0;
@@ -259,7 +262,11 @@ int simplify_eq_branch(CODE **c)
   if (is_ldc_int(*c,&k) && // not sure if is_aconst_null is for iconst
       is_ifeq(next(*c),&l1)) {
     if (k==0) return replace(c,2,makeCODEgoto(l1,NULL));
-    if (k==1) return replace(c,2,makeCODEnop(NULL));
+    if (k==1) 
+    {
+    	droplabel(l1);
+    	return replace(c,2,makeCODEnop(NULL));
+    }
   }
   return 0;
 }
@@ -288,9 +295,8 @@ int drop_dead_code(CODE **c)
       count++;
       p = next(p);  
     }
-    //printf("count: %d\n", count);
     if (count>0){
-      printf("count: %d\nL1:%d\nL2:%d\n", count,l1,l2);
+    	copylabel(l1);
       return replace_modified(c,count+1,makeCODEgoto(l1,NULL));
     }
     else
@@ -358,7 +364,7 @@ int positive_increment2(CODE **c)
   }
   return 0;
 }
-//TODO : fix multiple indegree
+
 int redundant_label(CODE **c)
 {
 	int label;
@@ -369,7 +375,12 @@ int redundant_label(CODE **c)
 		if (is_label(next(label_pos), &label2))
 		{
 			(*c)->val.labelC = label2;
-			return kill_line(&label_pos);
+			droplabel(label);
+			copylabel(label2);
+			if (deadlabel(label))
+			{
+				return kill_line(&label_pos);
+			}
 		}
 	}
 	return 0;
@@ -385,7 +396,7 @@ int redundant_goto(CODE **c)
 		{
 			if (label == label2)
 			{
-				return replace_modified(c, 2, NULL);
+				return replace_modified(c, 1, NULL);
 			}
 		}
 	}
@@ -401,7 +412,111 @@ int remove_nop(CODE **c)
 			kill_line(c);
 		}
 	}
-  return 0;
+	return 0;
+}
+
+int simplify_cmp(CODE **c)
+{
+	CODE* n = *c;
+	int elselabel;
+	if (uses_label(n, &elselabel))
+	{
+		int v1;
+		n = next(n);
+		if (is_ldc_int(n,&v1) && v1 == 0)
+		{
+			int stoplabel;
+			n = next(n);
+			if (is_goto(n, &stoplabel))
+			{
+				int elselabel2;
+				n = next(n);
+				if (is_label(n, &elselabel2) && elselabel == elselabel2 && uniquelabel(elselabel))
+				{
+					int v2;
+					n = next(n);
+					if (is_ldc_int(n, &v2) && v2 == 1)
+					{
+						int stoplabel2;
+						n = next(n);
+						if (is_label(n, &stoplabel2) && stoplabel2 == stoplabel && uniquelabel(stoplabel))
+						{
+							int finallabel;
+							n = next(n);
+							if (is_ifeq(n, &finallabel))
+							{
+								copylabel(finallabel);
+								droplabel(stoplabel);
+								droplabel(elselabel);
+								if (is_ifeq(*c, &elselabel))
+								{
+									return replace_modified(c, 7, makeCODEifne(finallabel, NULL));
+								}
+								else if (is_ifne(*c, &elselabel))
+								{
+									return replace_modified(c, 7, makeCODEifeq(finallabel, NULL));
+								}
+								else if (is_if_acmpeq(*c, &elselabel))
+								{
+									return replace_modified(c, 7, makeCODEif_acmpne(finallabel, NULL));
+								}
+								else if (is_if_acmpne(*c, &elselabel))
+								{
+									return replace_modified(c, 7, makeCODEif_acmpeq(finallabel, NULL));
+								}
+								else if (is_if_icmpeq(*c, &elselabel))
+								{
+									return replace_modified(c, 7, makeCODEif_icmpne(finallabel, NULL));
+								}
+								else if (is_if_icmpne(*c, &elselabel))
+								{
+									return replace_modified(c, 7, makeCODEif_icmpeq(finallabel, NULL));
+								}
+								else if (is_if_icmplt(*c, &elselabel))
+								{
+									return replace_modified(c, 7, makeCODEif_icmpge(finallabel, NULL));
+								}
+								else if (is_if_icmple(*c, &elselabel))
+								{
+									return replace_modified(c, 7, makeCODEif_icmpgt(finallabel, NULL));
+								}
+								else if (is_if_icmpgt(*c, &elselabel))
+								{
+									return replace_modified(c, 7, makeCODEif_icmple(finallabel, NULL));
+								}
+								else if (is_if_icmpge(*c, &elselabel))
+								{
+									return replace_modified(c, 7, makeCODEif_icmplt(finallabel, NULL));
+								}
+								else if (is_ifnull(*c, &elselabel))
+								{
+									return replace_modified(c, 7, makeCODEifnonnull(finallabel, NULL));
+								}
+								else if (is_ifnonnull(*c, &elselabel))
+								{
+									return replace_modified(c, 7, makeCODEifnull(finallabel, NULL));
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+int remove_deadlabel(CODE **c)
+{
+	int l;
+	if (is_label(*c, &l))
+	{
+		if (deadlabel(l))
+		{
+			kill_line(c);
+		}
+	}
+	return 0;
 }
 
 /* iconst k
@@ -447,22 +562,9 @@ int remove_dup_pop_around_istore(CODE **c)
   return 0;
 }
 
-/* dup
- * astore x
- * pop
- */
-int remove_dup_pop_around_astore(CODE **c)
-{ int k;
-  if (is_dup(*c) &&
-      is_astore(next(*c),&k) &&
-      is_pop(next(next(*c)))) {
-    return replace(c,3,makeCODEastore(k,NULL));
-  }
-  return 0;
-}
-
 int init_patterns()
 {
+  ADD_PATTERN(simplify_cmp);
   ADD_PATTERN(simplify_multiplication_right);
   ADD_PATTERN(simplify_astore);
   ADD_PATTERN(positive_increment);
@@ -482,8 +584,8 @@ int init_patterns()
   ADD_PATTERN(redundant_label);
   ADD_PATTERN(redundant_goto);
   ADD_PATTERN(remove_nop);
+  ADD_PATTERN(remove_deadlabel);
   ADD_PATTERN(iload_to_iconst);
   ADD_PATTERN(remove_dup_pop_around_istore);
-  ADD_PATTERN(remove_dup_pop_around_astore);
   return 1;
 }

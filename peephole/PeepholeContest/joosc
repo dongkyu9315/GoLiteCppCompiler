@@ -31,5 +31,7 @@ if ( { $PEEPDIR/joos $* } )  then
 	endif
 
 	echo -n "Total size: "
-	awk '{sum += $3} END {print sum}' size 
+	awk '{sum += $3} END {print sum}' size
+
+	echo ""
 endif

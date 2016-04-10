@@ -6,6 +6,7 @@ GrueHunt: $(SRC)
 	javac $(SRC)
 
 opt: $(SRC)
+	cd $(PEEPDIR)/JOOSA-src && $(MAKE)
 	$(PEEPDIR)/joosc -O $(SRC)
 
 joos: $(SRC)

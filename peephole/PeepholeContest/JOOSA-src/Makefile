@@ -6,7 +6,7 @@ YACCOPTS = bison -y -d
 
 # Select the first one when compiling on a real unix sytem,  second one 
 # when using gcc under Windows
-CFLAGS = -Wall -ansi -pedantic -g
+CFLAGS = -Wall -ansi -pedantic -g -std=c99
 #CFLAGS = 
 
 main:			y.tab.o lex.yy.o main.o tree.h tree.o error.h error.o memory.h memory.o weed.h weed.o symbol.h symbol.o type.h type.o defasn.h defasn.o resource.h resource.o code.h code.o optimize.h optimize.o emit.h emit.o
