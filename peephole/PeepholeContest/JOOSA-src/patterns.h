@@ -403,6 +403,47 @@ int remove_nop(CODE **c)
 	}
 }
 
+/* iconst k
+ * istore x
+ * stmts
+ * iload x
+ * =>
+ * iconst k
+ * istore x
+ * stmts
+ * iconst 2
+ */
+int iload_to_iconst(CODE **c)
+{ int k,x,y,z,label;
+  if (is_ldc_int(*c,&k) &&
+      is_istore(next(*c),&x)) {
+    CODE *iter = next(next(*c));
+    int count = 0;
+    while (!uses_label(iter,&label)) {
+      if (is_istore(iter,&y) && x==y) {
+        break;
+      }
+      if (is_iload(iter,&z) && x==z) {
+        return replace(iter,1,makeCODEldc_int(k,NULL));
+      }
+      iter = next(iter);
+    }
+  }
+}
+
+/* dup
+ * istore x
+ * pop
+ */
+int remove_dup_pop(CODE **c)
+{ int k;
+  if (is_dup(*c) &&
+      is_istore(next(*c),&k) &&
+      is_pop(next(next(*c)))) {
+    return replace(c,3,makeCODEistore(k,NULL));
+  }
+}
+
 int init_patterns()
 {
   ADD_PATTERN(simplify_multiplication_right);
@@ -424,5 +465,7 @@ int init_patterns()
   ADD_PATTERN(redundant_label);
   ADD_PATTERN(redundant_goto);
   ADD_PATTERN(remove_nop);
+  ADD_PATTERN(iload_to_iconst);
+  ADD_PATTERN(remove_dup_pop);
   return 1;
 }
