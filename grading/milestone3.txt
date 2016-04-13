@@ -1,0 +1,11 @@
+• Good and detailed explanation for the choice of C++.
+• How did you handle type aliases?  Your first point in "design
+  decisions" seems to imply both; I imagine you forgot to insert the
+  word "not" somewhere.
+• Forward function declaration is not necessary since we don't allow
+  that in GoLite.
+• Very, *very* good report: short, clear, precise and to the point.
+  Keep it up guys!
+• Tip: did you guys consider that a malicious Go program could use
+  variable names that are not keywords in Go, but are in C++?  E.g. var
+  typedef int = 3;
