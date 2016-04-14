@@ -567,6 +567,12 @@ public class Typechecker extends DepthFirstAdapter{
 				rightType = rightApp.type;
 			}
 			
+			if (repeatShortDecl(leftList)) {
+				printSymbolTable();
+				String errorMsg = "Assignment to the variable on the left is repeated at line " + pos.getLine(temp);
+				throw new TypeException(errorMsg);
+			}
+			
 			if (!leftType.assign(rightType)) {
 				printSymbolTable();
 				String errorMsg = "Assignment Error at line " + pos.getLine(temp);
@@ -581,7 +587,30 @@ public class Typechecker extends DepthFirstAdapter{
 		}
 	}
 	
-	// return true if the variable on the left is in the current scope
+	// returns true if the variable on the left is repeated
+	public boolean repeatShortDecl(LinkedList<PAstExp> pList) {
+		PAstExp elt = null;
+		PAstExp check = null;
+		for (int i = 0; i < pList.size(); i++) {
+			for (int j = i; j < pList.size(); j++) {
+				elt = pList.get(i);
+				check = pList.get(j);
+				if (elt instanceof AIdAstExp) {
+					AIdAstExp tmpElt = (AIdAstExp) elt;
+					String cmp = tmpElt.getId().getText().trim();
+					if (check instanceof AIdAstExp) {
+						AIdAstExp tmpCheck = (AIdAstExp) check;
+						if (cmp.equals(tmpCheck.getId().getText().trim())) {
+							return true;
+						}
+					}
+				}
+			}
+		}
+		return false;
+	}
+	
+	// returns true if the variable on the left is in the current scope
 	public boolean helperForShortDecl(PAstExp node, Type rightType) {
 		if (node.getClass().isInstance(new AParenAstExp())) {
 			AParenAstExp temp = (AParenAstExp) node;
