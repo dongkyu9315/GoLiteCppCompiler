@@ -524,8 +524,12 @@ public class PrettyPrinter extends DepthFirstAdapter {
 	@Override
 	public void caseASwitchAstStm(ASwitchAstStm node) {
 		print("switch");
-		node.getAstStm().apply(this);
-		node.getAstExp().apply(this);
+		if (node.getAstStm() != null) {
+			node.getAstStm().apply(this);
+		}
+		if (node.getAstExp() != null) {
+			node.getAstExp().apply(this);
+		}
 		print(" {\n");
 		LinkedList<?> stms = node.getAstSwitchStm();
 		for (Iterator<?> iterator = stms.iterator(); iterator.hasNext();) {
@@ -689,7 +693,9 @@ public class PrettyPrinter extends DepthFirstAdapter {
 			}
 		}
 		
-		node.getAstFallthroughStm().apply(this);
+		if (node.getAstFallthroughStm() != null) {
+			node.getAstFallthroughStm().apply(this);
+		}
 		print("\n");
 	}
 	

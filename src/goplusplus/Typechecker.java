@@ -174,6 +174,7 @@ public class Typechecker extends DepthFirstAdapter{
 	public void caseAAstTypeDecl(AAstTypeDecl node) {
 		LinkedList<TId> idlist = node.getId();
 		Type varType = forPAstTypeExp(node.getAstTypeExp());
+		
 		for (Iterator<TId> iterator = idlist.iterator(); iterator.hasNext();) {
 			TId d = (TId) iterator.next();
 			if (!symbolTable.getFirst().containsKey(d.getText().trim())) {
@@ -298,8 +299,11 @@ public class Typechecker extends DepthFirstAdapter{
 			}
 		} else if (node.getClass().isInstance(new ALongifAstStm())) {
 			ALongifAstStm temp = (ALongifAstStm) node;
-			LinkedList<PAstStm> list = temp.getIfStms();
-			list.addAll(temp.getElseStms());
+			LinkedList<PAstStm> ifList = temp.getIfStms();
+			LinkedList<PAstStm> elseList = temp.getElseStms();
+			LinkedList<PAstStm> list = new LinkedList<PAstStm>();
+			list.addAll(ifList);
+			list.addAll(elseList);
 			for (Iterator<PAstStm> iter = list.iterator(); iter.hasNext();) {
 				PAstStm ele = iter.next();
 				if (ele.getClass().isInstance(new AReturnAstStm())) {
@@ -556,6 +560,13 @@ public class Typechecker extends DepthFirstAdapter{
 				good = true;
 			}
 			
+			if (leftType.is(new AppendType()) && rightType.is(new AppendType())) {
+				AppendType leftApp = (AppendType) leftType;
+				AppendType rightApp = (AppendType) rightType;
+				leftType = leftApp.type;
+				rightType = rightApp.type;
+			}
+			
 			if (!leftType.assign(rightType)) {
 				printSymbolTable();
 				String errorMsg = "Assignment Error at line " + pos.getLine(temp);
@@ -705,9 +716,6 @@ public class Typechecker extends DepthFirstAdapter{
 	
 	@Override
 	public void caseALongifAstStm(ALongifAstStm node) {
-		HashMap<String, Type> newScope = new HashMap<String, Type>();
-		symbolTable.addFirst(newScope);
-		
 		if (node.getInit() != null) {
 			node.getInit().apply(this);
 		}
@@ -719,19 +727,24 @@ public class Typechecker extends DepthFirstAdapter{
 			throw new TypeException(errorMsg);
 		}
 		
+		HashMap<String, Type> newIfScope = new HashMap<String, Type>();
+		symbolTable.addFirst(newIfScope);
+		
 		LinkedList<PAstStm> if_stmts = node.getIfStms();
-		System.out.println("if_stmts size" + if_stmts.size());
 		for (Iterator<PAstStm> iterator = if_stmts.iterator(); iterator.hasNext();) {
 			PAstStm stm = (PAstStm) iterator.next();
-			System.out.println(stm.toString());
 			stm.apply(this);
 		}
 		
+		printSymbolTable();
+		symbolTable.removeFirst();
+		
+		HashMap<String, Type> newElseScope = new HashMap<String, Type>();
+		symbolTable.addFirst(newElseScope);
+		
 		LinkedList<PAstStm> else_stmts = node.getElseStms();
-		System.out.println("else_stmts size" + else_stmts.size());
 		for (Iterator<PAstStm> iterator = else_stmts.iterator(); iterator.hasNext();) {
 			PAstStm stm = (PAstStm) iterator.next();
-			System.out.println(stm.toString());
 			stm.apply(this);
 		}
 		
