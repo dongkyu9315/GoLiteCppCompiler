@@ -569,7 +569,7 @@ public class Typechecker extends DepthFirstAdapter{
 			
 			if (repeatShortDecl(leftList)) {
 				printSymbolTable();
-				String errorMsg = "Assignment to the variable on the left is repeated at line " + pos.getLine(temp);
+				String errorMsg = "The variable on the left is repeated at line " + pos.getLine(temp);
 				throw new TypeException(errorMsg);
 			}
 			
@@ -592,7 +592,7 @@ public class Typechecker extends DepthFirstAdapter{
 		PAstExp elt = null;
 		PAstExp check = null;
 		for (int i = 0; i < pList.size(); i++) {
-			for (int j = i; j < pList.size(); j++) {
+			for (int j = i+1; j < pList.size(); j++) {
 				elt = pList.get(i);
 				check = pList.get(j);
 				if (elt instanceof AIdAstExp) {
