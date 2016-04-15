@@ -1011,6 +1011,10 @@ public class Typechecker extends DepthFirstAdapter{
 					return Type.BOOL;
 				} else if (binOp.equals("&&")) {
 					return Type.BOOL;
+				} else if (binOp.equals("==")) {
+					return Type.BOOL;
+				} else if (binOp.equals("!=")) {
+					return Type.BOOL;
 				}
 				printSymbolTable();
 				String errorMsg = "Binary Operator Error at line " + pos.getLine(temp) + " : Invalid operation for boolean types";
