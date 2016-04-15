@@ -1271,7 +1271,9 @@ public class CppGenerator extends DepthFirstAdapter{
 	@Override
 	public void caseABasicCastAstExp(ABasicCastAstExp node) {
 		print("static_cast<");
-		print(node.getBasicTypes().toString().trim());
+		TBasicTypes cloneType = (TBasicTypes) node.getBasicTypes().clone();
+		Type basic = forPAstTypeExp(new ABasicAstTypeExp(cloneType));
+		print(basic.print());
 		print(">(");
 		node.getAstExp().apply(this);
 		print(")");
