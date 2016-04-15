@@ -258,10 +258,12 @@ public class CppGenerator extends DepthFirstAdapter{
 	public void caseAAstFuncDecl(AAstFuncDecl node) {
 		HashMap<String, Type> newScope = new HashMap<String, Type>();
 		symbolTable.addFirst(newScope);
+		boolean check = false;
 		if(node.getAstTypeExp() != null) {
 			node.getAstTypeExp().apply(this);
 		} else {
-			print("void");
+			print("int");
+			check = true;
 		}
 		
 		//function header
@@ -287,6 +289,11 @@ public class CppGenerator extends DepthFirstAdapter{
 			PAstStm stm = (PAstStm) iterator.next();
 			stm.apply(this);
 			
+		}
+		
+		if (check) {
+			printTab();
+			print("return 0\n");
 		}
 		
 		exitScope();
