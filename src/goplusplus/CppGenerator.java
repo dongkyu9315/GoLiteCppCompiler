@@ -242,7 +242,6 @@ public class CppGenerator extends DepthFirstAdapter{
 					printTab();
 					Type fieldType = forPAstTypeExp(tempField.getAstTypeExp());
 					print(fieldType.print());
-//					printList(fieldIdList);
 					String separator = "";
 					for(Node n : fieldIdList){
 						print(separator);
