@@ -668,7 +668,7 @@ public class Typechecker extends DepthFirstAdapter{
 		String temp = forPAstPostOp(node.getAstPostOp());
 		if (temp.equals("++") || temp.equals("--")) {
 			Type t = forPAstExp(node.getAstExp());
-			if (!t.is(Type.INT)) {
+			if (!t.is(Type.INT) && !t.is(Type.FLOAT64) && !t.is(Type.RUNE)) {
 				printSymbolTable();
 				String errorMsg = "Post Increment/Decrement Error at line " + pos.getLine(node);
 				throw new TypeException(errorMsg);

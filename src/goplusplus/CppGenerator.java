@@ -700,9 +700,6 @@ public class CppGenerator extends DepthFirstAdapter{
 		node.getAstPostOp().apply(this);
 		if(!isPostCondition(node))
 			print(";\n");
-		else{
-			print(";");
-		}
 	}
 	
 	@Override
@@ -875,8 +872,8 @@ public class CppGenerator extends DepthFirstAdapter{
 		
 		if (node.getCondition() != null) {
 			node.getCondition().apply(this);
-			print(";");
 		}
+		print(";");
 		if (node.getPost() != null) {
 			node.getPost().apply(this);
 		}
