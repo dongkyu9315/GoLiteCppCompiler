@@ -18,6 +18,6 @@ public class StringType extends Type{
 
 	@Override
 	public String print() {
-		return "std::string";
+		return "string";
 	}
 }

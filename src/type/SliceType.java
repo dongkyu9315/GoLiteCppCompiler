@@ -28,6 +28,6 @@ public class SliceType extends Type{
 	@Override
 	//pointer to vector
 	public String print() {
-		return "std::vector<" + elementType.print() +"> *";
+		return "vector<" + elementType.print() +"> *";
 	}
 }
