@@ -478,9 +478,13 @@ public class CppGenerator extends DepthFirstAdapter{
 				printTab();
 			PAstExp lval = lvals.get(i);
 			PAstExp rval = rvals.get(i);
-			lval.apply(this);
-			print("=");
-			rval.apply(this);
+			if (rval instanceof AAppendAstExp) {
+				rval.apply(this);
+			} else {
+				lval.apply(this);
+				print("=");
+				rval.apply(this);
+			}
 			if(!isPostCondition(node))
 				print(";\n");
 			else
@@ -540,16 +544,35 @@ public class CppGenerator extends DepthFirstAdapter{
 				print(temp.getId().getText().trim());
 				print(");\n");
 				printTab();
-				expRight.apply(this);
+				expLeft.apply(this);
+				print("->push_back(");
+				temp.getAstExp().apply(this);
+				print(");\n");
 			} else if (type != null) {
 				printTab();
-				print(type);
+				if (!isDeclared(expLeft)) {
+					print(type);
+				}
 				expLeft.apply(this);
 				print("=");
 				expRight.apply(this);
 				print(";\n");
 			}
 		}
+	}
+	
+	// returns true if AIdAstExp is declared before
+	public boolean isDeclared(PAstExp node) {
+		if (node instanceof AIdAstExp) {
+			AIdAstExp temp = (AIdAstExp) node;
+			for (Iterator<HashMap<String, Type>> iter = symbolTable.iterator(); iter.hasNext();) {
+				HashMap<String, Type> tempMap = iter.next();
+				if (tempMap.containsKey(temp.getId().getText().trim())) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 	
 	public String helperForShortDeclAstStm(Type expType) {
