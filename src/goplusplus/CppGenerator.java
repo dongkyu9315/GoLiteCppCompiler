@@ -603,29 +603,13 @@ public class CppGenerator extends DepthFirstAdapter{
 				}
 			} else if (type != null) {
 				printTab();
-				if (!isDeclared(expLeft)) {
-					print(type);
-				}
+				print(type);
 				expLeft.apply(this);
 				print("=");
 				expRight.apply(this);
 				print(";\n");
 			}
 		}
-	}
-	
-	// returns true if AIdAstExp is declared before
-	public boolean isDeclared(PAstExp node) {
-		if (node instanceof AIdAstExp) {
-			AIdAstExp temp = (AIdAstExp) node;
-			for (Iterator<HashMap<String, Type>> iter = symbolTable.iterator(); iter.hasNext();) {
-				HashMap<String, Type> tempMap = iter.next();
-				if (tempMap.containsKey(temp.getId().getText().trim())) {
-					return true;
-				}
-			}
-		}
-		return false;
 	}
 	
 	public String helperForShortDeclAstStm(Type expType) {
@@ -1119,7 +1103,8 @@ public class CppGenerator extends DepthFirstAdapter{
 			}
 		} else if (node.getClass().isInstance(new ABasicCastAstExp())) {
 			ABasicCastAstExp temp = (ABasicCastAstExp) node;
-			Type basic = forPAstTypeExp(new ABasicAstTypeExp(temp.getBasicTypes()));
+			TBasicTypes cloneType = (TBasicTypes) temp.getBasicTypes().clone();
+			Type basic = forPAstTypeExp(new ABasicAstTypeExp(cloneType));
 			Type other = forPAstExp(temp.getAstExp());
 			if (basic.is(Type.INT)) {
 				if (other.is(Type.FLOAT64) || other.is(Type.INT) || other.is(Type.RUNE)) {

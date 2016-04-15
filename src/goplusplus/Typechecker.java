@@ -1211,7 +1211,8 @@ public class Typechecker extends DepthFirstAdapter{
 			throw new TypeException(errorMsg);
 		} else if (node.getClass().isInstance(new ABasicCastAstExp())) {
 			ABasicCastAstExp temp = (ABasicCastAstExp) node;
-			Type basic = forPAstTypeExp(new ABasicAstTypeExp(temp.getBasicTypes()));
+			TBasicTypes cloneType = (TBasicTypes) temp.getBasicTypes().clone();
+			Type basic = forPAstTypeExp(new ABasicAstTypeExp(cloneType));
 			Type other = forPAstExp(temp.getAstExp());
 			if (basic.is(Type.INT)) {
 				if (other.is(Type.FLOAT64) || other.is(Type.INT) || other.is(Type.RUNE)) {
