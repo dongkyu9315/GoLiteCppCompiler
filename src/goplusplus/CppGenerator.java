@@ -594,6 +594,7 @@ public class CppGenerator extends DepthFirstAdapter{
 						printTab();
 						expRight.apply(this);
 						print(";\n");
+						symbolTable.getFirst().put(((AIdAstExp) expLeft).getId().getText().trim(), expType);
 					} else {
 						printTab();
 						print(type);
@@ -614,24 +615,9 @@ public class CppGenerator extends DepthFirstAdapter{
 						print("->push_back(");
 						temp.getAstExp().apply(this);
 						print(");\n");
+						symbolTable.getFirst().put(((AIdAstExp) expLeft).getId().getText().trim(), realType);
+						symbolTable.getFirst().put(tempRight.getId().getText().trim(), realType);
 					}
-				} else {
-					printTab();
-					print(type);
-					expLeft.apply(this);
-					print(";\n");
-					printTab();
-					print("*");
-					expLeft.apply(this);
-					print("= (*");
-					AAppendAstExp temp = (AAppendAstExp) expRight;
-					print(temp.getId().getText().trim());
-					print(");\n");
-					printTab();
-					expLeft.apply(this);
-					print("->push_back(");
-					temp.getAstExp().apply(this);
-					print(");\n");
 				}
 			} else if (type != null) {
 				printTab();
@@ -642,6 +628,9 @@ public class CppGenerator extends DepthFirstAdapter{
 				print("=");
 				expRight.apply(this);
 				print(";\n");
+				if (expLeft instanceof AIdAstExp) {
+					symbolTable.getFirst().put(((AIdAstExp) expLeft).getId().getText().trim(), expType);
+				}
 			}
 		}
 	}
@@ -1234,15 +1223,19 @@ public class CppGenerator extends DepthFirstAdapter{
 		PAstBinaryOp binaryOp = node.getAstBinaryOp();
 		if (binaryOp.getClass().isInstance(new ABitclearAstBinaryOp())) {
 			print("(");
+			print("(");
 			node.getLeft().apply(this);
 			print("^");
 			node.getRight().apply(this);
 			print(") & ");
 			node.getLeft().apply(this);
+			print(")");
 		} else {
+			print("(");
 			node.getLeft().apply(this);
 			binaryOp.apply(this);
 			node.getRight().apply(this);
+			print(")");
 		}
 	}
 	
@@ -1371,6 +1364,11 @@ public class CppGenerator extends DepthFirstAdapter{
 	@Override
 	public void caseAStringAstLiteral(AStringAstLiteral node) {
 		print(node.getStringLit().toString().trim());
+	}
+	
+	@Override
+	public void caseABoolAstLiteral(ABoolAstLiteral node) {
+		print(node.getBoolLit().toString().trim());
 	}
 	
 	// ast_binary_op	---------------------------------------------------
