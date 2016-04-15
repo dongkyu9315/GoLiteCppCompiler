@@ -479,7 +479,36 @@ public class CppGenerator extends DepthFirstAdapter{
 			PAstExp lval = lvals.get(i);
 			PAstExp rval = rvals.get(i);
 			if (rval instanceof AAppendAstExp) {
-				rval.apply(this);
+				if (lval instanceof AIdAstExp) {
+					AIdAstExp leftIdExp = (AIdAstExp) lval;
+					if (leftIdExp.getId().getText().trim().equals(((AAppendAstExp) rval).getId().getText().trim())) {
+						rval.apply(this);
+					} else {
+						print("*");
+						((AIdAstExp) lval).getId().apply(this);
+						print("=");
+						print("(*");
+						((AAppendAstExp) rval).getId().apply(this);
+						print(");\n");
+						printTab();
+						((AIdAstExp) lval).getId().apply(this);
+						print("->push_back(");
+						((AAppendAstExp) rval).getAstExp().apply(this);
+						print(")");
+					}
+				} else {
+					print("*");
+					lval.apply(this);
+					print("=");
+					print("(*");
+					((AAppendAstExp) rval).getId().apply(this);
+					print(");\n");
+					printTab();
+					lval.apply(this);
+					print("->push_back(");
+					((AAppendAstExp) rval).getAstExp().apply(this);
+					print(")");
+				}
 			} else {
 				lval.apply(this);
 				print("=");
@@ -520,7 +549,6 @@ public class CppGenerator extends DepthFirstAdapter{
 		}
 	}
 	
-	// TODO: implement this method
 	@Override
 	public void caseAShortDeclAstStm(AShortDeclAstStm node) {
 		LinkedList<PAstExp> lvals = node.getIds();
@@ -531,23 +559,48 @@ public class CppGenerator extends DepthFirstAdapter{
 			Type expType = forPAstExp(expRight);
 			String type = helperForShortDeclAstStm(expType);
 			if (expType.is(new AppendType())) {
-				printTab();
-				print(type);
-				expLeft.apply(this);
-				print(";\n");
-				printTab();
-				print("*");
-				expLeft.apply(this);
-				print("=");
-				print("(*");
-				AAppendAstExp temp = (AAppendAstExp) expRight;
-				print(temp.getId().getText().trim());
-				print(");\n");
-				printTab();
-				expLeft.apply(this);
-				print("->push_back(");
-				temp.getAstExp().apply(this);
-				print(");\n");
+				if (expLeft instanceof AIdAstExp) {
+					AAppendAstExp tempRight = (AAppendAstExp) expRight;
+					if (((AIdAstExp) expLeft).getId().getText().trim().equals(tempRight.getId().getText().trim())) {
+						printTab();
+						expRight.apply(this);
+						print(";\n");
+					} else {
+						printTab();
+						print(type);
+						expLeft.apply(this);
+						print(";\n");
+						printTab();
+						print("*");
+						expLeft.apply(this);
+						print("= (*");
+						AAppendAstExp temp = (AAppendAstExp) expRight;
+						print(temp.getId().getText().trim());
+						print(");\n");
+						printTab();
+						expLeft.apply(this);
+						print("->push_back(");
+						temp.getAstExp().apply(this);
+						print(");\n");
+					}
+				} else {
+					printTab();
+					print(type);
+					expLeft.apply(this);
+					print(";\n");
+					printTab();
+					print("*");
+					expLeft.apply(this);
+					print("= (*");
+					AAppendAstExp temp = (AAppendAstExp) expRight;
+					print(temp.getId().getText().trim());
+					print(");\n");
+					printTab();
+					expLeft.apply(this);
+					print("->push_back(");
+					temp.getAstExp().apply(this);
+					print(");\n");
+				}
 			} else if (type != null) {
 				printTab();
 				if (!isDeclared(expLeft)) {
