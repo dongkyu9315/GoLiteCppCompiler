@@ -710,8 +710,11 @@ public class CppGenerator extends DepthFirstAdapter{
 		for (Iterator<?> iterator = exps.iterator(); iterator.hasNext();) {
 			PAstExp exp = (PAstExp) iterator.next();
 			exp.apply(this);
-			if (iterator.hasNext())
+			if (iterator.hasNext()) {
 				print(" << ");
+				print("\" \"");
+				print(" << ");
+			}
 		}
 		print(";\n");
 	}
@@ -724,8 +727,11 @@ public class CppGenerator extends DepthFirstAdapter{
 		for (Iterator<?> iterator = exps.iterator(); iterator.hasNext();) {
 			PAstExp exp = (PAstExp) iterator.next();
 			exp.apply(this);
-			if (iterator.hasNext())
+			if (iterator.hasNext()) {
 				print(" << ");
+				print("\" \"");
+				print(" << ");
+			}
 		}
 		print("<< endl;\n");
 	}
