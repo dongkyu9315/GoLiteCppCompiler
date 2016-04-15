@@ -165,6 +165,10 @@ public class CppGenerator extends DepthFirstAdapter{
 			d.apply(this);
 			if (varType.is(new SliceType())) {
 				sep = ", *";
+				print("= new std::vector<");
+				SliceType temp = (SliceType) varType;
+				print(temp.elementType.toString().trim());
+				print(">");
 			} else {
 				sep = ",";
 			}
@@ -238,7 +242,21 @@ public class CppGenerator extends DepthFirstAdapter{
 					printTab();
 					Type fieldType = forPAstTypeExp(tempField.getAstTypeExp());
 					print(fieldType.print());
-					printList(fieldIdList);
+//					printList(fieldIdList);
+					String separator = "";
+					for(Node n : fieldIdList){
+						print(separator);
+						n.apply(this);
+						if (fieldType.is(new SliceType())) {
+							print("= new std::vector<");
+							SliceType realType = (SliceType) fieldType;
+							print(helperForShortDeclAstStm(realType.elementType));
+							print(">");
+							separator = ", *";
+						} else {
+							separator = ",";
+						}
+					}
 					print(";\n");
 				}
 				exitScope();
@@ -293,7 +311,7 @@ public class CppGenerator extends DepthFirstAdapter{
 		
 		if (check) {
 			printTab();
-			print("return 0\n");
+			print("return 0;\n");
 		}
 		
 		exitScope();
@@ -580,7 +598,10 @@ public class CppGenerator extends DepthFirstAdapter{
 						printTab();
 						print(type);
 						expLeft.apply(this);
-						print(";\n");
+						print("= new std::vector<");
+						AppendType realType = (AppendType) expType;
+						print(helperForShortDeclAstStm(realType.type));
+						print(">;\n");
 						printTab();
 						print("*");
 						expLeft.apply(this);
