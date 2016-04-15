@@ -163,7 +163,11 @@ public class CppGenerator extends DepthFirstAdapter{
 			symbolTable.getFirst().put(d.getText().trim(), varType);
 			print(sep);
 			d.apply(this);
-			sep = ",";
+			if (varType.is(new SliceType())) {
+				sep = ", *";
+			} else {
+				sep = ",";
+			}
 		}
 		print(";\n");
 	}
@@ -527,12 +531,12 @@ public class CppGenerator extends DepthFirstAdapter{
 		printTab();
 		if (opAssign.getClass().isInstance(new ABitclearEqAstOpAssign())) {
 			print(node.getL().getText().trim());
-			print("&=");
-			node.getR().apply(this);
-			print(";");
+			print("= (");
 			print(node.getL().getText().trim());
-			print("^=");
+			print("^");
 			node.getR().apply(this);
+			print(") &");
+			print(node.getL().getText().trim());
 		} else {
 			print(node.getL().getText().trim());
 			opAssign.apply(this);
@@ -1181,12 +1185,16 @@ public class CppGenerator extends DepthFirstAdapter{
 		node.getAstExp().apply(this);
 	}
 	
-	// TODO: check if the binaryOp is ABitclearAstBinaryOp and separate the & and ^
 	@Override
 	public void caseABinaryOpAstExp(ABinaryOpAstExp node) {
 		PAstBinaryOp binaryOp = node.getAstBinaryOp();
 		if (binaryOp.getClass().isInstance(new ABitclearAstBinaryOp())) {
-			//TODO implement
+			print("(");
+			node.getLeft().apply(this);
+			print("^");
+			node.getRight().apply(this);
+			print(") & ");
+			node.getLeft().apply(this);
 		} else {
 			node.getLeft().apply(this);
 			binaryOp.apply(this);
@@ -1208,7 +1216,6 @@ public class CppGenerator extends DepthFirstAdapter{
 		print(")");
 	}
 	
-	//TODO fix this shit
 	@Override
 	public void caseAAppendAstExp(AAppendAstExp node) {
 		print(node.getId().getText().trim());
@@ -1355,7 +1362,6 @@ public class CppGenerator extends DepthFirstAdapter{
 			return "<<";
 		} else if (node.getClass().isInstance(new ARshiftAstBinaryOp())) {
 			return ">>";
-		// TODO: separate two
 		} else if (node.getClass().isInstance(new ABitclearAstBinaryOp())) {
 			return "&^";
 		} else if (node.getClass().isInstance(new AOrAstBinaryOp())) {
@@ -1446,11 +1452,10 @@ public class CppGenerator extends DepthFirstAdapter{
 		print(">>");
 	}
 	
-	// TODO: separate two
-//	@Override
-//	public void caseABitclearAstBinaryOp(ABitclearAstBinaryOp node) {
-//		print("&^");
-//	}
+	@Override
+	public void caseABitclearAstBinaryOp(ABitclearAstBinaryOp node) {
+		print("&^");
+	}
 	
 	@Override
 	public void caseAOrAstBinaryOp(AOrAstBinaryOp node) {
@@ -1485,7 +1490,6 @@ public class CppGenerator extends DepthFirstAdapter{
 			return "<<=";
 		} else if (node.getClass().isInstance(new ARshiftEqAstOpAssign())) {
 			return ">>=";
-		// TODO: separate two
 		} else if (node.getClass().isInstance(new ABitclearEqAstOpAssign())) {
 			return "&^=";
 		}
@@ -1542,11 +1546,10 @@ public class CppGenerator extends DepthFirstAdapter{
 		print(">>=");
 	}
 	
-	// TODO: separate two
-//	@Override
-//	public void caseABitclearEqAstOpAssign(ABitclearEqAstOpAssign node) {
-//		print("&^=");
-//	}
+	@Override
+	public void caseABitclearEqAstOpAssign(ABitclearEqAstOpAssign node) {
+		print("&^=");
+	}
 	
 	// ast_unary_op		---------------------------------------------------
 	// return the unary_op of PAstUnaryOp
