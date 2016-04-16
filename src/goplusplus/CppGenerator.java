@@ -929,13 +929,11 @@ public class CppGenerator extends DepthFirstAdapter{
 		print("{\n");
 		newScope();
 		
-		printTab();
-		print("for (");
 		if (node.getInit() != null && !(node.getInit() instanceof AEmptyAstStm)) {
 			node.getInit().apply(this);
-		} else {
-			print(";");
 		}
+		printTab();
+		print("for (;");
 		if (node.getCondition() != null) {
 			node.getCondition().apply(this);
 		}
