@@ -223,9 +223,10 @@ public class CppGenerator extends DepthFirstAdapter{
 			aType.type = varType;
 			aType.alias = d.getText().trim();
 			symbolTable.getFirst().put(d.getText().trim(), aType);
-
+			
 			// for the fields of a struct
-			if (varType.is(Type.STRUCT)) {
+			if (varType.is(Type.STRUCT) && !(node.getAstTypeExp() instanceof AAliasAstTypeExp)) {
+				
 				AStructAstTypeExp tempNode = (AStructAstTypeExp) node.getAstTypeExp();
 				LinkedList<PAstStructField> fieldList = tempNode.getAstStructField();
 				print("struct " + d.getText().trim() + " {\n");
@@ -242,7 +243,14 @@ public class CppGenerator extends DepthFirstAdapter{
 				
 					printTab();
 					Type fieldType = forPAstTypeExp(tempField.getAstTypeExp());
-					print(fieldType.print());
+					if(tempField.getAstTypeExp() instanceof AAliasAstTypeExp){
+						AAliasAstTypeExp astTypeExp = (AAliasAstTypeExp) tempField.getAstTypeExp();
+						print(astTypeExp.getId().getText().trim());
+					}
+					else{
+						print(fieldType.print());
+					}
+					
 					String separator = "";
 					for(Node n : fieldIdList){
 						print(separator);
@@ -262,6 +270,13 @@ public class CppGenerator extends DepthFirstAdapter{
 				exitScope();
 				printTab();
 				print("};\n");
+				
+			}
+			else if(node.getAstTypeExp() instanceof AAliasAstTypeExp){
+				printTab();
+				AAliasAstTypeExp astTypeExp = (AAliasAstTypeExp) node.getAstTypeExp();
+				print("typedef " + astTypeExp.getId().getText().trim() + " " + d.getText().trim());
+				print(";\n");
 			}
 			else{
 				printTab();
@@ -482,6 +497,51 @@ public class CppGenerator extends DepthFirstAdapter{
 	public void caseASliceAstTypeExp(ASliceAstTypeExp node){
 		Type type = forPAstTypeExp(node);
 		print(type.print());
+	}
+	
+	public void caseAStructAstTypeExp(AStructAstTypeExp node){
+		LinkedList<PAstStructField> fieldList = node.getAstStructField();
+		print("struct " + " {\n");
+		newScope();
+		for (PAstStructField f : fieldList) {
+			AAstStructField tempField = (AAstStructField) f;
+			LinkedList<TId> fieldIdList = tempField.getId();
+			for (Iterator<TId> fieldIter = fieldIdList.iterator(); fieldIter.hasNext();) {
+				TId field = (TId) fieldIter.next();
+				String fieldName = field.toString().trim();
+				Type fieldType = forPAstTypeExp(tempField.getAstTypeExp());
+				symbolTable.getFirst().put(fieldName, fieldType);
+			}
+		
+			printTab();
+			Type fieldType = forPAstTypeExp(tempField.getAstTypeExp());
+			if(tempField.getAstTypeExp() instanceof AAliasAstTypeExp){
+				AAliasAstTypeExp astTypeExp = (AAliasAstTypeExp) tempField.getAstTypeExp();
+				print(astTypeExp.getId().getText().trim());
+			}
+			else{
+				print(fieldType.print());
+			}
+			
+			String separator = "";
+			for(Node n : fieldIdList){
+				print(separator);
+				n.apply(this);
+				if (fieldType.is(new SliceType())) {
+					print("= new vector<");
+					SliceType realType = (SliceType) fieldType;
+					print(helperForShortDeclAstStm(realType.elementType));
+					print(">");
+					separator = ", *";
+				} else {
+					separator = ",";
+				}
+			}
+			print(";\n");
+		}
+		exitScope();
+		printTab();
+		print("}");
 	}
 	
 	// ast_stm		----------------------------------------------
