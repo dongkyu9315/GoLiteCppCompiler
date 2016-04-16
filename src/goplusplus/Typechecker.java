@@ -1299,6 +1299,13 @@ public class Typechecker extends DepthFirstAdapter{
 			FunctionType funcType = (FunctionType) callType;
 			ArrayList<Type> paramList = funcType.paramType;
 			LinkedList<PAstExp> argList = node.getArgs();
+			
+			if (paramList.size() != argList.size()) {
+				printSymbolTable();
+				String errorMsg = "Type error at line " + pos.getLine(node) + " : Function call parameter/argument mismatch";
+				throw new TypeException(errorMsg);
+			}
+			
 			for (int i = 0; i < paramList.size(); i++) {
 				Type individualType = forPAstExp(argList.get(i));
 				if (!(paramList.get(i).is(individualType))) {
