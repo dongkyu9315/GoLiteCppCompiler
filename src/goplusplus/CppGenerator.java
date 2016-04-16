@@ -33,13 +33,13 @@ public class CppGenerator extends DepthFirstAdapter{
 	
 	private void print(String s) {
 		try {
-//			mFileWriter.append(s + " ");
-//			mFileWriter.flush();
-			if(s.endsWith("\n") || s.endsWith("\t")){
-				System.out.print(s);
-			}
-			else
-				System.out.print(s+" ");
+			mFileWriter.append(s + " ");
+			mFileWriter.flush();
+//			if(s.endsWith("\n") || s.endsWith("\t")){
+//				System.out.print(s);
+//			} else {
+//				System.out.print(s+" ");
+//			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
