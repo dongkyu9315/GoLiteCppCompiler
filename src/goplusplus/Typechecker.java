@@ -1208,7 +1208,8 @@ public class Typechecker extends DepthFirstAdapter{
 					Type astType = forPAstExp(temp.getAstExp());
 					AppendType appendType = new AppendType();
 					appendType.type = astType;
-					if (sliceType.assign(appendType)) {
+					SliceType tempType = (SliceType) sliceType;
+					if ((tempType.elementType).assign(appendType.type)) {
 						return appendType;
 					}
 					String errorMsg = "Type error at line " + temp.getId().getLine() + " : Slice type and the argument type incompatibility";

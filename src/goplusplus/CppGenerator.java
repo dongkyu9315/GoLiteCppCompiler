@@ -187,8 +187,31 @@ public class CppGenerator extends DepthFirstAdapter{
 			symbolTable.getFirst().put(d.getText().trim(), varType);
 			
 			printTab();
-			print(varType.print() + " " + d.getText().trim() + " = ");
-			exps.get(i).apply(this);
+			if (varType.is(new AppendType())) {
+				AppendType temp = (AppendType) varType;
+				print("std::vector<");
+				print(temp.type.print());
+				print("> *");
+				print(d.getText().trim());
+				print("= new std::vector<");
+				print(temp.type.print());
+				print(">;\n");
+				printTab();
+				print("*");
+				print(d.getText().trim());
+				print("= (*");
+				AAppendAstExp tRight = (AAppendAstExp) exps.get(i);
+				print(tRight.getId().getText().trim());
+				print(")\n");
+				printTab();
+				print(d.getText().trim());
+				print("->push_back(");
+				print(tRight.getAstExp().toString());
+				print(")");
+			} else {
+				print(varType.print() + " " + d.getText().trim() + " = ");
+				exps.get(i).apply(this);
+			}
 			print(";\n");
 		}
 	}
