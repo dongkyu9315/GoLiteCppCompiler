@@ -189,6 +189,9 @@ public class Typechecker extends DepthFirstAdapter{
 			
 			// for the fields of a struct
 			if (varType.is(Type.STRUCT)) {
+				if (node.getAstTypeExp() instanceof AAliasAstTypeExp){
+					return;
+				}
 				AStructAstTypeExp tempNode = (AStructAstTypeExp) node.getAstTypeExp();
 				LinkedList<PAstStructField> fieldList = tempNode.getAstStructField();
 				for (Iterator<PAstStructField> iter = fieldList.iterator(); iter.hasNext();) {
