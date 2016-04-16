@@ -1,0 +1,13 @@
+#!/bin/bash
+
+        case "$1" in
+                -v)
+                        echo "Version 1"
+                        ;;
+                -h)
+                        echo "Helper message"
+                        ;;
+                *)
+                		#echo `ant -Dbasedir=. -Dprogram="$1" -Dflag1="dumpsymtab" -Dflag2="pptype" -f src/build.xml run`
+                		java -cp bin goplusplus.Main $1 dumpsymtab pptype
+        esac
