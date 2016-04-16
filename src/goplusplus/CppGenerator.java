@@ -99,8 +99,7 @@ public class CppGenerator extends DepthFirstAdapter{
 		print("#include <iostream>\n");
 		print("#include <string>\n");
 		print("#include <vector>\n");
-		print("#include <array>\n\n");
-		print("using namespace std;\n");
+		print("#include <array>\n");
 		print("\n");
 		LinkedList<PAstDecl> decl = node.getDecl();
 		if (!decl.isEmpty()) {
@@ -166,7 +165,7 @@ public class CppGenerator extends DepthFirstAdapter{
 			d.apply(this);
 			if (varType.is(new SliceType())) {
 				sep = ", *";
-				print("= new vector<");
+				print("= new std::vector<");
 				SliceType temp = (SliceType) varType;
 				print(temp.elementType.print());
 				print(">");
@@ -248,7 +247,7 @@ public class CppGenerator extends DepthFirstAdapter{
 						print(separator);
 						n.apply(this);
 						if (fieldType.is(new SliceType())) {
-							print("= new vector<");
+							print("= new std::vector<");
 							SliceType realType = (SliceType) fieldType;
 							print(helperForShortDeclAstStm(realType.elementType));
 							print(">");
@@ -599,7 +598,7 @@ public class CppGenerator extends DepthFirstAdapter{
 						printTab();
 						print(type);
 						expLeft.apply(this);
-						print("= new vector<");
+						print("= new std::vector<");
 						AppendType realType = (AppendType) expType;
 						print(helperForShortDeclAstStm(realType.type));
 						print(">;\n");
@@ -655,10 +654,10 @@ public class CppGenerator extends DepthFirstAdapter{
 			return temp.alias;
 		} else if (expType.is(new AppendType())) {
 			AppendType temp = (AppendType) expType;
-			return "vector<" + helperForShortDeclAstStm(temp.type) + "> *";
+			return "std::vector<" + helperForShortDeclAstStm(temp.type) + "> *";
 		} else if (expType.is(new ArrayType())) {
 			ArrayType temp = (ArrayType) expType;
-			return "array<" + helperForShortDeclAstStm(temp.elementType) + ", " + temp.size + ">";
+			return "std::array<" + helperForShortDeclAstStm(temp.elementType) + ", " + temp.size + ">";
 		} else if (expType.is(new BoolType())) {
 			return "bool";
 		} else if (expType.is(new FloatType())) {
@@ -672,9 +671,9 @@ public class CppGenerator extends DepthFirstAdapter{
 			return "char";
 		} else if (expType.is(new SliceType())) {
 			SliceType temp = (SliceType) expType;
-			return "vector<" + helperForShortDeclAstStm(temp.elementType) + "> *";
+			return "std::vector<" + helperForShortDeclAstStm(temp.elementType) + "> *";
 		} else if (expType.is(new StringType())) {
-			return "string";
+			return "std::string";
 		} else if (expType.is(new StructType())) {
 			return "auto";
 		} else if (expType.is(new VoidType())) {
@@ -705,7 +704,7 @@ public class CppGenerator extends DepthFirstAdapter{
 	@Override
 	public void caseAPrintAstStm(APrintAstStm node) {
 		printTab();
-		print("cout << ");
+		print("std::cout << ");
 		LinkedList<?> exps = node.getAstExp();
 		for (Iterator<?> iterator = exps.iterator(); iterator.hasNext();) {
 			PAstExp exp = (PAstExp) iterator.next();
@@ -722,7 +721,7 @@ public class CppGenerator extends DepthFirstAdapter{
 	@Override
 	public void caseAPrintlnAstStm(APrintlnAstStm node) {
 		printTab();
-		print("cout << ");
+		print("std::cout << ");
 		LinkedList<?> exps = node.getAstExp();
 		for (Iterator<?> iterator = exps.iterator(); iterator.hasNext();) {
 			PAstExp exp = (PAstExp) iterator.next();
@@ -733,7 +732,7 @@ public class CppGenerator extends DepthFirstAdapter{
 				print(" << ");
 			}
 		}
-		print("<< endl;\n");
+		print("<< std::endl;\n");
 	}
 	
 	@Override
