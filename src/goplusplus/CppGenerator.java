@@ -929,12 +929,13 @@ public class CppGenerator extends DepthFirstAdapter{
 		print("{\n");
 		newScope();
 		
+		printTab();
+		print("for (");
 		if (node.getInit() != null && !(node.getInit() instanceof AEmptyAstStm)) {
 			node.getInit().apply(this);
+		} else {
+			print(";");
 		}
-		printTab();
-		print("for (;");
-		
 		if (node.getCondition() != null) {
 			node.getCondition().apply(this);
 		}
@@ -1337,9 +1338,16 @@ public class CppGenerator extends DepthFirstAdapter{
 	@Override
 	public void caseAArrayAccessAstExp(AArrayAccessAstExp node) {
 		node.getArray().apply(this);
-		print("[");
-		node.getIndex().apply(this);
-		print("]");
+		Type typeExp = forPAstExp(node.getArray());
+		if (typeExp.is(new SliceType())) {
+			print("->at(");
+			node.getIndex().apply(this);
+			print(")");
+		} else {
+			print("[");
+			node.getIndex().apply(this);
+			print("]");
+		}
 	}
 	
 	@Override
