@@ -154,9 +154,9 @@ public class Typechecker extends DepthFirstAdapter{
 		for (int i = 0; i < idlist.size(); i++) {
 			TId d = idlist.get(i);
 			Type varType = forPAstExp(exps.get(i));
-			if (!varType.assign(typeExp)) {
+			if (!typeExp.assign(varType)) {
 				printSymbolTable();
-				String errorMsg = "Declaration Error at line " + d.getLine() + " : Expression of type " + typeExp + " cannot be assigned to variable " + d.getText().trim();
+				String errorMsg = "Declaration Error at line " + d.getLine() + " : Expression of type " + varType + " cannot be assigned to variable " + d.getText().trim();
 				throw new TypeException(errorMsg);
 			}
 			if (!symbolTable.getFirst().containsKey(d.getText().trim())) {
