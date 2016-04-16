@@ -687,7 +687,8 @@ public class Typechecker extends DepthFirstAdapter{
 		LinkedList<PAstExp> exps = node.getAstExp();
 		for (Iterator<PAstExp> iterator = exps.iterator(); iterator.hasNext();) {
 			PAstExp exp = (PAstExp) iterator.next();
-			if (!typeCheckPAstExp(exp)) {
+			Type type = forPAstExp(exp);
+			if (!type.isBasic() || !typeCheckPAstExp(exp)) {
 				printSymbolTable();
 				String errorMsg = "Print Error at line " + pos.getLine(exp);
 				throw new TypeException(errorMsg);
@@ -700,7 +701,8 @@ public class Typechecker extends DepthFirstAdapter{
 		LinkedList<PAstExp> exps = node.getAstExp();
 		for (Iterator<PAstExp> iterator = exps.iterator(); iterator.hasNext();) {
 			PAstExp exp = (PAstExp) iterator.next();
-			if (!typeCheckPAstExp(exp)) {
+			Type type = forPAstExp(exp);
+			if (!type.isBasic() || !typeCheckPAstExp(exp)) {
 				printSymbolTable();
 				String errorMsg = "Println Error at line " + pos.getLine(exp);
 				throw new TypeException(errorMsg);
