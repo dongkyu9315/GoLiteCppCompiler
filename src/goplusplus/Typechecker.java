@@ -229,7 +229,6 @@ public class Typechecker extends DepthFirstAdapter{
 			param.apply(this);
 		}
 		
-		
 		LinkedList<PAstStm> stmts = node.getAstStm();
 		for (Iterator<PAstStm> iterator = stmts.iterator(); iterator.hasNext();) {
 			PAstStm stm = (PAstStm) iterator.next();
@@ -1291,6 +1290,24 @@ public class Typechecker extends DepthFirstAdapter{
 			throw new TypeException(errorMsg);
 		}
 		return null;
+	}
+	
+	@Override
+	public void caseAFuncCallAstExp(AFuncCallAstExp node) {
+		Type callType = forPAstExp(node.getName());
+		if (callType instanceof FunctionType) {
+			FunctionType funcType = (FunctionType) callType;
+			ArrayList<Type> paramList = funcType.paramType;
+			LinkedList<PAstExp> argList = node.getArgs();
+			for (int i = 0; i < paramList.size(); i++) {
+				Type individualType = forPAstExp(argList.get(i));
+				if (!(paramList.get(i).is(individualType))) {
+					printSymbolTable();
+					String errorMsg = "Type error at line " + pos.getLine(node) + " : Function call parameter mismatch";
+					throw new TypeException(errorMsg);
+				}
+			}
+		}
 	}
 	
 	// ast_switch_stm	---------------------------------------------------
