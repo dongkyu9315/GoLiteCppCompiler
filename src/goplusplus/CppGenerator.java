@@ -909,7 +909,10 @@ public class CppGenerator extends DepthFirstAdapter{
 		
 		printTab();
 		print("switch (");
-		node.getAstExp().apply(this);
+		if(node.getAstExp()!=null)
+			node.getAstExp().apply(this);
+		else
+			print("true");
 		print(") {\n"); newScope();
 		
 		LinkedList<?> stms = node.getAstSwitchStm();
