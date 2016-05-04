@@ -1,0 +1,17 @@
+# assumes sablecc script is on your PATH
+
+# to compile the code
+joosc: clean
+	$(PEEPDIR)/joosc *.java
+opt: clean
+	cd $(PEEPDIR)/JOOSA-src && $(MAKE)
+	$(PEEPDIR)/joosc -O *.java
+
+java: clean
+	javac *.java
+
+check:	
+	./check.py
+
+clean:	
+	rm -rf *.class *.j

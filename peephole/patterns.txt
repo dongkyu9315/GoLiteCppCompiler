@@ -1,0 +1,115 @@
+//DONE
+iconst x
+iconst y
+arithmentic operation
+=> compute and load the value directly, can be recursively applied
+iconst x op y
+
+branching true/false
+=> replace constants (any value we can precompute)
+remove dead code
+remove branch and labels
+
+//DONE
+iload/aload x
+iload/aload x
+=>
+iload/aload x
+dup
+
+// DONE but need a look
+aload x
+getfield a
+aload x
+getfield a
+=>
+aload x
+getfield a
+dup
+
+// DONE
+istore x
+iload x
+=>	same for all store/load
+dup
+istore x
+
+// DONE but need a look
+iconst_0
+if_icmpeq L
+=>
+ifeq L
+
+// DONE but need a look
+iconst_0
+if_icmpne L
+=>
+ifne L
+
+// DONE below 2 but need a look
+iconst_0
+ifne goto L
+stmts
+=>
+stmts
+
+iconst_1
+ifne goto L
+=>
+goto L
+
+// DONE below 2 but need a look
+iconst_0
+ifeq goto L
+=>
+goto L
+
+iconst_1
+ifeq goto L
+stmts
+=>
+stmts
+
+// NOT DONEEEEEEEEEEEE
+goto L
+stmts1(without label or indegree=0)
+L:
+stmts2
+=>
+stmts2
+
+// DONE
+ldc 0
+iload x
+idiv
+=>
+ldc 0
+
+// DONE below 3
+ldc 0
+iload x
+imul
+=>
+ldc 0
+
+ldc 1   
+iload x 
+imul    
+=> 
+iload x 
+
+ldc 2
+iload x
+imul
+=>
+iload x
+dup
+iadd
+
+// DONE
+ldc k   (0<=k<=127)
+iload x
+iadd
+istore x
+=>
+iinc x k
