@@ -14,6 +14,7 @@ public class Weeder extends DepthFirstAdapter {
 	public Weeder(Position p){
 		pos = p;
 	}
+	
 	/*Checklist
 	 * DONE:
 	 * 	break & continue
@@ -30,122 +31,124 @@ public class Weeder extends DepthFirstAdapter {
 	 *  
 	 */
 	
-	public void inAFuncCallAstExp(AFuncCallAstExp node){
+	public void inAFuncCallAstExp(AFuncCallAstExp node) {
 		PAstExp funcName = node.getName();
-		if(funcName instanceof AIdAstExp){
+		if (funcName instanceof AIdAstExp) {
 			String name = ((AIdAstExp) funcName).getId().getText();
-			if(this.aliasOfStringType.contains(name))
+			if (this.aliasOfStringType.contains(name)) {
 				error("alias of string cannot be used for type casting", node);
+			}
 		}
 	}
-	
-	public void inAAstTypeDecl(AAstTypeDecl node){
+
+	public void inAAstTypeDecl(AAstTypeDecl node) {
 		PAstTypeExp typeExp = node.getAstTypeExp();
 		// store all alias of string for later lookup
-		if(typeExp instanceof ABasicAstTypeExp){
-			if(((ABasicAstTypeExp) typeExp).getBasicTypes().getText().toLowerCase().equals("string"))
-				for(TId id : node.getId())
+		if (typeExp instanceof ABasicAstTypeExp) {
+			if (((ABasicAstTypeExp) typeExp).getBasicTypes().getText().toLowerCase().equals("string")) {
+				for (TId id : node.getId()) {
 					this.aliasOfStringType.add(id.getText());
-		}
-		else if(typeExp instanceof AAliasAstTypeExp){
+				}
+			}
+		} else if (typeExp instanceof AAliasAstTypeExp) {
 			String alias = ((AAliasAstTypeExp) typeExp).getId().getText();
-			if(this.aliasOfStringType.contains(alias)){
-				for(TId id : node.getId())
+			if (this.aliasOfStringType.contains(alias)) {
+				for (TId id : node.getId()) {
 					this.aliasOfStringType.add(id.getText());
+				}
 			}
 		}
 	}
 	
-	
-	
 	public void inAForAstStm(AForAstStm node) {
 		PAstStm post = node.getPost();
-		if(post instanceof AShortDeclAstStm){
+		if (post instanceof AShortDeclAstStm) {
 			error("post statement of for loop must not be short var decl", node);
 		}
 	}
 	
-	
-	public void inAAstFuncDecl(AAstFuncDecl node){
-		if(node.getAstTypeExp()!=null){
+	public void inAAstFuncDecl(AAstFuncDecl node) {
+		if (node.getAstTypeExp()!=null) {
 			LinkedList<PAstStm> functionBody = node.getAstStm();
-			if(!checkReturn(functionBody))
-				error("missing return statement in function body",node);
+			if (!checkReturn(functionBody)) {
+				error("missing return statement in function body", node);
+			}
 		}
-		
 	}
 	
-	private boolean checkReturn(List<PAstStm> stms){
-		for(PAstStm stm : stms){
-			if(stm instanceof AReturnAstStm)
+	private boolean checkReturn(List<PAstStm> stms) {
+		for (PAstStm stm : stms) {
+			if (stm instanceof AReturnAstStm) {
 				return true;
-			if(stm instanceof ALongifAstStm){
+			}
+			if (stm instanceof ALongifAstStm) {
 				LinkedList<PAstStm> ifStms = ((ALongifAstStm) stm).getIfStms();
 				LinkedList<PAstStm> elseStms = ((ALongifAstStm) stm).getElseStms();
-				if(checkReturn(ifStms) && checkReturn(elseStms))
+				if (checkReturn(ifStms) && checkReturn(elseStms)) {
 					return true;
+				}
 			}
 		}
 		return false;
 	}
 	
-	
-	public void caseABasicCastAstExp(ABasicCastAstExp node){
-		if(node.getBasicTypes().getText().toLowerCase().equals("string"))
+	public void caseABasicCastAstExp(ABasicCastAstExp node) {
+		if (node.getBasicTypes().getText().toLowerCase().equals("string")) {
 			error("cannot use string type for casting", node);
+		}
 	}
 	
-	public void caseAIncDecAstStm(AIncDecAstStm node){
+	public void caseAIncDecAstStm(AIncDecAstStm node) {
 		PAstExp exp = node.getAstExp();
 		checkIsLvalue(exp);
 	}
 	
 	public void caseAShortDeclAstStm(AShortDeclAstStm node) {
 		LinkedList<PAstExp> lvals = node.getIds();
-		if(lvals.size() != node.getAstExp().size())
-			error("number of operands not match on different sides of the short variable decl",node);
-		for(PAstExp lval : lvals){
-			if(!(lval instanceof AIdAstExp)){
-				error("LHS of short decl is not id list",lval);
+		if (lvals.size() != node.getAstExp().size()) {
+			error("number of operands not match on different sides of the short variable decl", node);
+		}
+		for (PAstExp lval : lvals) {
+			if (!(lval instanceof AIdAstExp)) {
+				error("LHS of short decl is not id list", lval);
 			}
 		}
 	}
-	
-	public void caseAAssignAstStm(AAssignAstStm node){
-		if(node.getLval().size() != node.getRval().size()){
+
+	public void caseAAssignAstStm(AAssignAstStm node) {
+		if (node.getLval().size() != node.getRval().size()) {
 			error("number of expressions not match on different sides of the assignment", node);
 		}
 		
-		for(PAstExp l :node.getLval()){
+		for (PAstExp l :node.getLval()) {
 			checkIsLvalue(l);
 		}
 	}
 	
-	private void checkIsLvalue(PAstExp l){
-		if(l instanceof AParenAstExp){
+	private void checkIsLvalue(PAstExp l) {
+		if (l instanceof AParenAstExp) {
 			checkIsLvalue(((AParenAstExp) l).getAstExp());
 		}
-		else if(!(l instanceof AIdAstExp || l instanceof AArrayAccessAstExp || l instanceof AFieldAccessAstExp)){
+		else if (!(l instanceof AIdAstExp || l instanceof AArrayAccessAstExp || l instanceof AFieldAccessAstExp)) {
 			error("LHS of assignment not a valid lvalue", l);
 		}
 	}
 	
-	public void caseABreakAstStm(ABreakAstStm node){
+	public void caseABreakAstStm(ABreakAstStm node) {
 		Node parent = node.parent();
-		while(parent != null){
-			if(parent instanceof AForAstStm || parent instanceof AAstSwitchStm){
+		while (parent != null) {
+			if (parent instanceof AForAstStm || parent instanceof AAstSwitchStm) {
 				return;
 			}
 			parent = parent.parent();
 		}
 		error("break keyword not used inside enclosing for loop or switch", node);
 	}
-	
-	public void caseAContinueAstStm(AContinueAstStm node){
-		
+
+	public void caseAContinueAstStm(AContinueAstStm node) {
 		Node parent = node.parent();
-		while(parent != null){
-			if(parent instanceof AForAstStm ){
+		while (parent != null) {
+			if (parent instanceof AForAstStm) {
 				return;
 			}
 			parent = parent.parent();
@@ -153,20 +156,20 @@ public class Weeder extends DepthFirstAdapter {
 		error("continue keyword not used inside enclosing for loop", node);
 	}
 	
-	public void inASwitchAstStm(ASwitchAstStm node){
+	public void inASwitchAstStm(ASwitchAstStm node) {
 		LinkedList<PAstSwitchStm> astSwitchStm = node.getAstSwitchStm();
 		boolean hasDefault = false;
 		
-		for(PAstSwitchStm switchStm : astSwitchStm){
+		for (PAstSwitchStm switchStm : astSwitchStm) {
 			PAstSwitchCase switchCase = ((AAstSwitchStm) switchStm).getAstSwitchCase();
-			if(switchCase instanceof ADefaultAstSwitchCase){
-				if(hasDefault)
+			if (switchCase instanceof ADefaultAstSwitchCase) {
+				if(hasDefault) {
 					error("more than one default in switch statement", switchCase);
+				}
 				hasDefault = true;
 			}
 		}
 	}
-	
 	
 	private void error(String msg, Node n) {
 		throw new WeederException(String.format("%s around position [%d:%d]", msg, pos.getLine(n), pos.getPos(n)));

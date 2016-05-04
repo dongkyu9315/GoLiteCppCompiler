@@ -1,7 +1,3 @@
-src/goplusplus/*/*
-bin
-#*.class
-
 *.pretty.go
 *.symtab
 
@@ -18,3 +14,4 @@ hs_err_pid*
 ~*
 *.tmp
 *.temp
+/bin/

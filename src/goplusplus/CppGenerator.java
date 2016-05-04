@@ -35,7 +35,7 @@ public class CppGenerator extends DepthFirstAdapter{
 		try {
 			mFileWriter.append(s + " ");
 			mFileWriter.flush();
-//			if(s.endsWith("\n") || s.endsWith("\t")){
+//			if (s.endsWith("\n") || s.endsWith("\t")) {
 //				System.out.print(s);
 //			} else {
 //				System.out.print(s+" ");
