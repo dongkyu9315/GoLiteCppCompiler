@@ -11,7 +11,7 @@ public class Weeder extends DepthFirstAdapter {
 	private Position pos;
 	private HashSet<String> aliasOfStringType = new HashSet<>();
 	
-	public Weeder(Position p){
+	public Weeder(Position p) {
 		pos = p;
 	}
 	
