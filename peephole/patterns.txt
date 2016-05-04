@@ -1,4 +1,4 @@
-//DONE
+// DONE
 iconst x
 iconst y
 arithmentic operation
@@ -10,7 +10,7 @@ branching true/false
 remove dead code
 remove branch and labels
 
-//DONE
+// DONE
 iload/aload x
 iload/aload x
 =>
@@ -70,7 +70,7 @@ stmts
 =>
 stmts
 
-// NOT DONEEEEEEEEEEEE
+// NOT DONE
 goto L
 stmts1(without label or indegree=0)
 L:
